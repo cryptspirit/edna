@@ -1,0 +1,69 @@
+Rc_Title=Настройки
+Ok=ОК
+Cancel=Отмена
+Apply=Применить
+Rc_All_Page=Общие
+Rc_Tab_Page=Таблица
+
+Cell_Name=Имя
+Cell_Type=Тип
+Cell_Size=Размер
+Cell_DateC=Дата создания
+Cell_DateM=Дата модификации
+Cell_User=Владелец
+Cell_Group=Группа
+Cell_Atr=Атрибуты
+
+Cell_Cell_Expand=Расш.
+Cell_Cell_Min_Size=Мин. разм.
+Cell_Cell_Alignment_H=По гор.
+Cell_Cell_Alignment_V=По верт.
+
+Cell_Cell_Alignment_H_1.0=Справа
+Cell_Cell_Alignment_H_0.5=По центру
+Cell_Cell_Alignment_H_0.0=Слева
+
+Cell_Cell_Alignment_V_1.0=Снизу
+Cell_Cell_Alignment_V_0.5=По центру
+Cell_Cell_Alignment_V_0.0=Сверху
+
+Cell_Cell_DateC_Format=Формат времени создания
+Cell_Cell_DateM_Format=Формат времени модификации
+Cell_Cell_Size_Format=Формат размера
+
+Rc_Cell_Cell=Столбцы
+List_Size_Format_0=в байтах с пробелом
+List_Size_Format_1=с плавующей точкой в Кб и Мб
+List_Size_Format_2=с плавующей точкой в Кб, Мб, Гб
+Colors=Цвета
+Even_Row=Четная строка
+Odd_Row=Нечетная строка
+Sel_Row=Выдиленая строка
+Row_FG=Передний план
+Row_BG=Задний план
+Rc_Cell_Appearance=Внешний вид
+
+Remove_Question=Вы действительно хотите удалить
+File=файл
+Files=файлы
+Folder=папку
+Folders=папки
+Counts=шт.
+Remove=Удаление
+Pause=Пауза
+Start=Старт
+Copy_Question=Копировать
+In=в
+Link=Ссылка на
+Notlink=Нессылка
+Error_Read_File=Ошибка! Не могу прочитать файл
+Exists=Сушествует
+Notexists=Несушествует
+Button_Miss=_Пропустить
+Button_Miss_All=Пропустить _все
+Button_Again=П_овторить
+Font_Button_Text=_Шрифт строки
+Font_Label_Text=Пример строки Cell Text
+Cell_Atr_Format_0=символьное
+Cell_Atr_Format_1=числовое
+Cell_Cell_Atr_Format=Отображение прав доступа
