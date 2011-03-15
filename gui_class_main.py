@@ -173,7 +173,7 @@ class miss_window(gtk.Window):
         if key == 'Escape': self.destr()
         
 class copy_window(gtk.Window):
-    def __init__(self, dest, list, ref_list, destpath, current_path, siz, remove_after):
+    def __init__(self, dest, list, destpath, current_path, siz, remove_after):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
@@ -193,7 +193,6 @@ class copy_window(gtk.Window):
         self.destpath = destpath
         self.dest = dest
         self.list = list
-        self.ref_list = ref_list
         self.list.reverse()
         self.n = len(list) + len(dest)
         self.count = 0
@@ -261,7 +260,6 @@ class copy_window(gtk.Window):
         if self.Pause != True:
             self.hide()
             self.destr()
-            self.ref_list()
             
     def cp_l(self, args, n):
         if len(args) > 0:
@@ -373,7 +371,7 @@ class copy_window(gtk.Window):
         
         
 class remove_window(gtk.Window):
-    def __init__(self, dest, list, ref_list):
+    def __init__(self, dest, list):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
@@ -385,7 +383,6 @@ class remove_window(gtk.Window):
         self.set_title(rc_modul.locale['Remove'])
         self.set_icon(edna_function.get_theme.load_icon('gtk-clear', 20, 0))
         self.set_position(gtk.WIN_POS_CENTER)
-        self.ref_list = ref_list
         self.dest = dest
         self.list = list
         self.list.reverse()
@@ -427,7 +424,6 @@ class remove_window(gtk.Window):
         if self.Pause != True:
             self.hide()
             self.destr()
-            self.ref_list()
             
     def del_l(self, args, n):
         if len(args) > 0:
@@ -481,7 +477,7 @@ class remove_window(gtk.Window):
         
         
 class question_window(gtk.Window):
-    def __init__(self, list, ref_list):
+    def __init__(self, list):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
@@ -491,7 +487,6 @@ class question_window(gtk.Window):
         self.set_border_width(5)
         hbox = gtk.HBox(False, 2)
         hbox.set_spacing(10)
-        self.ref_list = ref_list
         self.set_title(self_name)
         self.icon_image = gtk.Image()
         pix = edna_function.get_theme.load_icon('gtk-help', 50, 0)
@@ -548,7 +543,7 @@ class question_window(gtk.Window):
                     if os.path.isdir(i[0]):
                         k += edna_function.get_full_size(i[0], True)[1]
         self.hide()
-        r = remove_window(args[1], k, self.ref_list)
+        r = remove_window(args[1], k)
         self.destr()
     
     def destr(self, *args):
@@ -561,7 +556,7 @@ class question_window(gtk.Window):
         
         
 class question_window_copy(gtk.Window):
-    def __init__(self, destpath, current_path, list, ref_list, remove_after):
+    def __init__(self, destpath, current_path, list, remove_after):
         gtk.Window.__init__(self)
         self.destpath = destpath
         self.remove_after = remove_after
@@ -575,7 +570,6 @@ class question_window_copy(gtk.Window):
         vbox = gtk.VBox(False, 2)
         vbox.set_spacing(3)
         self.set_border_width(5)
-        self.ref_list = ref_list
         self.list = list
         self.current_path = current_path
         self.set_title(self_name)
@@ -617,7 +611,7 @@ class question_window_copy(gtk.Window):
                         k += buf[1]
                         siz += buf[0]
         self.hide()
-        r = copy_window(self.list, k, self.ref_list, self.destpath, self.current_path, siz, self.remove_after)
+        r = copy_window(self.list, k, self.destpath, self.current_path, siz, self.remove_after)
         self.destr()
     
     def destr(self, *args):
@@ -636,8 +630,10 @@ class listen_cell(gtk.VBox):
         self.n = n
         self.return_path_cell = return_path_cell
         #self.Cursor = 0
+        self.Focus_State = True
         self.Select_List = []
         self.articles = None
+        self.Exit_State = False
         ####################################
         self.rc_dict = rc_dict
         rc_modul.locale = locale_dict
@@ -689,14 +685,19 @@ class listen_cell(gtk.VBox):
         self.Timer_func.start()
         
     def timer_refresh(self):
-        while 1:
-            time.sleep(2)
-            gtk.gdk.threads_enter()
-            model = self.__create_model()
-            if model:
-                self.treeview.set_model(model)
-                self.treeview.set_cursor(self.return_select)
-            gtk.gdk.threads_leave()
+        while not self.Exit_State:
+            if self.Focus_State:
+                if self.Exit_State: break
+                time.sleep(1)
+                if self.Exit_State: break
+                time.sleep(1)
+                if self.Exit_State: break
+                model = self.__create_model()
+                gtk.gdk.threads_enter()
+                if model:
+                    self.treeview.set_model(model)
+                    self.treeview.set_cursor(self.return_select)
+                gtk.gdk.threads_leave()
             
     def cursor_changed(self, *args):
         #print args[0].get_cursor()[0]
@@ -792,10 +793,10 @@ class listen_cell(gtk.VBox):
                 subprocess.Popen(i + list_lanch[i], shell=True)
                 
     def deleting(self, key):
-        y = question_window(self.get_select_now(), self.ref_list)
+        y = question_window(self.get_select_now())
         
     def copys(self, remove_after):
-        y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), self.ref_list, remove_after)
+        y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), remove_after)
     
     #def ref_list(self):
     #    time.sleep(0.5)
@@ -858,6 +859,7 @@ class listen_cell(gtk.VBox):
         self.ch_dir_entry(os.path.dirname(self.Current_Path))
         model = self.__create_model()
         self.treeview.set_model(model)
+        #print 'r', self.return_select
         self.treeview.set_cursor(self.return_select)
                     
     def chdir_new(self):
@@ -873,6 +875,7 @@ class listen_cell(gtk.VBox):
             self.ch_dir_entry(dp)
             model = self.__create_model()
             self.treeview.set_model(model)
+            #print 'r', self.return_select
             self.treeview.set_cursor(self.return_select)
             
         elif os.path.isfile(dp):
@@ -927,15 +930,30 @@ class listen_cell(gtk.VBox):
                 treeview.append_column(column)
             
     def __create_model(self):
-        # create list store
-        
-        articles_new, return_select_new = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
+        articles_new, return_select_new, fg2 = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
         len_articles_new = len(articles_new)
         if articles_new != self.articles:
+            u = rc_modul.Sum_cell(self.rc_dict)
+            if self.articles:
+                fg2_keys = fg2.keys()
+                if self.Select_List:
+                    for i in self.Select_List:
+                        try: fg2_keys.index(i)
+                        except: self.Select_List.remove(i)
+                    
+                try: idx = u.index('Cell_Size')
+                except: pass
+                else:
+                    for i in articles_new:
+                        try: h = self.fg[i[self.len_u]]
+                        except: pass
+                        else:
+                            if i[idx] == '<DIR>' and self.articles[h][idx] != '<DIR>': i[idx] = self.articles[h][idx]
+            self.fg = fg2
             self.articles, self.return_select = articles_new, return_select_new
             self.len_articles = len_articles_new
             
-            u = rc_modul.Sum_cell(self.rc_dict)
+            
             self.len_u = len(u)
             if self.len_u == 1:
                 model = gtk.ListStore(

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 #
 #       Edna.py
@@ -58,6 +58,8 @@ class Dwindow(gtk.Window):
         #self.connect('key-release-event', self.key_c)
         #self.connect('key-press-event', self.key_c)
         self.add(self.vbox1)
+        self.foc = self.is_focus()
+        self.connect('focus', self.focuss)
         
     def return_path_cell(self, index):
         return self.cel[not index].Current_Path
@@ -67,7 +69,13 @@ class Dwindow(gtk.Window):
         self.cel1.upData(rc_dict)
         self.cel2.upData(rc_dict)
         
+    def focuss(self, *args):
+        if self.foc != self.is_focus():
+            self.foc = self.is_focus()
+            for i in self.cel: i.Focus_State = self.is_focus()
+        
     def exitt(self, *args):
+        for i in self.cel: i.Exit_State = True
         args[0].hide()
         gtk.main_quit()
         

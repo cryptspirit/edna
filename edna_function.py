@@ -394,8 +394,9 @@ def get_list_path(path, pattern_s, select_list):
     if path != '/':
         m.insert(0, ttt)
     op = 0
+    fg = {}
     for i in xrange(len(m)):
-
+        fg[m[i][len(cellse)]] = i
         if select_list:
             try: select_list.index(m[i][len(cellse)])
             except:
@@ -422,10 +423,11 @@ def get_list_path(path, pattern_s, select_list):
         m[i].append(color_bg)
         m[i].append(fgl)
     
-        if m[i][len(m[i]) - 5].strip('\t\n') == pattern_s.strip('\t\n'):
+        if m[i][len(cellse)].strip('\t\n') == pattern_s.strip('\t\n'):
             op = i
+            #print 'i', i
     
-    return m, op
+    return m, op, fg
         
         
 def main():
