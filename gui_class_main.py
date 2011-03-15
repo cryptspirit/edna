@@ -635,8 +635,9 @@ class listen_cell(gtk.VBox):
         self.pattern_s = ''
         self.n = n
         self.return_path_cell = return_path_cell
-        self.Cursor = 0
+        #self.Cursor = 0
         self.Select_List = []
+        self.articles = None
         ####################################
         self.rc_dict = rc_dict
         rc_modul.locale = locale_dict
@@ -672,6 +673,7 @@ class listen_cell(gtk.VBox):
         self.treeview.connect('button-press-event', self.pr)
         self.treeview.connect('focus-in-event', self.focus_trap)
         self.treeview.connect('focus-out-event', self.focus_trap)
+        self.treeview.connect('cursor-changed', self.cursor_changed)
         self.__add_columns(self.treeview)
         self.treeview.set_model(model)
         ###################################
@@ -683,6 +685,24 @@ class listen_cell(gtk.VBox):
         self.pack_start(self.evtb, False)
         self.pack_start(self.scrol)
         self.pack_start(self.info_label, False)
+        self.Timer_func = threading.Timer(0, self.timer_refresh)
+        self.Timer_func.start()
+        
+    def timer_refresh(self):
+        while 1:
+            time.sleep(2)
+            gtk.gdk.threads_enter()
+            model = self.__create_model()
+            if model:
+                self.treeview.set_model(model)
+                self.treeview.set_cursor(self.return_select)
+            gtk.gdk.threads_leave()
+            
+    def cursor_changed(self, *args):
+        #print args[0].get_cursor()[0]
+        selection = self.treeview.get_selection()
+        model_sel, iter_sel = selection.get_selected()
+        self.pattern_s = model_sel.get_value(iter_sel, self.len_u)
         
     def focus_trap(self, *args):
         #self.treeview.set_cursor(self.treeview.is_focus())
@@ -777,16 +797,16 @@ class listen_cell(gtk.VBox):
     def copys(self, remove_after):
         y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), self.ref_list, remove_after)
     
-    def ref_list(self):
-        time.sleep(0.5)
-        selection = self.treeview.get_cursor()[0][0]
-        model = self.__create_model()
-        self.treeview.set_model(model)
-        self.treeview.set_cursor(self.return_select)
-        if self.return_select == 0:
-            self.treeview.set_cursor(selection)
-        else:
-            self.treeview.set_cursor(self.return_select)
+    #def ref_list(self):
+    #    time.sleep(0.5)
+    #    selection = self.treeview.get_cursor()[0][0]
+    #    model = self.__create_model()
+    #    self.treeview.set_model(model)
+    #    self.treeview.set_cursor(self.return_select)
+    #    if self.return_select == 0:
+    #        self.treeview.set_cursor(selection)
+    #    else:
+    #        self.treeview.set_cursor(self.return_select)
         
     def select_function(self, key):
         selection = self.treeview.get_selection()
@@ -908,100 +928,107 @@ class listen_cell(gtk.VBox):
             
     def __create_model(self):
         # create list store
-        u = rc_modul.Sum_cell(self.rc_dict)
-        self.articles, self.return_select = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
-        self.len_articles = len(self.articles)
-        self.len_u = len(u)
-        if self.len_u == 1:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 2:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 3:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 4:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 5:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 6:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 7:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gtk.gdk.Pixbuf, gobject.TYPE_STRING,
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif self.len_u == 8:
-            model = gtk.ListStore(
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gtk.gdk.Pixbuf,
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                gobject.TYPE_STRING, gobject.TYPE_STRING)
-                                
-                                
-        for item in self.articles:
-            iter = model.append()
-            model.set(iter)
-            for j in xrange(len(item)):
-                model.set_value(iter, j, item[j])
-        return model
+        
+        articles_new, return_select_new = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
+        len_articles_new = len(articles_new)
+        if articles_new != self.articles:
+            self.articles, self.return_select = articles_new, return_select_new
+            self.len_articles = len_articles_new
+            
+            u = rc_modul.Sum_cell(self.rc_dict)
+            self.len_u = len(u)
+            if self.len_u == 1:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 2:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 3:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 4:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 5:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 6:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 7:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING,
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+            elif self.len_u == 8:
+                model = gtk.ListStore(
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf,
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+                                    
+                                    
+            for item in self.articles:
+                iter = model.append()
+                model.set(iter)
+                for j in xrange(len(item)):
+                    model.set_value(iter, j, item[j])
+            return model
+        else:
+            return None
         
     def Step_dir(self):
         pass
