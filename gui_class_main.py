@@ -636,6 +636,7 @@ class listen_cell(gtk.VBox):
         self.n = n
         self.return_path_cell = return_path_cell
         self.Cursor = 0
+        self.Select_List = []
         ####################################
         self.rc_dict = rc_dict
         rc_modul.locale = locale_dict
@@ -696,13 +697,13 @@ class listen_cell(gtk.VBox):
             
     def ch_dir_entry(self, path):
         self.Current_Path = path
+        self.Select_List = []
         self.path_entry.set_text(self.Current_Path)
         
     def get_select_now(self):
         return_list = []
         selection = self.treeview.get_selection()
         model_sel, iter_sel = selection.get_selected()
-        u = rc_modul.Sum_cell(self.rc_dict)
         path = model_sel.get_path(iter_sel)[0]
         model = self.treeview.get_model()
         
@@ -713,11 +714,11 @@ class listen_cell(gtk.VBox):
         now_select_in = True
         for i in xrange(nc, self.len_articles):
             iter = model.get_iter(i)
-            if model.get_value(iter, len(u) + 2) == self.rc_dict['Sel_Row_FG']:
+            if model.get_value(iter, self.len_u + 4) == 'True':
                 if path == i: now_select_in = False
-                dp = model.get_value(iter, len(u))
+                dp = model.get_value(iter, self.len_u)
                 return_list.append([dp, os.path.isfile(dp)])
-        dp = model_sel.get_value(iter_sel, len(u))
+        dp = model_sel.get_value(iter_sel, self.len_u)
         if now_select_in and dp != '..':
             return_list.append([dp, os.path.isfile(dp)])
         return return_list
@@ -739,8 +740,8 @@ class listen_cell(gtk.VBox):
     def Enter_key(self):
         input_list = self.get_select_now()
         model_sel, iter_sel = self.treeview.get_selection().get_selected()
-        u = rc_modul.Sum_cell(self.rc_dict)
-        p = model_sel.get_value(iter_sel, len(u))
+        #u = rc_modul.Sum_cell(self.rc_dict)
+        p = model_sel.get_value(iter_sel, self.len_u)
         if len(input_list) == 1 or p == '..' or os.path.isdir(p) == True:
             self.chdir_new()
         elif len(input_list) == 0:
@@ -790,10 +791,9 @@ class listen_cell(gtk.VBox):
     def select_function(self, key):
         selection = self.treeview.get_selection()
         model, iter = selection.get_selected()
-        u = rc_modul.Sum_cell(self.rc_dict)
         path = model.get_path(iter)[0]
         sel_col = {}
-        if model.get_value(iter, len(u) + 2) == self.rc_dict['Sel_Row_FG']:
+        if model.get_value(iter, self.len_u + 4) == 'True':
             if path % 2:
                 ts = 'Odd'
             else:
@@ -801,15 +801,19 @@ class listen_cell(gtk.VBox):
                 
             sel_col['FG'] = self.rc_dict[ts + '_Row_FG']
             sel_col['BG'] = self.rc_dict[ts + '_Row_BG']
-        
+            try: self.Select_List.remove(model.get_value(iter, self.len_u))
+            except: pass
+            self.articles[path][self.len_u + 4] = 'False'
         else:
             sel_col['FG'] = self.rc_dict['Sel_Row_FG']
             sel_col['BG'] = self.rc_dict['Sel_Row_BG']
+            self.articles[path][self.len_u + 4] = 'True'
+            self.Select_List.append(model.get_value(iter, self.len_u))
         f = ['FG', 'BG']
+        model.set(iter, self.len_u + 4, self.articles[path][self.len_u + 4])
         for i in xrange(len(f)):
-            #print self.articles[path][len(u) + 2 + i]
-            self.articles[path][len(u) + 2 + i] = sel_col[f[i]]
-            model.set(iter, len(u) + 2 + i, self.articles[path][len(u) + 2 + i])
+            self.articles[path][self.len_u + 2 + i] = sel_col[f[i]]
+            model.set(iter, self.len_u + 2 + i, self.articles[path][self.len_u + 2 + i])
         cellse = rc_modul.Sum_cell(self.rc_dict)
         
         if key == 'space':
@@ -818,7 +822,7 @@ class listen_cell(gtk.VBox):
             except:
                 pass
             else:
-                n = model.get_value(iter, len(u))
+                n = model.get_value(iter, self.len_u)
                 if os.path.isdir(n):
                     self.articles[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
                     model.set(iter, ic, self.articles[path][ic])
@@ -830,6 +834,7 @@ class listen_cell(gtk.VBox):
             
     def back_dir(self):
         self.pattern_s = self.Current_Path
+        self.Select_List = []
         self.ch_dir_entry(os.path.dirname(self.Current_Path))
         model = self.__create_model()
         self.treeview.set_model(model)
@@ -859,9 +864,13 @@ class listen_cell(gtk.VBox):
             
                 
     def __add_columns(self, treeview):
+        '''
+        Создание столбцов
+        '''
         model = treeview.get_model()
         u = rc_modul.Sum_cell(self.rc_dict)
-        for i in xrange(len(u)):
+        for i in xrange(self.len_u):
+            alg = [float(self.rc_dict[u[i] + '_Alignment_H']), float(self.rc_dict[u[i] + '_Alignment_V'])]
             if u[i] == 'Cell_Name':
                 column = gtk.TreeViewColumn()
                 column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
@@ -870,52 +879,40 @@ class listen_cell(gtk.VBox):
                 column.set_title(rc_modul.locale[u[i]])                
                 
                 renderer = gtk.CellRendererPixbuf()
-                renderer.set_alignment(0.5, 0.5)
+                renderer.set_alignment(alg[0], alg[1])
                 column.pack_start(renderer, False)
-                column.set_attributes(renderer, pixbuf=len(u) + 1)
-                #column.set_attributes(renderer, icon_name=len(u) + 1)
+                column.set_attributes(renderer, pixbuf=self.len_u + 1)
                 
                 renderer = gtk.CellRendererText()
-                
-                renderer.set_alignment(float(self.rc_dict[u[i] + '_Alignment_H']), float(self.rc_dict[u[i] + '_Alignment_V']))
+                renderer.set_alignment(alg[0], alg[1])
                 renderer.set_property('font-desc' , pango.FontDescription(self.rc_dict['Font_Cell_Text']))
                 column.pack_start(renderer, True)
-                column.set_attributes(renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
+                column.set_attributes(renderer, text=i, background=self.len_u + 3, foreground=self.len_u + 2)
                 itk = int(self.rc_dict[u[i] + '_Expand'])
-                #if itk:
                 column.set_expand(itk)
-                    
-                #column.set_resizable(True)
-                
                 treeview.append_column(column)
-                #column.set_cell_data_func(cell_renderer, macro_set_func_text)
             else:
-                treeview.append_column(self.text_colum(treeview, model, u, i))
-            
-            
-    def text_colum(self, treeview, model, u, i):
-        renderer = gtk.CellRendererText()
-        renderer.set_data(rc_modul.locale[u[i]], i)
-        renderer.set_alignment(float(self.rc_dict[u[i] + '_Alignment_H']), float(self.rc_dict[u[i] + '_Alignment_V']))
-        renderer.set_property('background-set' , True)
-        renderer.set_property('foreground-set' , True)
-        renderer.set_property('font-desc' , pango.FontDescription(self.rc_dict['Font_Cell_Text']))
-        column = gtk.TreeViewColumn(rc_modul.locale[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
-        column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-        column.expand = True
-        itk = int(self.rc_dict[u[i] + '_Expand'])
-        column.set_expand(itk)
-        column.set_min_width(int(self.rc_dict[u[i] + '_Size']))    
-        return column
-        
+                renderer = gtk.CellRendererText()
+                renderer.set_data(rc_modul.locale[u[i]], i)
+                renderer.set_alignment(alg[0], alg[1])
+                renderer.set_property('background-set' , True)
+                renderer.set_property('foreground-set' , True)
+                renderer.set_property('font-desc' , pango.FontDescription(self.rc_dict['Font_Cell_Text']))
+                column = gtk.TreeViewColumn(rc_modul.locale[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
+                column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+                column.expand = True
+                itk = int(self.rc_dict[u[i] + '_Expand'])
+                column.set_expand(itk)
+                column.set_min_width(int(self.rc_dict[u[i] + '_Size']))    
+                treeview.append_column(column)
             
     def __create_model(self):
         # create list store
         u = rc_modul.Sum_cell(self.rc_dict)
-        self.articles, self.return_select = edna_function.get_list_path(self.Current_Path, self.pattern_s)
+        self.articles, self.return_select = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
         self.len_articles = len(self.articles)
-        len_u = len(u)
-        if len_u == 1:
+        self.len_u = len(u)
+        if self.len_u == 1:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
@@ -924,7 +921,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 2:
+        elif self.len_u == 2:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
@@ -933,7 +930,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 3:
+        elif self.len_u == 3:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -943,7 +940,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 4:
+        elif self.len_u == 4:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -953,7 +950,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 5:
+        elif self.len_u == 5:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -963,7 +960,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 6:
+        elif self.len_u == 6:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -974,7 +971,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 7:
+        elif self.len_u == 7:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -986,7 +983,7 @@ class listen_cell(gtk.VBox):
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING)
-        elif len_u == 8:
+        elif self.len_u == 8:
             model = gtk.ListStore(
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 
                                 gobject.TYPE_STRING, gobject.TYPE_STRING, 

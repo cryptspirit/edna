@@ -242,42 +242,10 @@ def get_file_date(path, cm):
     return ss
     
 def get_file_uid(path):
-    #b = rc_dict[cm]
-    ss = get_username(str(os.lstat(path)[4]))
-    #if cm == 'Cell_DateC_Format':
-    #    nm = 8
-    #else:
-    #    nm = 9
-    #if len(b) > 0:
-    #    s = time.localtime(os.lstat(path)[nm])
-    #    
-    #    for i in xrange(len(b)):
-    #        if b[i] in rc_modul.md:
-    #            t = str(s[rc_modul.md.index(b[i])])
-    #            if len(t) == 1: t = '0' + t
-    #            ss += t
-    #        else:
-    #            ss += b[i] 
-    return ss
+    return get_username(str(os.lstat(path)[4]))
     
 def get_file_gid(path):
-    #b = rc_dict[cm]
-    ss = get_groupname(str(os.lstat(path)[5]))
-    #if cm == 'Cell_DateC_Format':
-    #    nm = 8
-    #else:
-    #    nm = 9
-    #if len(b) > 0:
-    #    s = time.localtime(os.lstat(path)[nm])
-    #    
-    #    for i in xrange(len(b)):
-    #        if b[i] in rc_modul.md:
-    #            t = str(s[rc_modul.md.index(b[i])])
-    #            if len(t) == 1: t = '0' + t
-    #            ss += t
-    #        else:
-    #            ss += b[i] 
-    return ss
+    return get_groupname(str(os.lstat(path)[5]))
 
 def get_username(uidd):
     try: dickt_nameusers.keys().index(uidd)
@@ -382,7 +350,7 @@ def get_ico(s):
         #print 'cache'
         return dic_icon[s]
        
-def get_list_path(path, pattern_s):
+def get_list_path(path, pattern_s, select_list):
     '''
     Получение списка файлов с описаными столбцами
     '''
@@ -427,16 +395,33 @@ def get_list_path(path, pattern_s):
         m.insert(0, ttt)
     op = 0
     for i in xrange(len(m)):
-        if i % 2 != 0:
-            color_fg = rc_dict['Odd_Row_FG']
-            color_bg = rc_dict['Odd_Row_BG']
+
+        if select_list:
+            try: select_list.index(m[i][len(cellse)])
+            except:
+                if i % 2 != 0:
+                    color_fg = rc_dict['Odd_Row_FG']
+                    color_bg = rc_dict['Odd_Row_BG']
+                else:
+                    color_fg = rc_dict['Even_Row_FG']
+                    color_bg = rc_dict['Even_Row_BG']
+                fgl = 'False'
+            else:
+                fgl = 'True'
+                color_fg = rc_dict['Sel_Row_FG']
+                color_bg = rc_dict['Sel_Row_BG']
         else:
-            color_fg = rc_dict['Even_Row_FG']
-            color_bg = rc_dict['Even_Row_BG']
+            if i % 2 != 0:
+                color_fg = rc_dict['Odd_Row_FG']
+                color_bg = rc_dict['Odd_Row_BG']
+            else:
+                color_fg = rc_dict['Even_Row_FG']
+                color_bg = rc_dict['Even_Row_BG']
+            fgl = 'False'
         m[i].append(color_fg)
         m[i].append(color_bg)
-        m[i].append('False')
-        
+        m[i].append(fgl)
+    
         if m[i][len(m[i]) - 5].strip('\t\n') == pattern_s.strip('\t\n'):
             op = i
     
