@@ -22,17 +22,28 @@
 import gtk
 import gobject
 import pango
-
+import gettext
 import rc_modul
 
+gettext.install('edna', unicode=True)
 
+Name_Colum = {'cell_name': _('Name'), 
+            'cell_type': _('Type'), 
+            'cell_size': _('Size'), 
+            'cell_datec': _('Created'), 
+            'cell_datem': _('Changed'), 
+            'cell_user': _('User'), 
+            'cell_group': _('Group'), 
+            'cell_atr': _('Attribute')}
+            
 gf = [1.0, 0.5, 0.0]
+gfH = [_('right'), _('center'), _('left')]
+gfV = [_('up'), _('center'), _('down')]
 
 class Rc_Window(gtk.Window):
-    def __init__(self, locale_dict):
+    def __init__(self):
         gtk.Window.__init__(self)
-        self.locale_dict = locale_dict
-        self.set_title(self.locale_dict['Rc_Title'])
+        self.set_title(_('Configurations'))
         self.set_position(gtk.WIN_POS_CENTER)
         #self.set_resizable(False)
         self.set_default_size(400, 500)
@@ -64,7 +75,7 @@ class Rc_Window(gtk.Window):
     def all_page(self):
         vbox2 = gtk.VBox()
         
-        self.note.append_page(vbox2, gtk.Label(self.locale_dict['Rc_All_Page']))
+        self.note.append_page(vbox2, gtk.Label(_('Genaral')))
         
     def tab_style(self):
         vbox2 = gtk.VBox(False)
@@ -74,11 +85,12 @@ class Rc_Window(gtk.Window):
         tab1 = gtk.Table(1, 1, False)
         tab1.set_row_spacings(5)
         tab1.set_col_spacings(5)
-        lab = gtk.Label(self.locale_dict['Colors'])
+        lab = gtk.Label(_('Colors'))
         lab.modify_font(pango.FontDescription('bold'))
         #lab.set_justify(gtk.JUSTIFY_LEFT)
         lab.set_alignment(0.0, 0.5)
         l = ['even_row', 'odd_row', 'sel_row']
+        l_name = [_('Even rows'), _('Odd rows'), _('Select rows')]
         p = ['fg', 'bg']
         bt = {}
         for i in l:
@@ -90,18 +102,18 @@ class Rc_Window(gtk.Window):
                 bt[i + '_' + j].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
                 #bt[i + '_' + j].modify_bg(gtk.STATE_ACTIVE, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
                 bt[i + '_' + j].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
-        tab1.attach(gtk.Label(self.locale_dict['Row_FG']), 1, 2, 0, 1)
-        tab1.attach(gtk.Label(self.locale_dict['Row_BG']), 2, 3, 0, 1)
+        tab1.attach(gtk.Label(_('Foreground')), 1, 2, 0, 1)
+        tab1.attach(gtk.Label(_('Background')), 2, 3, 0, 1)
         for i in xrange(len(l)):
-            lbb = gtk.Label(self.locale_dict[l[i]] + ':')
+            lbb = gtk.Label(l_name[i] + ':')
             lbb.set_alignment(0.0, 0.5)
             tab1.attach(lbb, 0, 1, i + 1, i + 2)
             for j in xrange(len(p)):
                 tab1.attach(bt[l[i] + '_' + p[j]], j + 1, j + 2, i + 1, i + 2)
         
-        self.font_label_text = gtk.Label(self.locale_dict['Font_Label_Text'])
+        self.font_label_text = gtk.Label(_('Example text'))
         self.font_label_text.modify_font(pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
-        self.font_button_text = gtk.Button(self.locale_dict['Font_Button_Text'])
+        self.font_button_text = gtk.Button(_('Font button'))
         self.font_button_text.connect('clicked', self.font_click, self.font_label_text)
         
         hbox1.pack_start(self.font_label_text, True)
@@ -109,7 +121,7 @@ class Rc_Window(gtk.Window):
         vbox2.pack_start(lab, False)
         vbox2.pack_start(tab1, False)
         vbox2.pack_start(hbox1, False)
-        self.note.append_page(vbox2, gtk.Label(self.locale_dict['Rc_Cell_Appearance']))
+        self.note.append_page(vbox2, gtk.Label(_('Appearance')))
         
     def font_click(self, *args):
         dialog = gtk.FontSelectionDialog("Changing color")
@@ -157,10 +169,10 @@ class Rc_Window(gtk.Window):
         ###########Rc_Cell_Cell###################
         button1 = gtk.Button(stock='gtk-go-up')
         button2 = gtk.Button(stock='gtk-go-down')
-        label1 = gtk.Label(self.locale_dict['Rc_Cell_Cell'])
+        label1 = gtk.Label(_('Columns'))
         label1.modify_font(pango.FontDescription('bold'))
         label1.set_justify(gtk.JUSTIFY_LEFT)
-        cel_sort = listen_cel(self.locale_dict)
+        cel_sort = listen_cel()
         cel_sort.renderer.connect('toggled', self.fixed_toggled, cel_sort.model)
         button1.connect('clicked', self.downup, cel_sort, True)
         button2.connect('clicked', self.downup, cel_sort, False)
@@ -168,7 +180,7 @@ class Rc_Window(gtk.Window):
         #########################################
         
         #############Rc_Cell_Appearance##########
-        label2 = gtk.Label(self.locale_dict['Rc_Cell_Appearance'])
+        label2 = gtk.Label(_('Appearance'))
         label2.modify_font(pango.FontDescription('bold'))
         #chkb1 = gtk.CheckButton()
         #tb1.attach()
@@ -182,10 +194,10 @@ class Rc_Window(gtk.Window):
         vvbox1.pack_start(hhbox1, False)
         
         vvbox1.pack_start(label2, False)
-        tb1.attach(gtk.Label(self.locale_dict['Cell_Cell_Expand']), 0, 1, 0, 1)
-        tb1.attach(gtk.Label(self.locale_dict['Cell_Cell_Min_Size']), 1, 2, 0, 1)
-        tb1.attach(gtk.Label(self.locale_dict['Cell_Cell_Alignment_H']), 2, 3, 0, 1)
-        tb1.attach(gtk.Label(self.locale_dict['Cell_Cell_Alignment_V']), 3, 4, 0, 1)
+        tb1.attach(gtk.Label(_('Expand')), 0, 1, 0, 1)
+        tb1.attach(gtk.Label(_('Min size')), 1, 2, 0, 1)
+        tb1.attach(gtk.Label(_('Horizontal')), 2, 3, 0, 1)
+        tb1.attach(gtk.Label(_('Vertical')), 3, 4, 0, 1)
         
         for i in xrange(len(rc_modul.mc)):
             cheak = gtk.CheckButton(None)
@@ -199,15 +211,15 @@ class Rc_Window(gtk.Window):
             sp2.connect('value_changed', self.spin)
             
             chkH1 = gtk.combo_box_new_text()
-            for j in gf:
-                chkH1.append_text(self.locale_dict['Cell_Cell_Alignment_H_' + str(j)])
+            for j in gfH:
+                chkH1.append_text(j)
             chkH1.nm = '%s_alignment_h' % rc_modul.mc[i]
             chkH1.set_active(gf.index(float(rc_modul.rc_dict['style'][chkH1.nm])))
             chkH1.connect('changed', self.chk_c)
             
             chkV1 = gtk.combo_box_new_text()
-            for j in gf:
-                chkV1.append_text(self.locale_dict['Cell_Cell_Alignment_V_%s' % j])
+            for j in gfV:
+                chkV1.append_text(j)
             chkV1.nm = '%s_alignment_v' % rc_modul.mc[i]
             chkV1.set_active(gf.index(float(rc_modul.rc_dict['style'][chkV1.nm])))
             chkV1.connect('changed', self.chk_c)
@@ -217,10 +229,10 @@ class Rc_Window(gtk.Window):
             tb1.attach(chkH1, 2, 3, i + 1, i + 2)
             tb1.attach(chkV1, 3, 4, i + 1, i + 2)
             
-        lb = gtk.Label(self.locale_dict['Rc_Cell_Cell'])
+        lb = gtk.Label(_('Columns'))
         vvbox3.pack_start(lb, True)
         for i in xrange(len(rc_modul.mc)):
-            lb = gtk.Label(self.locale_dict[rc_modul.mc[i]])
+            lb = gtk.Label(Name_Colum[rc_modul.mc[i]])
             lb.set_alignment(0.0, 0.5)
             vvbox3.pack_start(lb, True)
         
@@ -230,7 +242,7 @@ class Rc_Window(gtk.Window):
         vvbox1.pack_start(hhbox2, False)
         
         hbox2 = gtk.HBox(False, 10)
-        label1 = gtk.Label(self.locale_dict['Cell_Cell_DateC_Format'])
+        label1 = gtk.Label(_('Format of creation'))
         label1.set_alignment(0.0, 0.5)
         entry1 = gtk.Entry()
         entry1.set_text(rc_modul.rc_dict['style']['cell_datec_format'])
@@ -240,7 +252,7 @@ class Rc_Window(gtk.Window):
         hbox2.pack_start(entry1, False)
         
         hbox3 = gtk.HBox(False, 10)
-        label2 = gtk.Label(self.locale_dict['Cell_Cell_DateM_Format'])
+        label2 = gtk.Label(_('Format of change'))
         label2.set_alignment(0.0, 0.5)
         entry2 = gtk.Entry()
         entry2.set_text(rc_modul.rc_dict['style']['cell_datem_format'])
@@ -252,21 +264,23 @@ class Rc_Window(gtk.Window):
         hbox4 = gtk.HBox(False, 3)
         
         chk1 = gtk.combo_box_new_text()
-        for i in xrange(3):
-            chk1.append_text(self.locale_dict['List_Size_Format_%s' % i])
+        chk1.append_text(_('in the bytes'))
+        chk1.append_text(_('with a floating point Kb, Mb'))
+        chk1.append_text(_('with a floating point Kb, Mb, Gb'))
         chk1.set_active(int(rc_modul.rc_dict['style']['cell_size_format']))
         chk1.connect('changed', self.chk1_c)
-        label3 = gtk.Label(self.locale_dict['Cell_Cell_Size_Format'])
+        label3 = gtk.Label(_('Size format'))
         label3.set_alignment(0.0, 0.5)
         
         hbox5 = gtk.HBox(False, 3)
         
         chk2 = gtk.combo_box_new_text()
-        for i in xrange(2):
-            chk2.append_text(self.locale_dict['Cell_Atr_Format_' + str(i)])
+        chk2.append_text(_('numerical'))
+        chk2.append_text(_('string'))
+        
         chk2.set_active(int(rc_modul.rc_dict['style']['cell_atr_format']))
         chk2.connect('changed', self.chk2_c)
-        label4 = gtk.Label(self.locale_dict['Cell_Cell_Atr_Format'])
+        label4 = gtk.Label(_('Attribute format'))
         label4.set_alignment(0.0, 0.5)
         
         hbox4.pack_start(label3, True)
@@ -278,7 +292,7 @@ class Rc_Window(gtk.Window):
         vvbox1.pack_start(hbox3, False)
         vvbox1.pack_start(hbox4, False)
         vvbox1.pack_start(hbox5, False)
-        self.note.append_page(vvbox1, gtk.Label(self.locale_dict['Rc_Tab_Page']))
+        self.note.append_page(vvbox1, gtk.Label(_('Table')))
         
     def chk_c(self, *args):
         rc_modul.rc_dict['style'][args[0].nm] = str(gf[args[0].get_active()])        
@@ -319,9 +333,8 @@ class Rc_Window(gtk.Window):
 
         
 class listen_cel(gtk.ScrolledWindow):
-    def __init__(self, locale_dict):
+    def __init__(self):
         gtk.ScrolledWindow.__init__(self)
-        self.locale_dict = locale_dict
         self.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         model = self.__create_model()
@@ -353,7 +366,7 @@ class listen_cel(gtk.ScrolledWindow):
         for i in xrange(len(rc_modul.mc)):
             t = rc_modul.mc[int(rc_modul.rc_dict['style']['cell_sort'][i])]
             b = bool(int(rc_modul.rc_dict['style'][t]))
-            self.articles.append([b, self.locale_dict[t], t])
+            self.articles.append([b, Name_Colum[t], t])
         
         model = gtk.ListStore(gobject.TYPE_BOOLEAN, gobject.TYPE_STRING, gobject.TYPE_STRING)
         for item in self.articles:
@@ -366,8 +379,7 @@ def sv(*args):
     gtk.main_quit()
 
 def main():
-    lc = rc_modul.locale_rc('.local')
-    rrr = Rc_Window(lc)
+    rrr = Rc_Window()
     rrr.button_ok.connect('clicked', sv)
     
     gtk.main()

@@ -200,28 +200,6 @@ def save_rc():
         CP.write(f)
         f.close()
 
-def parsa(s):
-    '''
-    Функция заполнения словаря настроек и локализации
-    '''
-    m = re.findall(r'\S+=.*', s)
-    res_dict = {}
-    for i in m:
-        temp = re.search(r'\S+=', i).group()[:-1]
-        temp1 = i[len(temp) + 1:]
-        res_dict[temp] = temp1
-    return res_dict
-
-def locale_rc(path):
-    '''
-    Функция чтения файла локализации
-    '''
-    f = open(path, 'r')
-    s = f.read()
-    f.close()
-    return parsa(s)
-    
-locale = locale_rc('.local')
 read_rc()
 
 def main():

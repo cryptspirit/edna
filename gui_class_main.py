@@ -32,8 +32,20 @@ import threading
 import time
 import filecmp
 import mimetypes
+import gettext
+
+gettext.install('edna', unicode=True)
 
 self_name = 'Edna'
+
+Name_Colum = {'cell_name': _('Name'), 
+            'cell_type': _('Type'), 
+            'cell_size': _('Size'), 
+            'cell_datec': _('Created'), 
+            'cell_datem': _('Changed'), 
+            'cell_user': _('User'), 
+            'cell_group': _('Group'), 
+            'cell_atr': _('Attribute')}
 
 class miss_window(gtk.Window):
     def __init__(self, text):
@@ -44,21 +56,21 @@ class miss_window(gtk.Window):
         self.set_border_width(5)
         self.set_icon(edna_function.get_theme.load_icon('gtk-dialog-info', 20, 0))
         self.set_position(gtk.WIN_POS_CENTER)
-        self.set_title(rc_modul.locale['Error_Read_File'])
+        self.set_title(_('Error! I not can read file'))
         
         if os.path.exists(text):
-            f1 = rc_modul.locale['Exists']
+            f1 = _('Exists')
             f2 = edna_function.get_file_size(text)
             f3 = edna_function.get_file_attr(text)
             f4 = mimetypes.guess_type(text)[0]
             if os.path.islink(text):
-                f5 = rc_modul.locale['Link']
+                f5 = _('Link')
                 f6 = os.readlink(text)
             else:
-                f5 = rc_modul.locale['Notlink']
+                f5 = _('Not link')
                 f6 = '--'
         else:
-            f1 = rc_modul.locale['Notexists']
+            f1 = _('Not exists')
             f2 = '--'
             f3 = '--'
             f4 = '--'
@@ -83,9 +95,9 @@ class miss_window(gtk.Window):
         bbox.set_layout(gtk.BUTTONBOX_SPREAD)
         bbox.set_spacing(0)
         
-        self.butt_miss = gtk.Button(rc_modul.locale['Button_Miss'])
-        self.butt_again = gtk.Button(rc_modul.locale['Button_Again'])
-        self.butt_miss_all = gtk.Button(rc_modul.locale['Button_Miss_All'])
+        self.butt_miss = gtk.Button(_('_Miss'))
+        self.butt_again = gtk.Button(_('_Repeat'))
+        self.butt_miss_all = gtk.Button(_('Miss _All'))
         self.butt_cancel = gtk.Button(stock='gtk-cancel')
         
         bbox.add(self.butt_miss)
@@ -94,7 +106,7 @@ class miss_window(gtk.Window):
         bbox.add(self.butt_cancel)
         
         self.label_mesage = gtk.Label()
-        self.label_mesage.set_text(rc_modul.locale['Error_Read_File'])
+        self.label_mesage.set_text(_('Error! I not can read file'))
         self.label_mesage.set_alignment(0.0, 0.5)
         self.label_mesage.set_size_request(350, -1)
         
@@ -103,19 +115,19 @@ class miss_window(gtk.Window):
         self.label_file.set_alignment(0.0, 0.5)
         self.label_file.set_size_request(350, -1)
         
-        hbox2.pack_start(self.labe_s(rc_modul.locale['File'], 0.0))
+        hbox2.pack_start(self.labe_s(_('File'), 0.0))
         hbox2.pack_start(gtk.VSeparator())
         hbox2.pack_start(self.labe_s(f1, 1.0))
         
-        hbox3.pack_start(self.labe_s(rc_modul.locale['cell_size'], 0.0))
+        hbox3.pack_start(self.labe_s(_('Size'), 0.0))
         hbox3.pack_start(gtk.VSeparator())
         hbox3.pack_start(self.labe_s(f2, 1.0))
         
-        hbox4.pack_start(self.labe_s(rc_modul.locale['cell_atr'], 0.0))
+        hbox4.pack_start(self.labe_s(_('Attributes'), 0.0))
         hbox4.pack_start(gtk.VSeparator())
         hbox4.pack_start(self.labe_s(f3, 1.0))
         
-        hbox5.pack_start(self.labe_s(rc_modul.locale['cell_type'], 0.0))
+        hbox5.pack_start(self.labe_s(_('Type'), 0.0))
         hbox5.pack_start(gtk.VSeparator())
         hbox5.pack_start(self.labe_s(f4, 1.0))
         
@@ -223,7 +235,7 @@ class copy_window(gtk.Window):
         tab.set_col_spacings(30)
         self.butt_cen = gtk.Button(stock='gtk-cancel')
         self.butt_cen.connect('clicked', self.but_destr)
-        self.butt_ps = gtk.Button(rc_modul.locale['Pause'])
+        self.butt_ps = gtk.Button(_('Pause'))
         self.butt_ps.connect('clicked', self.restart)
         tab.attach(gtk.Label(), 0, 1, 0, 1)
         tab.attach(self.butt_cen, 1, 2, 0, 1)
@@ -244,11 +256,11 @@ class copy_window(gtk.Window):
         
     def restart(self, *args):
         if self.Pause:
-            args[0].set_label(rc_modul.locale['Pause'])
+            args[0].set_label(_('Pause'))
             self.timer = threading.Timer(0, self.copy_timer)
             self.timer.start()
         else:
-            args[0].set_label(rc_modul.locale['Start'])
+            args[0].set_label(_('Start'))
         self.Pause = not self.Pause
             
     def copy_timer(self):
@@ -380,7 +392,7 @@ class remove_window(gtk.Window):
         self.set_border_width(5)
         self.Exit = False
         self.Pause = False
-        self.set_title(rc_modul.locale['Remove'])
+        self.set_title(_('Delete'))
         self.set_icon(edna_function.get_theme.load_icon('gtk-clear', 20, 0))
         self.set_position(gtk.WIN_POS_CENTER)
         self.dest = dest
@@ -398,7 +410,7 @@ class remove_window(gtk.Window):
         tab.set_col_spacings(30)
         self.butt_cen = gtk.Button(stock='gtk-cancel')
         self.butt_cen.connect('clicked', self.but_destr)
-        self.butt_ps = gtk.Button(rc_modul.locale['Pause'])
+        self.butt_ps = gtk.Button(_('_Pause'))
         self.butt_ps.connect('clicked', self.restart)
         tab.attach(gtk.Label(), 0, 1, 0, 1)
         tab.attach(self.butt_cen, 1, 2, 0, 1)
@@ -441,11 +453,11 @@ class remove_window(gtk.Window):
                 
     def restart(self, *args):
         if self.Pause:
-            args[0].set_label(rc_modul.locale['Pause'])
+            args[0].set_label(_('_Pause'))
             self.timer = threading.Timer(0, self.copy_timer)
             self.timer.start()
         else:
-            args[0].set_label(rc_modul.locale['Start'])
+            args[0].set_label(_('_Start'))
         self.Pause = not self.Pause
         
     def del_l(self, args, n):
@@ -506,16 +518,16 @@ class question_window(gtk.Window):
                     p = list[i][0][len(os.path.dirname(list[0][0])):] + '\n'
                     if p[0] == '/': p = p[1:]
                     target_list += p
-            target = rc_modul.locale['Files'] + '/' + rc_modul.locale['Folders'] + ' (' + str(len(list)) + ' ' + rc_modul.locale['Counts'] + ')' + '?:\n'
+            target = _('files/folders (%d th.)?:\n' % len(list))
         else:
             if list[0][1]:
-                target = rc_modul.locale['File'] + ' '
+                target = _('file') + ' '
             else:
-                target = rc_modul.locale['Folder'] + ' '
+                target = _('folder') + ' '
             p = list[0][0][len(os.path.dirname(list[0][0])):]
             if p[0] == '/': p = p[1:]
             target_list += p + '?'
-        text = rc_modul.locale['Remove_Question'] + '\n' + target + target_list
+        text = _('You want to delete\n%s%s' % (target, target_list))
         self.label_question = gtk.Label(text)
         self.label_question.set_alignment(0.0, 0.0)
         hbbox = gtk.HButtonBox()
@@ -574,7 +586,7 @@ class question_window_copy(gtk.Window):
         self.current_path = current_path
         self.set_title(self_name)
         self.set_position(gtk.WIN_POS_CENTER)
-        text = rc_modul.locale['Copy_Question'] + ' ' + str(len(list)) + ' ' + rc_modul.locale['Files'] + '/' + rc_modul.locale['Folders'] + ' ' + rc_modul.locale['In'] 
+        text = _('To copy %s files/folders in' % len(list))
         label_question = gtk.Label(text)
         label_question.set_alignment(0.0, 0.0)
         self.entry1 = gtk.Entry()
@@ -624,7 +636,7 @@ class question_window_copy(gtk.Window):
         if key == 'Return': self.ok_button_click()
             
 class listen_cell(gtk.VBox):
-    def __init__(self, n, locale_dict, return_path_cell):
+    def __init__(self, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
         self.pattern_s = ''
         self.n = n
@@ -635,7 +647,6 @@ class listen_cell(gtk.VBox):
         self.articles = None
         self.Exit_State = False
         ####################################
-        rc_modul.locale = locale_dict
         self.Current_Path = rc_modul.rc_dict['config']['panel_history%d' % n]
         ####################################
         self.scrol = gtk.ScrolledWindow()
@@ -883,7 +894,6 @@ class listen_cell(gtk.VBox):
                 subprocess.Popen(ret + ' \'' + dp + '\'', shell=True)
             print ret
             
-                
     def __add_columns(self, treeview):
         '''
         Создание столбцов
@@ -897,7 +907,7 @@ class listen_cell(gtk.VBox):
                 column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
                 column.expand = True
                 column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))
-                column.set_title(rc_modul.locale[u[i]])                
+                column.set_title(Name_Colum[u[i]])                
                 
                 renderer = gtk.CellRendererPixbuf()
                 renderer.set_alignment(alg[0], alg[1])
@@ -914,12 +924,12 @@ class listen_cell(gtk.VBox):
                 treeview.append_column(column)
             else:
                 renderer = gtk.CellRendererText()
-                renderer.set_data(rc_modul.locale[u[i]], i)
+                renderer.set_data(Name_Colum[u[i]], i)
                 renderer.set_alignment(alg[0], alg[1])
                 renderer.set_property('background-set' , True)
                 renderer.set_property('foreground-set' , True)
                 renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
-                column = gtk.TreeViewColumn(rc_modul.locale[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
+                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
                 column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
                 column.expand = True
                 itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])

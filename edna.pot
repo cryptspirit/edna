@@ -1,0 +1,259 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-03-17 16:11+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gui_class_main.py:41 gui_class_rc.py:30
+msgid "Name"
+msgstr ""
+
+#: gui_class_main.py:42 gui_class_main.py:130 gui_class_rc.py:31
+msgid "Type"
+msgstr ""
+
+#: gui_class_main.py:43 gui_class_main.py:122 gui_class_rc.py:32
+msgid "Size"
+msgstr ""
+
+#: gui_class_main.py:44 gui_class_rc.py:33
+msgid "Created"
+msgstr ""
+
+#: gui_class_main.py:45 gui_class_rc.py:34
+msgid "Changed"
+msgstr ""
+
+#: gui_class_main.py:46 gui_class_rc.py:35
+msgid "User"
+msgstr ""
+
+#: gui_class_main.py:47 gui_class_rc.py:36
+msgid "Group"
+msgstr ""
+
+#: gui_class_main.py:48 gui_class_rc.py:37
+msgid "Attribute"
+msgstr ""
+
+#: gui_class_main.py:59 gui_class_main.py:109
+msgid "Error! I not can read file"
+msgstr ""
+
+#: gui_class_main.py:62
+msgid "Exists"
+msgstr ""
+
+#: gui_class_main.py:67
+msgid "Link"
+msgstr ""
+
+#: gui_class_main.py:70
+msgid "Not link"
+msgstr ""
+
+#: gui_class_main.py:73
+msgid "Not exists"
+msgstr ""
+
+#: gui_class_main.py:98
+msgid "_Miss"
+msgstr ""
+
+#: gui_class_main.py:99
+msgid "_Repeat"
+msgstr ""
+
+#: gui_class_main.py:100
+msgid "Miss _All"
+msgstr ""
+
+#: gui_class_main.py:118
+msgid "File"
+msgstr ""
+
+#: gui_class_main.py:126
+msgid "Attributes"
+msgstr ""
+
+#: gui_class_main.py:238 gui_class_main.py:259
+msgid "Pause"
+msgstr ""
+
+#: gui_class_main.py:263
+msgid "Start"
+msgstr ""
+
+#: gui_class_main.py:395
+msgid "Delete"
+msgstr ""
+
+#: gui_class_main.py:413 gui_class_main.py:456
+msgid "_Pause"
+msgstr ""
+
+#: gui_class_main.py:460
+msgid "_Start"
+msgstr ""
+
+#: gui_class_main.py:521
+#, python-format
+msgid "files/folders (%d th.)?:\n"
+msgstr ""
+
+#: gui_class_main.py:524
+msgid "file"
+msgstr ""
+
+#: gui_class_main.py:526
+msgid "folder"
+msgstr ""
+
+#: gui_class_main.py:530
+#, python-format
+msgid ""
+"You want to delete\n"
+"%s%s"
+msgstr ""
+
+#: gui_class_main.py:589
+#, python-format
+msgid "To copy %s files/folders in"
+msgstr ""
+
+#: gui_class_rc.py:40
+msgid "right"
+msgstr ""
+
+#: gui_class_rc.py:40 gui_class_rc.py:41
+msgid "center"
+msgstr ""
+
+#: gui_class_rc.py:40
+msgid "left"
+msgstr ""
+
+#: gui_class_rc.py:41
+msgid "up"
+msgstr ""
+
+#: gui_class_rc.py:41
+msgid "down"
+msgstr ""
+
+#: gui_class_rc.py:46
+msgid "Configurations"
+msgstr ""
+
+#: gui_class_rc.py:78
+msgid "Genaral"
+msgstr ""
+
+#: gui_class_rc.py:88
+msgid "Colors"
+msgstr ""
+
+#: gui_class_rc.py:93
+msgid "Even rows"
+msgstr ""
+
+#: gui_class_rc.py:93
+msgid "Odd rows"
+msgstr ""
+
+#: gui_class_rc.py:93
+msgid "Select rows"
+msgstr ""
+
+#: gui_class_rc.py:105
+msgid "Foreground"
+msgstr ""
+
+#: gui_class_rc.py:106
+msgid "Background"
+msgstr ""
+
+#: gui_class_rc.py:114
+msgid "Example text"
+msgstr ""
+
+#: gui_class_rc.py:116
+msgid "Font button"
+msgstr ""
+
+#: gui_class_rc.py:124 gui_class_rc.py:183
+msgid "Appearance"
+msgstr ""
+
+#: gui_class_rc.py:172 gui_class_rc.py:232
+msgid "Columns"
+msgstr ""
+
+#: gui_class_rc.py:197
+msgid "Expand"
+msgstr ""
+
+#: gui_class_rc.py:198
+msgid "Min size"
+msgstr ""
+
+#: gui_class_rc.py:199
+msgid "Horizontal"
+msgstr ""
+
+#: gui_class_rc.py:200
+msgid "Vertical"
+msgstr ""
+
+#: gui_class_rc.py:245
+msgid "Format of creation"
+msgstr ""
+
+#: gui_class_rc.py:255
+msgid "Format of change"
+msgstr ""
+
+#: gui_class_rc.py:267
+msgid "in the bytes"
+msgstr ""
+
+#: gui_class_rc.py:268
+msgid "with a floating point Kb, Mb"
+msgstr ""
+
+#: gui_class_rc.py:269
+msgid "with a floating point Kb, Mb, Gb"
+msgstr ""
+
+#: gui_class_rc.py:272
+msgid "Size format"
+msgstr ""
+
+#: gui_class_rc.py:278
+msgid "numerical"
+msgstr ""
+
+#: gui_class_rc.py:279
+msgid "string"
+msgstr ""
+
+#: gui_class_rc.py:283
+msgid "Attribute format"
+msgstr ""
+
+#: gui_class_rc.py:295
+msgid "Table"
+msgstr ""
