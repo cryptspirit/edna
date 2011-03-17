@@ -222,7 +222,7 @@ def get_file_attr(file):
     return f[int(rc_modul.rc_dict['style']['cell_atr_format'])]
 
 def get_file_date(path, cm):
-    b = rc_modul.rc_dict[cm]
+    b = rc_modul.rc_dict['style'][cm]
     ss = ''
     if cm == 'cell_datec_format':
         nm = 8

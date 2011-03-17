@@ -26,11 +26,11 @@ import ConfigParser
 filerc = '.ednarc'
 
 md = ['Y', 
-'M', 
-'D', 
-'h', 
-'m', 
-'s']
+    'M', 
+    'D', 
+    'h', 
+    'm', 
+    's']
 
 mc = ['cell_name', 
 'cell_type', 
@@ -142,9 +142,9 @@ def read_rc():
                         need_write = True
             else:
                 CP.add_section(i)
+                need_write = True
                 for j in defaultrc[i].keys():
                     CP.set(i, j, defaultrc[i][j])
-                    need_write = True
                 rc_dict[i] = defaultrc[i]
         if need_write:
             f = open(filerc, 'r+')
@@ -162,14 +162,43 @@ def read_rc():
         f.close()
         Sum_cell_function()
                 
-def save_rc(dict):
+def save_rc():
     '''
     Функция сохранения словаря настроек
     '''
-    f = open(filerc, 'w')
-    for k in dict.keys():
-        f.write(k + '=' + dict[k] + '\n')
-    f.close()
+    Sum_cell_function()
+    need_write = False
+    if os.path.isfile(filerc):
+        CP = ConfigParser.ConfigParser()
+        CP.read(filerc)
+        for i in rc_dict.keys():
+            if CP.has_section(i):
+                for j in rc_dict[i].keys():
+                    if CP.has_option(i, j):
+                        if CP.get(i, j) != rc_dict[i][j]:
+                            CP.set(i, j, rc_dict[i][j])
+                            need_write = True
+                    else:
+                        CP.set(i, j, rc_dict[i][j])
+                        need_write = True
+            else:
+                CP.add_section(i)
+                need_write = True
+                for j in rc_dict[i].keys():
+                    CP.set(i, j, rc_dict[i][j])
+        if need_write:
+            f = open(filerc, 'r+')
+            CP.write(f)
+            f.close()
+    else:
+        CP = ConfigParser.ConfigParser()
+        for i in rc_dict.keys():
+            CP.add_section(i)
+            for j in rc_dict[i].keys():
+                CP.set(i, j, rc_dict[i][j])
+        f = open(filerc, 'w')
+        CP.write(f)
+        f.close()
 
 def parsa(s):
     '''

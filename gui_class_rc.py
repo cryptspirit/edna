@@ -29,10 +29,9 @@ import rc_modul
 gf = [1.0, 0.5, 0.0]
 
 class Rc_Window(gtk.Window):
-    def __init__(self, locale_dict, rc_dict):
+    def __init__(self, locale_dict):
         gtk.Window.__init__(self)
         self.locale_dict = locale_dict
-        self.rc_dict = rc_dict
         self.set_title(self.locale_dict['Rc_Title'])
         self.set_position(gtk.WIN_POS_CENTER)
         #self.set_resizable(False)
@@ -79,18 +78,18 @@ class Rc_Window(gtk.Window):
         lab.modify_font(pango.FontDescription('bold'))
         #lab.set_justify(gtk.JUSTIFY_LEFT)
         lab.set_alignment(0.0, 0.5)
-        l = ['Even_Row', 'Odd_Row', 'Sel_Row']
-        p = ['FG', 'BG']
+        l = ['even_row', 'odd_row', 'sel_row']
+        p = ['fg', 'bg']
         bt = {}
         for i in l:
             for j in p:
                 bt[i + '_' + j] = gtk.Button()
                 bt[i + '_' + j].set_size_request(30, 30)
                 bt[i + '_' + j].connect('clicked', self.color_click, i + '_' + j)
-                bt[i + '_' + j].modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(self.rc_dict[i + '_' + j]))
-                bt[i + '_' + j].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(self.rc_dict[i + '_' + j]))
-                #bt[i + '_' + j].modify_bg(gtk.STATE_ACTIVE, gtk.gdk.Color(self.rc_dict[i + '_' + j]))
-                bt[i + '_' + j].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(self.rc_dict[i + '_' + j]))
+                bt[i + '_' + j].modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
+                bt[i + '_' + j].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
+                #bt[i + '_' + j].modify_bg(gtk.STATE_ACTIVE, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
+                bt[i + '_' + j].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(rc_modul.rc_dict['style']['%s_%s' % (i, j)]))
         tab1.attach(gtk.Label(self.locale_dict['Row_FG']), 1, 2, 0, 1)
         tab1.attach(gtk.Label(self.locale_dict['Row_BG']), 2, 3, 0, 1)
         for i in xrange(len(l)):
@@ -101,7 +100,7 @@ class Rc_Window(gtk.Window):
                 tab1.attach(bt[l[i] + '_' + p[j]], j + 1, j + 2, i + 1, i + 2)
         
         self.font_label_text = gtk.Label(self.locale_dict['Font_Label_Text'])
-        self.font_label_text.modify_font(pango.FontDescription(self.rc_dict['Font_Cell_Text']))
+        self.font_label_text.modify_font(pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
         self.font_button_text = gtk.Button(self.locale_dict['Font_Button_Text'])
         self.font_button_text.connect('clicked', self.font_click, self.font_label_text)
         
@@ -116,12 +115,12 @@ class Rc_Window(gtk.Window):
         dialog = gtk.FontSelectionDialog("Changing color")
         dialog.set_transient_for(self)
         fontsel = dialog.fontsel
-        fontsel.set_font_name(self.rc_dict['Font_Cell_Text'])
+        fontsel.set_font_name(rc_modul.rc_dict['style']['font_cell_text'])
         response = dialog.run()
 
         if response == gtk.RESPONSE_OK:
-            self.rc_dict['Font_Cell_Text'] = fontsel.get_font_name()
-            args[1].modify_font(pango.FontDescription(self.rc_dict['Font_Cell_Text']))
+            rc_modul.rc_dict['style']['font_cell_text'] = fontsel.get_font_name()
+            args[1].modify_font(pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
 
         dialog.destroy()
         
@@ -130,17 +129,17 @@ class Rc_Window(gtk.Window):
         dialog.set_transient_for(self)
         colorsel = dialog.colorsel
         
-        colorsel.set_previous_color(gtk.gdk.Color(self.rc_dict[args[1]]))
-        colorsel.set_current_color(gtk.gdk.Color(self.rc_dict[args[1]]))
+        colorsel.set_previous_color(gtk.gdk.Color(rc_modul.rc_dict['style'][args[1]]))
+        colorsel.set_current_color(gtk.gdk.Color(rc_modul.rc_dict['style'][args[1]]))
         colorsel.set_has_palette(True)
 
         response = dialog.run()
 
         if response == gtk.RESPONSE_OK:
-            self.rc_dict[args[1]] = str(colorsel.get_current_color())
-            args[0].modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(self.rc_dict[args[1]]))
-            args[0].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(self.rc_dict[args[1]]))
-            args[0].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(self.rc_dict[args[1]]))
+            rc_modul.rc_dict['style'][args[1]] = str(colorsel.get_current_color())
+            args[0].modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style'][args[1]]))
+            args[0].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(rc_modul.rc_dict['style'][args[1]]))
+            args[0].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(rc_modul.rc_dict['style'][args[1]]))
 
         dialog.destroy()
             
@@ -161,7 +160,7 @@ class Rc_Window(gtk.Window):
         label1 = gtk.Label(self.locale_dict['Rc_Cell_Cell'])
         label1.modify_font(pango.FontDescription('bold'))
         label1.set_justify(gtk.JUSTIFY_LEFT)
-        cel_sort = listen_cel(self.locale_dict, self.rc_dict)
+        cel_sort = listen_cel(self.locale_dict)
         cel_sort.renderer.connect('toggled', self.fixed_toggled, cel_sort.model)
         button1.connect('clicked', self.downup, cel_sort, True)
         button2.connect('clicked', self.downup, cel_sort, False)
@@ -190,27 +189,27 @@ class Rc_Window(gtk.Window):
         
         for i in xrange(len(rc_modul.mc)):
             cheak = gtk.CheckButton(None)
-            cheak.cl = rc_modul.mc[i] + '_Expand'
-            cheak.set_active(int(self.rc_dict[cheak.cl]))
+            cheak.cl = '%s_expand' % rc_modul.mc[i]
+            cheak.set_active(int(rc_modul.rc_dict['style'][cheak.cl]))
             cheak.connect('toggled', self.toggled)
             
             sp2 = gtk.SpinButton(gtk.Adjustment(0, 0, 100, 1, -1))
-            sp2.cl = rc_modul.mc[i] + '_Size'
-            sp2.set_value(int(self.rc_dict[sp2.cl]))
+            sp2.cl = '%s_size' % rc_modul.mc[i]
+            sp2.set_value(int(rc_modul.rc_dict['style'][sp2.cl]))
             sp2.connect('value_changed', self.spin)
             
             chkH1 = gtk.combo_box_new_text()
             for j in gf:
                 chkH1.append_text(self.locale_dict['Cell_Cell_Alignment_H_' + str(j)])
-            chkH1.nm = rc_modul.mc[i] + '_Alignment_H'
-            chkH1.set_active(gf.index(float(self.rc_dict[chkH1.nm])))
+            chkH1.nm = '%s_alignment_h' % rc_modul.mc[i]
+            chkH1.set_active(gf.index(float(rc_modul.rc_dict['style'][chkH1.nm])))
             chkH1.connect('changed', self.chk_c)
             
             chkV1 = gtk.combo_box_new_text()
             for j in gf:
-                chkV1.append_text(self.locale_dict['Cell_Cell_Alignment_V_' + str(j)])
-            chkV1.nm = rc_modul.mc[i] + '_Alignment_V'
-            chkV1.set_active(gf.index(float(self.rc_dict[chkV1.nm])))
+                chkV1.append_text(self.locale_dict['Cell_Cell_Alignment_V_%s' % j])
+            chkV1.nm = '%s_alignment_v' % rc_modul.mc[i]
+            chkV1.set_active(gf.index(float(rc_modul.rc_dict['style'][chkV1.nm])))
             chkV1.connect('changed', self.chk_c)
             
             tb1.attach(cheak, 0, 1, i + 1, i + 2)
@@ -234,8 +233,8 @@ class Rc_Window(gtk.Window):
         label1 = gtk.Label(self.locale_dict['Cell_Cell_DateC_Format'])
         label1.set_alignment(0.0, 0.5)
         entry1 = gtk.Entry()
-        entry1.set_text(self.rc_dict['Cell_DateC_Format'])
-        entry1.connect('changed', self.on_changed, 'Cell_DateC_Format')
+        entry1.set_text(rc_modul.rc_dict['style']['cell_datec_format'])
+        entry1.connect('changed', self.on_changed, 'cell_datec_format')
         
         hbox2.pack_start(label1, True)
         hbox2.pack_start(entry1, False)
@@ -244,8 +243,8 @@ class Rc_Window(gtk.Window):
         label2 = gtk.Label(self.locale_dict['Cell_Cell_DateM_Format'])
         label2.set_alignment(0.0, 0.5)
         entry2 = gtk.Entry()
-        entry2.set_text(self.rc_dict['Cell_DateM_Format'])
-        entry2.connect('changed', self.on_changed, 'Cell_DateM_Format')        
+        entry2.set_text(rc_modul.rc_dict['style']['cell_datem_format'])
+        entry2.connect('changed', self.on_changed, 'cell_datem_format')        
         
         hbox3.pack_start(label2, True)
         hbox3.pack_start(entry2, False)
@@ -254,8 +253,8 @@ class Rc_Window(gtk.Window):
         
         chk1 = gtk.combo_box_new_text()
         for i in xrange(3):
-            chk1.append_text(self.locale_dict['List_Size_Format_' + str(i)])
-        chk1.set_active(int(self.rc_dict['Cell_Size_Format']))
+            chk1.append_text(self.locale_dict['List_Size_Format_%s' % i])
+        chk1.set_active(int(rc_modul.rc_dict['style']['cell_size_format']))
         chk1.connect('changed', self.chk1_c)
         label3 = gtk.Label(self.locale_dict['Cell_Cell_Size_Format'])
         label3.set_alignment(0.0, 0.5)
@@ -265,7 +264,7 @@ class Rc_Window(gtk.Window):
         chk2 = gtk.combo_box_new_text()
         for i in xrange(2):
             chk2.append_text(self.locale_dict['Cell_Atr_Format_' + str(i)])
-        chk2.set_active(int(self.rc_dict['Cell_Atr_Format']))
+        chk2.set_active(int(rc_modul.rc_dict['style']['cell_atr_format']))
         chk2.connect('changed', self.chk2_c)
         label4 = gtk.Label(self.locale_dict['Cell_Cell_Atr_Format'])
         label4.set_alignment(0.0, 0.5)
@@ -282,13 +281,13 @@ class Rc_Window(gtk.Window):
         self.note.append_page(vvbox1, gtk.Label(self.locale_dict['Rc_Tab_Page']))
         
     def chk_c(self, *args):
-        self.rc_dict[args[0].nm] = str(gf[args[0].get_active()])        
+        rc_modul.rc_dict['style'][args[0].nm] = str(gf[args[0].get_active()])        
         
     def chk1_c(self, *args):
-        self.rc_dict['Cell_Size_Format'] = str(args[0].get_active())
+        rc_modul.rc_dict['style']['cell_size_format'] = str(args[0].get_active())
         
     def chk2_c(self, *args):
-        self.rc_dict['Cell_Atr_Format'] = str(args[0].get_active())
+        rc_modul.rc_dict['style']['cell_atr_format'] = str(args[0].get_active())
             
     def downup(self, *args):
         selection = args[1].treeview.get_selection()
@@ -301,30 +300,28 @@ class Rc_Window(gtk.Window):
     def on_changed(self, *args):
         text = args[0].get_text()#.strip()
         args[0].set_text(''.join([i for i in text if i in 'YMDhsm/-.: ']))
-        self.rc_dict[args[1]] = args[0].get_text() 
+        rc_modul.rc_dict['style'][args[1]] = args[0].get_text() 
 
     def spin(self, *args):
-        self.rc_dict[args[0].cl] = str(int(args[0].get_value()))
+        rc_modul.rc_dict['style'][args[0].cl] = str(int(args[0].get_value()))
         
     def toggled(self, *args):
-        self.rc_dict[args[0].cl] = str(int(args[0].get_active()))
+        rc_modul.rc_dict['style'][args[0].cl] = str(int(args[0].get_active()))
 
              
     def fixed_toggled(self, cell, path, model):
         iter = model.get_iter((int(path),))
         fixed = model.get_value(iter, 0)
         fixed = not fixed
-        self.rc_dict[model.get_value(iter, 2)] = str(int(fixed))
+        rc_modul.rc_dict['style'][model.get_value(iter, 2)] = str(int(fixed))
         model.set(iter, 0, fixed)
 
 
         
 class listen_cel(gtk.ScrolledWindow):
-    def __init__(self, locale_dict, rc_dict):
+    def __init__(self, locale_dict):
         gtk.ScrolledWindow.__init__(self)
         self.locale_dict = locale_dict
-        self.rc_dict = rc_dict
-        
         self.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         model = self.__create_model()
@@ -354,8 +351,8 @@ class listen_cel(gtk.ScrolledWindow):
     def __create_model(self):
         self.articles = []
         for i in xrange(len(rc_modul.mc)):
-            t = rc_modul.mc[int(self.rc_dict['Cell_Sort'][i])]
-            b = bool(int(self.rc_dict[t]))
+            t = rc_modul.mc[int(rc_modul.rc_dict['style']['cell_sort'][i])]
+            b = bool(int(rc_modul.rc_dict['style'][t]))
             self.articles.append([b, self.locale_dict[t], t])
         
         model = gtk.ListStore(gobject.TYPE_BOOLEAN, gobject.TYPE_STRING, gobject.TYPE_STRING)
@@ -365,15 +362,13 @@ class listen_cel(gtk.ScrolledWindow):
         return model
 
 def sv(*args):
-    rc_modul.save_rc(args[1].rc_dict)
-    
+    rc_modul.save_rc()
     gtk.main_quit()
 
 def main():
-    rc = rc_modul.read_rc()
     lc = rc_modul.locale_rc('.local')
-    rrr = Rc_Window(lc, rc)
-    rrr.button_ok.connect('clicked', sv, rrr)
+    rrr = Rc_Window(lc)
+    rrr.button_ok.connect('clicked', sv)
     
     gtk.main()
     return 0
