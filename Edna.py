@@ -32,9 +32,8 @@ import hotkeys
 import profile
 
 class Dwindow(gtk.Window):
-    def __init__(self, locale_dict, rc_dict):
+    def __init__(self, locale_dict):
         gtk.Window.__init__(self)
-        self.rc_dict = rc_dict
         self.locale_dict = locale_dict
         self.connect('destroy', self.exitt)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -45,8 +44,8 @@ class Dwindow(gtk.Window):
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
         self.cel = []
-        self.cel.append(gui_class_main.listen_cell(0, self.locale_dict, self.rc_dict, self.return_path_cell))
-        self.cel.append(gui_class_main.listen_cell(1, self.locale_dict, self.rc_dict, self.return_path_cell))
+        self.cel.append(gui_class_main.listen_cell(0, self.locale_dict, self.return_path_cell))
+        self.cel.append(gui_class_main.listen_cell(1, self.locale_dict, self.return_path_cell))
         self.set_focus(self.cel[0].treeview)
         self.foc_c = True
         #################################
@@ -65,9 +64,9 @@ class Dwindow(gtk.Window):
         return self.cel[not index].Current_Path
 
         
-    def upData(sefl, rc_dict):
-        self.cel1.upData(rc_dict)
-        self.cel2.upData(rc_dict)
+    def upData(sefl):
+        self.cel1.upData()
+        self.cel2.upData()
         
     def focuss(self, *args):
         if self.foc != self.is_focus():
@@ -81,9 +80,8 @@ class Dwindow(gtk.Window):
         
 def main():
     gtk.gdk.threads_init()
-    rc = rc_modul.read_rc()
     lc = rc_modul.locale
-    d = Dwindow(lc, rc).show_all()
+    d = Dwindow(lc).show_all()
     gtk.main()
     return 0
 

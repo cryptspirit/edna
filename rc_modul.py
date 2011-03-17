@@ -21,6 +21,7 @@
 #       MA 02110-1301, USA.
 import re
 import os
+import ConfigParser
 
 filerc = '.ednarc'
 
@@ -31,101 +32,135 @@ md = ['Y',
 'm', 
 's']
 
-mc = ['Cell_Name', 
-'Cell_Type', 
-'Cell_Size', 
-'Cell_DateC', 
-'Cell_DateM', 
-'Cell_User', 
-'Cell_Group', 
-'Cell_Atr']
+mc = ['cell_name', 
+'cell_type', 
+'cell_size', 
+'cell_datec', 
+'cell_datem', 
+'cell_user', 
+'cell_group', 
+'cell_atr']
 
-defaultrc = {'Cell_Name':'1',  
-            'Cell_Type':'1', 
-            'Cell_Size':'1', 
-            'Cell_DateC':'0', 
-            'Cell_DateM':'0', 
-            'Cell_User':'0', 
-            'Cell_Group':'0', 
-            'Cell_Atr':'0',
-            'Cell_Sort':'01234567',
-            'Panel_History0':'/',
-            'Panel_History1':'/',
-            'Cell_Name_Expand':'1',  
-            'Cell_Type_Expand':'0', 
-            'Cell_Size_Expand':'0', 
-            'Cell_DateC_Expand':'0', 
-            'Cell_DateM_Expand':'0', 
-            'Cell_User_Expand':'0', 
-            'Cell_Group_Expand':'0', 
-            'Cell_Atr_Expand':'0',
-            'Cell_Name_Alignment_H':'0.0',  
-            'Cell_Type_Alignment_H':'0.0', 
-            'Cell_Size_Alignment_H':'1.0', 
-            'Cell_DateC_Alignment_H':'0.0', 
-            'Cell_DateM_Alignment_H':'0.0', 
-            'Cell_User_Alignment_H':'0.0', 
-            'Cell_Group_Alignment_H':'1.0', 
-            'Cell_Atr_Alignment_H':'1.0',
-            'Cell_Name_Alignment_V':'0.5',  
-            'Cell_Type_Alignment_V':'0.5', 
-            'Cell_Size_Alignment_V':'0.5', 
-            'Cell_DateC_Alignment_V':'0.5', 
-            'Cell_DateM_Alignment_V':'0.5', 
-            'Cell_User_Alignment_V':'0.5', 
-            'Cell_Group_Alignment_V':'0.5', 
-            'Cell_Atr_Alignment_V':'0.5',
-            'Cell_Name_Size':'100',  
-            'Cell_Type_Size':'70', 
-            'Cell_Size_Size':'70', 
-            'Cell_DateC_Size':'70', 
-            'Cell_DateM_Size':'70', 
-            'Cell_User_Size':'70', 
-            'Cell_Group_Size':'70', 
-            'Cell_Atr_Size':'70',
-            'Cell_DateC_Format':'M.D.Y',
-            'Cell_DateM_Format':'M.D.Y',
-            'Cell_Size_Format':'0',
-            'Cell_Date_Type':'0',
-            'Cell_Atr_Format':'0',
-            'Date_Format':'0',
-            'Even_Row_FG':'#DFDDF0',
-            'Even_Row_BG':'#454a56',
-            'Odd_Row_FG':'#DFDDF0',
-            'Odd_Row_BG':'#41517a',
-            'Sel_Row_FG':'#474747',
-            'Sel_Row_BG':'#599839',
-            'Icon_Size':'16',
-            'Font_Cell_Text':'Sans 10',
-            'Hot_Key_1':'0',
-            'Hot_Key_2':'0',
-            'Hot_Key_3':'0',
-            'Hot_Key_4':'0',
-            'Hot_Key_5':'0',
-            'Hot_Key_6':'0',
-            'Hot_Key_7':'0'}
-
+rc_config = {'panel_history0':'/',
+            'panel_history1':'/'}
+            
+rc_style = {'cell_name':'1',  
+            'cell_type':'1', 
+            'cell_size':'1', 
+            'cell_datec':'0', 
+            'cell_datem':'0', 
+            'cell_user':'0', 
+            'cell_group':'0', 
+            'cell_atr':'0',
+            'cell_sort':'01234567',
+            'cell_name_expand':'1',  
+            'cell_type_expand':'0', 
+            'cell_size_expand':'0', 
+            'cell_datec_expand':'0', 
+            'cell_datem_expand':'0', 
+            'cell_user_expand':'0', 
+            'cell_group_expand':'0', 
+            'cell_atr_expand':'0',
+            'cell_name_alignment_h':'0.0',  
+            'cell_type_alignment_h':'0.0', 
+            'cell_size_alignment_h':'1.0', 
+            'cell_datec_alignment_h':'0.0', 
+            'cell_datem_alignment_h':'0.0', 
+            'cell_user_alignment_h':'0.0', 
+            'cell_group_alignment_h':'1.0', 
+            'cell_atr_alignment_h':'1.0',
+            'cell_name_alignment_v':'0.5',  
+            'cell_type_alignment_v':'0.5', 
+            'cell_size_alignment_v':'0.5', 
+            'cell_datec_alignment_v':'0.5', 
+            'cell_datem_alignment_v':'0.5', 
+            'cell_user_alignment_v':'0.5', 
+            'cell_group_alignment_v':'0.5', 
+            'cell_atr_alignment_v':'0.5',
+            'cell_name_size':'100',  
+            'cell_type_size':'70', 
+            'cell_size_size':'70', 
+            'cell_datec_size':'70', 
+            'cell_datem_size':'70', 
+            'cell_user_size':'70', 
+            'cell_group_size':'70', 
+            'cell_atr_size':'70',
+            'cell_datec_format':'D.M.Y',
+            'cell_datem_format':'D.M.Y',
+            'cell_size_format':'0',
+            'cell_date_type':'0',
+            'cell_atr_format':'0',
+            'date_format':'0',
+            'even_row_fg':'#DFDDF0',
+            'even_row_bg':'#454a56',
+            'odd_row_fg':'#DFDDF0',
+            'odd_row_bg':'#41517a',
+            'sel_row_fg':'#474747',
+            'sel_row_bg':'#599839',
+            'icon_size':'16',
+            'font_cell_text':'Sans 10'}
+            
+rc_hotkeys = {'key_1':'0',
+            'key_2':'0',
+            'key_3':'0',
+            'key_4':'0',
+            'key_5':'0',
+            'key_6':'0',
+            'key_7':'0'}
+            
+defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
     
-def Sum_cell(rc_dict):
-    t = rc_dict['Cell_Sort']
+def Sum_cell_function():
+    global Sum_cell
+    t = rc_dict['style']['cell_sort']
     p = []
     for i in xrange(len(t)):
-        if rc_dict[mc[int(t[i])]] == '1':
+        if rc_dict['style'][mc[int(t[i])]] == '1':
             p.append(mc[int(t[i])])
-    return p
+    Sum_cell = p
 
 def read_rc():
     '''
     Функция чтения файла настроек
     '''
+    global rc_dict
+    rc_dict = {}
+    need_write = False
     if os.path.isfile(filerc):
-        f = open(filerc, 'r')
-        s = f.read()
-        f.close()
-        return correction_rc(parsa(s))
+        CP = ConfigParser.ConfigParser()
+        CP.read(filerc)
+        for i in defaultrc.keys():
+            if CP.has_section(i):
+                rc_dict[i] = {}
+                for j in defaultrc[i].keys():
+                    if CP.has_option(i, j):
+                        rc_dict[i][j] = CP.get(i, j)
+                    else:
+                        rc_dict[i][j] = defaultrc[i][j]
+                        CP.set(i, j, defaultrc[i][j])
+                        need_write = True
+            else:
+                CP.add_section(i)
+                for j in defaultrc[i].keys():
+                    CP.set(i, j, defaultrc[i][j])
+                    need_write = True
+                rc_dict[i] = defaultrc[i]
+        if need_write:
+            f = open(filerc, 'r+')
+            CP.write(f)
+            f.close()
+        Sum_cell_function()
     else:
-        return defaultrc
+        CP = ConfigParser.ConfigParser()
+        for i in defaultrc.keys():
+            CP.add_section(i)
+            for j in defaultrc[i].keys():
+                CP.set(i, j, defaultrc[i][j])
+        f = open(filerc, 'w')
+        CP.write(f)
+        f.close()
+        Sum_cell_function()
                 
 def save_rc(dict):
     '''
@@ -156,26 +191,12 @@ def locale_rc(path):
     s = f.read()
     f.close()
     return parsa(s)
-
-def correction_rc(rc_dict):
-    '''
-    Функция внисения недостающих настроек в файл настроек
-    '''
-    f = False
-    for i in defaultrc.keys():
-        try:
-            rc_dict[i]
-        except:
-            rc_dict[i] = defaultrc[i]
-            f = True
-    if f:        
-        save_rc(rc_dict)
-    return rc_dict
     
 locale = locale_rc('.local')
-    
+read_rc()
+
 def main():
-    read_rc()
+    print read_rc()
     return 0
 
 if __name__ == '__main__':

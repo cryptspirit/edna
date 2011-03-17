@@ -32,11 +32,10 @@ import threading
 import stat
 
 
-betc = {'Row_FG':3,
-        'Row_BG':2,
+betc = {'row_fg':3,
+        'row_bg':2,
         'flag':1,
-        'Name':0,}
-rc_dict = rc_modul.read_rc()
+        'name':0,}
 
 type_ico_load = gtk.ICON_LOOKUP_USE_BUILTIN
 
@@ -44,8 +43,8 @@ dic_icon = {}
 
 get_theme = gtk.icon_theme_get_default()
 
-dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_dict['Icon_Size']), type_ico_load)
-dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['Icon_Size']), type_ico_load)
+dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
+dic_icon['empty'] = get_theme.load_icon('empty', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
 
 def buf_def(c):
     global answer
@@ -167,7 +166,7 @@ def get_file_size(path):
     
 def get_in_format_size(t):
     s = ''
-    if rc_dict['Cell_Size_Format'] == '0':
+    if rc_modul.rc_dict['style']['cell_size_format'] == '0':
         t = str(t)
         if len(t) > 3:
             l = len(t)
@@ -178,7 +177,7 @@ def get_in_format_size(t):
         else:
             s = t
 
-    elif rc_dict['Cell_Size_Format'] == '1':
+    elif rc_modul.rc_dict['style']['cell_size_format'] == '1':
         if t < 1024:
             s = str(t) + ' B'
         elif t >= 1024 and t <= 1048576:
@@ -186,7 +185,7 @@ def get_in_format_size(t):
         else:
             s = str(round(t / 1048576., 2)) + ' MB'
             
-    elif rc_dict['Cell_Size_Format'] == '2':
+    elif rc_modul.rc_dict['style']['cell_size_format'] == '2':
         if t < 1024:
             s = str(t) + ' B'
         elif t >= 1024 and t <= 1048576:
@@ -220,12 +219,12 @@ def get_file_attr(file):
                 s += '-'
         s1 += str(u)
     f = [s, s1]
-    return f[int(rc_dict['Cell_Atr_Format'])]
+    return f[int(rc_modul.rc_dict['style']['cell_atr_format'])]
 
 def get_file_date(path, cm):
-    b = rc_dict[cm]
+    b = rc_modul.rc_dict[cm]
     ss = ''
-    if cm == 'Cell_DateC_Format':
+    if cm == 'cell_datec_format':
         nm = 8
     else:
         nm = 9
@@ -308,27 +307,27 @@ def get_cell(path, i, is_fil, cellse):
     if is_fil:
         n, t = get_typ(i)
     for j in cellse:
-        if j == 'Cell_Name':
+        if j == 'cell_name':
             if is_fil:
                 ret.append(n)
             else:
                 ret.append(i)
-        elif j == 'Cell_Type':
+        elif j == 'cell_type':
             ret.append(t)
-        elif j == 'Cell_Size':
+        elif j == 'cell_size':
             if is_fil:
                 ret.append(get_file_size(path_i))
             else:
                 ret.append('<DIR>')
-        elif j == 'Cell_DateC':
-                ret.append(get_file_date(path_i, 'Cell_DateC_Format'))
-        elif j == 'Cell_DateM':
-                ret.append(get_file_date(path_i, 'Cell_DateM_Format'))
-        elif j == 'Cell_User':
+        elif j == 'cell_datec':
+                ret.append(get_file_date(path_i, 'cell_datec_format'))
+        elif j == 'cell_datem':
+                ret.append(get_file_date(path_i, 'cell_datem_format'))
+        elif j == 'cell_user':
                 ret.append(get_file_uid(path_i))
-        elif j == 'Cell_Group':
+        elif j == 'cell_group':
                 ret.append(get_file_gid(path_i))
-        elif j == 'Cell_Atr':
+        elif j == 'cell_atr':
                 ret.append(get_file_attr(path_i))
     ret.append(path_i)
     ret.append(get_ico(mime_name_ico(temp)))
@@ -340,7 +339,7 @@ def get_ico(s):
         dic_icon.keys().index(s)
     except:
         try:
-            b = get_theme.load_icon(s, int(rc_dict['Icon_Size']), type_ico_load)
+            b = get_theme.load_icon(s, int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
         except:
             return dic_icon['empty']
         else:
@@ -354,13 +353,13 @@ def get_list_path(path, pattern_s, select_list):
     '''
     Получение списка файлов с описаными столбцами
     '''
-    cellse = rc_modul.Sum_cell(rc_dict)
+    cellse = rc_modul.Sum_cell
     
-    try: cellse.index('Cell_User')
+    try: cellse.index('cell_user')
     except: pass
     else: get_dickt_nameusers()
     
-    try: cellse.index('Cell_Group')
+    try: cellse.index('cell_group')
     except: pass
     else: get_dickt_namegroups()
     
@@ -372,9 +371,9 @@ def get_list_path(path, pattern_s, select_list):
         ttt = []
         
         for j in cellse:
-            if j == 'Cell_Name':
+            if j == 'cell_name':
                 ttt.append('..')
-            elif j == 'Cell_Size':
+            elif j == 'cell_size':
                 ttt.append('<DIR>')
             else:
                 ttt.append('')
@@ -401,23 +400,23 @@ def get_list_path(path, pattern_s, select_list):
             try: select_list.index(m[i][len(cellse)])
             except:
                 if i % 2 != 0:
-                    color_fg = rc_dict['Odd_Row_FG']
-                    color_bg = rc_dict['Odd_Row_BG']
+                    color_fg = rc_modul.rc_dict['style']['odd_row_fg']
+                    color_bg = rc_modul.rc_dict['style']['odd_row_bg']
                 else:
-                    color_fg = rc_dict['Even_Row_FG']
-                    color_bg = rc_dict['Even_Row_BG']
+                    color_fg = rc_modul.rc_dict['style']['even_row_fg']
+                    color_bg = rc_modul.rc_dict['style']['even_row_bg']
                 fgl = 'False'
             else:
                 fgl = 'True'
-                color_fg = rc_dict['Sel_Row_FG']
-                color_bg = rc_dict['Sel_Row_BG']
+                color_fg = rc_modul.rc_dict['style']['sel_row_fg']
+                color_bg = rc_modul.rc_dict['style']['sel_row_bg']
         else:
             if i % 2 != 0:
-                color_fg = rc_dict['Odd_Row_FG']
-                color_bg = rc_dict['Odd_Row_BG']
+                color_fg = rc_modul.rc_dict['style']['odd_row_fg']
+                color_bg = rc_modul.rc_dict['style']['odd_row_bg']
             else:
-                color_fg = rc_dict['Even_Row_FG']
-                color_bg = rc_dict['Even_Row_BG']
+                color_fg = rc_modul.rc_dict['style']['even_row_fg']
+                color_bg = rc_modul.rc_dict['style']['even_row_bg']
             fgl = 'False'
         m[i].append(color_fg)
         m[i].append(color_bg)

@@ -5,14 +5,14 @@ Apply=Применить
 Rc_All_Page=Общие
 Rc_Tab_Page=Таблица
 
-Cell_Name=Имя
-Cell_Type=Тип
-Cell_Size=Размер
-Cell_DateC=Дата создания
-Cell_DateM=Дата модификации
-Cell_User=Владелец
-Cell_Group=Группа
-Cell_Atr=Атрибуты
+cell_name=Имя
+cell_type=Тип
+cell_size=Размер
+cell_datec=Дата создания
+cell_datem=Дата модификации
+cell_user=Владелец
+cell_group=Группа
+cell_atr=Атрибуты
 
 Cell_Cell_Expand=Расш.
 Cell_Cell_Min_Size=Мин. разм.

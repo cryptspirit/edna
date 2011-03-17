@@ -107,15 +107,15 @@ class miss_window(gtk.Window):
         hbox2.pack_start(gtk.VSeparator())
         hbox2.pack_start(self.labe_s(f1, 1.0))
         
-        hbox3.pack_start(self.labe_s(rc_modul.locale['Cell_Size'], 0.0))
+        hbox3.pack_start(self.labe_s(rc_modul.locale['cell_size'], 0.0))
         hbox3.pack_start(gtk.VSeparator())
         hbox3.pack_start(self.labe_s(f2, 1.0))
         
-        hbox4.pack_start(self.labe_s(rc_modul.locale['Cell_Atr'], 0.0))
+        hbox4.pack_start(self.labe_s(rc_modul.locale['cell_atr'], 0.0))
         hbox4.pack_start(gtk.VSeparator())
         hbox4.pack_start(self.labe_s(f3, 1.0))
         
-        hbox5.pack_start(self.labe_s(rc_modul.locale['Cell_Type'], 0.0))
+        hbox5.pack_start(self.labe_s(rc_modul.locale['cell_type'], 0.0))
         hbox5.pack_start(gtk.VSeparator())
         hbox5.pack_start(self.labe_s(f4, 1.0))
         
@@ -624,7 +624,7 @@ class question_window_copy(gtk.Window):
         if key == 'Return': self.ok_button_click()
             
 class listen_cell(gtk.VBox):
-    def __init__(self, n, locale_dict, rc_dict, return_path_cell):
+    def __init__(self, n, locale_dict, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
         self.pattern_s = ''
         self.n = n
@@ -635,9 +635,8 @@ class listen_cell(gtk.VBox):
         self.articles = None
         self.Exit_State = False
         ####################################
-        self.rc_dict = rc_dict
         rc_modul.locale = locale_dict
-        self.Current_Path = self.rc_dict['Panel_History' + str(n)]
+        self.Current_Path = rc_modul.rc_dict['config']['panel_history%d' % n]
         ####################################
         self.scrol = gtk.ScrolledWindow()
         self.scrol.set_shadow_type(gtk.SHADOW_ETCHED_IN)
@@ -650,8 +649,8 @@ class listen_cell(gtk.VBox):
         self.evtb = gtk.EventBox()
         self.evtb.add(self.path_entry)
         #self.evtb.set_border_width(3)
-        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(self.rc_dict['Even_Row_BG']))
-        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(self.rc_dict['Even_Row_FG']))
+        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
+        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_fg']))
         self.path_entry.set_alignment(0.0, 0.5)
         self.path_entry.set_text(self.Current_Path)
         ###################################
@@ -660,7 +659,7 @@ class listen_cell(gtk.VBox):
         self.treeview.set_rules_hint(True)
         self.treeview.set_grid_lines(False)
         #self.treeview.style('even-row-color', gtk.gdk.Color('#D51A1A'))
-        self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(self.rc_dict['Even_Row_BG']))
+        self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
         #self.treeview.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
         #self.treeview.set_property('enable-tree-lines', False)
         self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
@@ -676,7 +675,7 @@ class listen_cell(gtk.VBox):
         self.info_label = gtk.Label('info')
         ###################################
         self.scrol.add(self.treeview)
-        self.upData(self.rc_dict)
+        self.upData()
         self.pack_start(self.drive_info_label, False)
         self.pack_start(self.evtb, False)
         self.pack_start(self.scrol)
@@ -761,7 +760,6 @@ class listen_cell(gtk.VBox):
     def Enter_key(self):
         input_list = self.get_select_now()
         model_sel, iter_sel = self.treeview.get_selection().get_selected()
-        #u = rc_modul.Sum_cell(self.rc_dict)
         p = model_sel.get_value(iter_sel, self.len_u)
         if len(input_list) == 1 or p == '..' or os.path.isdir(p) == True:
             self.chdir_new()
@@ -816,30 +814,30 @@ class listen_cell(gtk.VBox):
         sel_col = {}
         if model.get_value(iter, self.len_u + 4) == 'True':
             if path % 2:
-                ts = 'Odd'
+                ts = 'odd'
             else:
-                ts = 'Even'
+                ts = 'even'
                 
-            sel_col['FG'] = self.rc_dict[ts + '_Row_FG']
-            sel_col['BG'] = self.rc_dict[ts + '_Row_BG']
+            sel_col['fg'] = rc_modul.rc_dict['style']['%s_row_fg' % ts]
+            sel_col['bg'] = rc_modul.rc_dict['style']['%s_row_bg' % ts]
             try: self.Select_List.remove(model.get_value(iter, self.len_u))
             except: pass
             self.articles[path][self.len_u + 4] = 'False'
         else:
-            sel_col['FG'] = self.rc_dict['Sel_Row_FG']
-            sel_col['BG'] = self.rc_dict['Sel_Row_BG']
+            sel_col['fg'] = rc_modul.rc_dict['style']['sel_row_fg']
+            sel_col['bg'] = rc_modul.rc_dict['style']['sel_row_bg']
             self.articles[path][self.len_u + 4] = 'True'
             self.Select_List.append(model.get_value(iter, self.len_u))
-        f = ['FG', 'BG']
+        f = ['fg', 'bg']
         model.set(iter, self.len_u + 4, self.articles[path][self.len_u + 4])
         for i in xrange(len(f)):
             self.articles[path][self.len_u + 2 + i] = sel_col[f[i]]
             model.set(iter, self.len_u + 2 + i, self.articles[path][self.len_u + 2 + i])
-        cellse = rc_modul.Sum_cell(self.rc_dict)
+        cellse = rc_modul.Sum_cell
         
         if key == 'space':
             try:
-                ic = cellse.index('Cell_Size')
+                ic = cellse.index('cell_size')
             except:
                 pass
             else:
@@ -865,7 +863,7 @@ class listen_cell(gtk.VBox):
     def chdir_new(self):
         selection = self.treeview.get_selection()
         model, iter = selection.get_selected()
-        u = rc_modul.Sum_cell(self.rc_dict)
+        u = rc_modul.Sum_cell
         dp = model.get_value(iter, len(u))
         if dp == '..':
             self.back_dir()
@@ -891,14 +889,14 @@ class listen_cell(gtk.VBox):
         Создание столбцов
         '''
         model = treeview.get_model()
-        u = rc_modul.Sum_cell(self.rc_dict)
+        u = rc_modul.Sum_cell
         for i in xrange(self.len_u):
-            alg = [float(self.rc_dict[u[i] + '_Alignment_H']), float(self.rc_dict[u[i] + '_Alignment_V'])]
-            if u[i] == 'Cell_Name':
+            alg = [float(rc_modul.rc_dict['style']['%s_alignment_h' % u[i]]), float(rc_modul.rc_dict['style']['%s_alignment_v' % u[i]])]
+            if u[i] == 'cell_name':
                 column = gtk.TreeViewColumn()
                 column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
                 column.expand = True
-                column.set_min_width(int(self.rc_dict[u[i] + '_Size']))
+                column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))
                 column.set_title(rc_modul.locale[u[i]])                
                 
                 renderer = gtk.CellRendererPixbuf()
@@ -908,10 +906,10 @@ class listen_cell(gtk.VBox):
                 
                 renderer = gtk.CellRendererText()
                 renderer.set_alignment(alg[0], alg[1])
-                renderer.set_property('font-desc' , pango.FontDescription(self.rc_dict['Font_Cell_Text']))
+                renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
                 column.pack_start(renderer, True)
                 column.set_attributes(renderer, text=i, background=self.len_u + 3, foreground=self.len_u + 2)
-                itk = int(self.rc_dict[u[i] + '_Expand'])
+                itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])
                 column.set_expand(itk)
                 treeview.append_column(column)
             else:
@@ -920,20 +918,20 @@ class listen_cell(gtk.VBox):
                 renderer.set_alignment(alg[0], alg[1])
                 renderer.set_property('background-set' , True)
                 renderer.set_property('foreground-set' , True)
-                renderer.set_property('font-desc' , pango.FontDescription(self.rc_dict['Font_Cell_Text']))
+                renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
                 column = gtk.TreeViewColumn(rc_modul.locale[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
                 column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
                 column.expand = True
-                itk = int(self.rc_dict[u[i] + '_Expand'])
+                itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])
                 column.set_expand(itk)
-                column.set_min_width(int(self.rc_dict[u[i] + '_Size']))    
+                column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))    
                 treeview.append_column(column)
             
     def __create_model(self):
         articles_new, return_select_new, fg2 = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
         len_articles_new = len(articles_new)
         if articles_new != self.articles:
-            u = rc_modul.Sum_cell(self.rc_dict)
+            u = rc_modul.Sum_cell
             if self.articles:
                 fg2_keys = fg2.keys()
                 if self.Select_List:
@@ -941,7 +939,7 @@ class listen_cell(gtk.VBox):
                         try: fg2_keys.index(i)
                         except: self.Select_List.remove(i)
                     
-                try: idx = u.index('Cell_Size')
+                try: idx = u.index('cell_size')
                 except: pass
                 else:
                     for i in articles_new:
@@ -1051,7 +1049,7 @@ class listen_cell(gtk.VBox):
     def Step_dir(self):
         pass
             
-    def upData(sefl, rc_dict):
+    def upData(sefl):
         #treeview.set_rules_hint(True)
         
         pass
