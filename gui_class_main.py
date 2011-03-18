@@ -656,23 +656,17 @@ class listen_cell(gtk.VBox):
         self.drive_info_label = gtk.Label('drive')
         ###################################
         self.path_entry = gtk.Label()
-        #self.path_entry.set_size_request(-1, 17)
         self.evtb = gtk.EventBox()
         self.evtb.add(self.path_entry)
-        #self.evtb.set_border_width(3)
-        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
-        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_fg']))
+        self.evtb.set_border_width(3)
+        
         self.path_entry.set_alignment(0.0, 0.5)
         self.path_entry.set_text(self.Current_Path)
         ###################################
-        model = self.__create_model()
-        self.treeview = gtk.TreeView(model)
+        self.treeview = gtk.TreeView()
         self.treeview.set_rules_hint(True)
         self.treeview.set_grid_lines(False)
-        #self.treeview.style('even-row-color', gtk.gdk.Color('#D51A1A'))
-        self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
-        #self.treeview.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
-        #self.treeview.set_property('enable-tree-lines', False)
+        
         self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
         self.treeview.connect('key-release-event', self.key_event)
         self.treeview.connect('key-press-event', self.key_event)
@@ -680,8 +674,8 @@ class listen_cell(gtk.VBox):
         self.treeview.connect('focus-in-event', self.focus_trap)
         self.treeview.connect('focus-out-event', self.focus_trap)
         self.treeview.connect('cursor-changed', self.cursor_changed)
-        self.__add_columns(self.treeview)
-        self.treeview.set_model(model)
+        
+        
         ###################################
         self.info_label = gtk.Label('info')
         ###################################
@@ -693,6 +687,21 @@ class listen_cell(gtk.VBox):
         self.pack_start(self.info_label, False)
         self.Timer_func = threading.Timer(0, self.timer_refresh)
         self.Timer_func.start()
+        
+    def upData(self):
+        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
+        self.evtb.modify_font(pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
+        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_fg']))
+        #self.treeview.style('even-row-color', gtk.gdk.Color('#D51A1A'))
+        #self.treeview.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
+        #self.treeview.set_property('enable-tree-lines', False)
+        model = self.__create_model()
+        self.treeview.set_model(model)
+        self.__add_columns(self.treeview)
+        self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(rc_modul.rc_dict['style']['even_row_bg']))
+        #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
+        #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
+        
         
     def timer_refresh(self):
         while not self.Exit_State:
@@ -807,17 +816,6 @@ class listen_cell(gtk.VBox):
     def copys(self, remove_after):
         y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), remove_after)
     
-    #def ref_list(self):
-    #    time.sleep(0.5)
-    #    selection = self.treeview.get_cursor()[0][0]
-    #    model = self.__create_model()
-    #    self.treeview.set_model(model)
-    #    self.treeview.set_cursor(self.return_select)
-    #    if self.return_select == 0:
-    #        self.treeview.set_cursor(selection)
-    #    else:
-    #        self.treeview.set_cursor(self.return_select)
-        
     def select_function(self, key):
         selection = self.treeview.get_selection()
         model, iter = selection.get_selected()
@@ -899,43 +897,40 @@ class listen_cell(gtk.VBox):
         Создание столбцов
         '''
         model = treeview.get_model()
+        clmn = treeview.get_columns()
+        if clmn:
+            for i in clmn:
+                treeview.remove_column(i)
         u = rc_modul.Sum_cell
         for i in xrange(self.len_u):
             alg = [float(rc_modul.rc_dict['style']['%s_alignment_h' % u[i]]), float(rc_modul.rc_dict['style']['%s_alignment_v' % u[i]])]
             if u[i] == 'cell_name':
                 column = gtk.TreeViewColumn()
-                column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-                column.expand = True
-                column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))
                 column.set_title(Name_Colum[u[i]])                
-                
                 renderer = gtk.CellRendererPixbuf()
                 renderer.set_alignment(alg[0], alg[1])
                 column.pack_start(renderer, False)
                 column.set_attributes(renderer, pixbuf=self.len_u + 1)
-                
-                renderer = gtk.CellRendererText()
-                renderer.set_alignment(alg[0], alg[1])
-                renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
+            else:
+                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
+            column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+            column.expand = True
+            column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))
+            
+            renderer = gtk.CellRendererText()
+            #renderer.set_data(Name_Colum[u[i]], i)
+            renderer.set_alignment(alg[0], alg[1])
+            renderer.set_property('background-set' , True)
+            renderer.set_property('foreground-set' , True)
+            renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
+            
+            if u[i] == 'cell_name':
                 column.pack_start(renderer, True)
                 column.set_attributes(renderer, text=i, background=self.len_u + 3, foreground=self.len_u + 2)
-                itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])
-                column.set_expand(itk)
-                treeview.append_column(column)
-            else:
-                renderer = gtk.CellRendererText()
-                renderer.set_data(Name_Colum[u[i]], i)
-                renderer.set_alignment(alg[0], alg[1])
-                renderer.set_property('background-set' , True)
-                renderer.set_property('foreground-set' , True)
-                renderer.set_property('font-desc' , pango.FontDescription(rc_modul.rc_dict['style']['font_cell_text']))
-                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
-                column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
-                column.expand = True
-                itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])
-                column.set_expand(itk)
-                column.set_min_width(int(rc_modul.rc_dict['style']['%s_size' % u[i]]))    
-                treeview.append_column(column)
+                
+            itk = int(rc_modul.rc_dict['style']['%s_expand' % u[i]])
+            column.set_expand(itk)
+            treeview.append_column(column)
             
     def __create_model(self):
         articles_new, return_select_new, fg2 = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
@@ -960,7 +955,6 @@ class listen_cell(gtk.VBox):
             self.fg = fg2
             self.articles, self.return_select = articles_new, return_select_new
             self.len_articles = len_articles_new
-            
             
             self.len_u = len(u)
             if self.len_u == 1:
@@ -1058,12 +1052,6 @@ class listen_cell(gtk.VBox):
         
     def Step_dir(self):
         pass
-            
-    def upData(sefl):
-        #treeview.set_rules_hint(True)
-        
-        pass
-
             
 def main():
     #global answer

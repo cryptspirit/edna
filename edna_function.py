@@ -46,6 +46,11 @@ get_theme = gtk.icon_theme_get_default()
 dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
 dic_icon['empty'] = get_theme.load_icon('empty', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
 
+#def get_key_info(key_box):
+#    st = re.search(r'keyval=\S+>', key_box.string).group()[7:-1]
+#    k = key_box.keyval
+#    return st, k
+
 def buf_def(c):
     global answer
     answer = c

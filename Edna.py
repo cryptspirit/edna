@@ -26,9 +26,9 @@ import os
 import sys
 import time
 import gui_class_main
+import gui_class_rc
 import edna_function
 import rc_modul
-import hotkeys
 import profile
 import gettext
 
@@ -41,8 +41,11 @@ class Dwindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_default_size(900, 500)
         self.set_title('Edna')
+        self.set_icon_from_file('edna.svg')
         # Widget#########################
-        self.vbox1 = gtk.VBox(True, 5)
+        hdlbox = gtk.HandleBox()
+        hdlbox.add(self.create_menu())
+        self.vbox1 = gtk.VBox(False, 5)
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
         self.cel = []
@@ -54,6 +57,7 @@ class Dwindow(gtk.Window):
         #BOX############################
         for i in xrange(2):
             self.hpannel1.pack_start(self.cel[i])
+        self.vbox1.pack_start(hdlbox, False)
         self.vbox1.pack_start(self.hpannel1)
         ################################
         #self.connect('key-release-event', self.key_c)
@@ -61,14 +65,51 @@ class Dwindow(gtk.Window):
         self.add(self.vbox1)
         self.foc = self.is_focus()
         self.connect('focus', self.focuss)
+    
+    def create_menu(self):
+        ui_string = """<ui>
+        <menubar>
+            <menu name='Configurations' action='Configurations'>
+                <menuitem action='Config'/>
+            </menu>
+            <placeholder name='OtherMenus'/>
+            <menu name='HelpMenu' action='HelpMenu'>
+                <menuitem action='HelpAbout'/>
+            </menu>
+        </menubar>
+        </ui>
+        """
+        actions = [
+            ('Configurations', None, '_Configurations'),
+            ('Config', gtk.STOCK_PREFERENCES, None, None, None, self.config_window),
+            ('HelpMenu', gtk.STOCK_HELP),
+            ('HelpAbout', None, 'A_bout', None, None, self.help_about),
+            ]
+        self.ag = gtk.ActionGroup('edit')
+        self.ag.add_actions(actions)
+        self.ui = gtk.UIManager()
+        self.ui.insert_action_group(self.ag, 0)
+        self.ui.add_ui_from_string(ui_string)
+        self.add_accel_group(self.ui.get_accel_group())
+        return self.ui.get_widget('/menubar')
+    
+    def config_window(self, *args):
+        rrr = gui_class_rc.Rc_Window()
+        rrr.button_ok.connect('clicked', self.upData, rrr, True)
         
+    def help_about(self, *args):
+        pass
+        
+    
     def return_path_cell(self, index):
         return self.cel[not index].Current_Path
 
         
-    def upData(sefl):
-        self.cel1.upData()
-        self.cel2.upData()
+    def upData(self, *args):
+        print args
+        rc_modul.save_rc()
+        self.cel[0].upData()
+        self.cel[1].upData()
         
     def focuss(self, *args):
         if self.foc != self.is_focus():

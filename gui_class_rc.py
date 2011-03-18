@@ -24,6 +24,7 @@ import gobject
 import pango
 import gettext
 import rc_modul
+import edna_function
 
 gettext.install('edna', unicode=True)
 
@@ -47,7 +48,7 @@ class Rc_Window(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         #self.set_resizable(False)
         self.set_default_size(400, 500)
-        
+        self.set_icon(edna_function.get_theme.load_icon('gtk-preferences', 20, 0))
         vbox1 = gtk.VBox(False)
         hbox1 = gtk.HButtonBox()
         hbox1.set_layout(gtk.BUTTONBOX_END)
