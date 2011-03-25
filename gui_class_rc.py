@@ -73,6 +73,8 @@ class Rc_Window(gtk.Window):
         self.all_page()
         self.tab_page()
         self.tab_style()
+        self.tab_hotkeys()
+        
     def all_page(self):
         vbox2 = gtk.VBox()
         
@@ -124,6 +126,25 @@ class Rc_Window(gtk.Window):
         vbox2.pack_start(hbox1, False)
         self.note.append_page(vbox2, gtk.Label(_('Appearance')))
         
+    def tab_hotkeys(self):
+        vbox2 = gtk.VBox(False)
+        vbox2.set_border_width(3)
+        lst_hotkeys = listen_hotkeys()
+        
+        button1 = gtk.Button(_('Clear'))
+        button1.connect('clicked', self.clear_keys, lst_hotkeys)
+        
+        vbox2.pack_start(lst_hotkeys, True)
+        vbox2.pack_start(button1, False)
+        self.note.append_page(vbox2, gtk.Label(_('Hotkeys')))
+
+    def clear_keys(self, *args):
+        selection = args[1].treeview.get_selection()
+        model, iter = selection.get_selected()
+        if iter:
+            rc_modul.rc_dict['hotkeys'][model.get_value(iter, 2)] = ''
+            model.set(iter, 1, '')
+
     def font_click(self, *args):
         dialog = gtk.FontSelectionDialog("Changing color")
         dialog.set_transient_for(self)
@@ -370,6 +391,56 @@ class listen_cel(gtk.ScrolledWindow):
             self.articles.append([b, Name_Colum[t], t])
         
         model = gtk.ListStore(gobject.TYPE_BOOLEAN, gobject.TYPE_STRING, gobject.TYPE_STRING)
+        for item in self.articles:
+            iter = model.append()
+            model.set(iter, 0, item[0], 1, item[1], 2, item[2])
+        return model
+        
+        
+class listen_hotkeys(gtk.ScrolledWindow):
+    def __init__(self):
+        gtk.ScrolledWindow.__init__(self)
+        self.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        model = self.__create_model()
+        self.treeview = gtk.TreeView(model)
+        #self.treeview.set_headers_visible(False)
+        self.treeview.set_size_request(100,-1)
+        self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
+        self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
+        self.__add_columns(self.treeview)
+        self.treeview.set_model(model)
+        self.add(self.treeview)
+        
+    def __add_columns(self, treeview):
+        #self.model = treeview.get_model()
+        
+        renderer = gtk.CellRendererText()
+        renderer.set_data('', 0)
+        column = gtk.TreeViewColumn('', renderer, text=0)
+        column.set_min_width(70)
+        column.expand = True
+        column.set_expand(100)
+        column.set_title(_('Action'))
+        treeview.append_column(column)
+        
+        renderer = gtk.CellRendererText()
+        renderer.set_data('', 1)
+        column = gtk.TreeViewColumn('', renderer, text=1)
+        column.set_min_width(150)
+        column.set_title(_('Keys'))
+        treeview.append_column(column)
+        
+    def __create_model(self):
+        self.articles = []
+        yk = rc_modul.rc_hotkeys.keys()
+        yk.sort()
+        for i in yk:
+            t = rc_modul.rc_dict['hotkeys'][i]
+            b = rc_modul.hotkeys_function_name[i]
+            self.articles.append([b, t, i])
+        
+        model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
         for item in self.articles:
             iter = model.append()
             model.set(iter, 0, item[0], 1, item[1], 2, item[2])

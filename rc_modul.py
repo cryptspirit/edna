@@ -22,6 +22,9 @@
 import re
 import os
 import ConfigParser
+import gettext
+
+gettext.install('edna', unicode=True)
 
 filerc = '.ednarc'
 
@@ -62,8 +65,8 @@ rc_style = {'cell_name':'1',
             'cell_group_expand':'0', 
             'cell_atr_expand':'0',
             'cell_name_alignment_h':'0.0',  
-            'cell_type_alignment_h':'0.0', 
-            'cell_size_alignment_h':'1.0', 
+            'cell_type_alignment_h':'1.0', 
+            'cell_size_alignment_h':'0.0', 
             'cell_datec_alignment_h':'0.0', 
             'cell_datem_alignment_h':'0.0', 
             'cell_user_alignment_h':'0.0', 
@@ -79,7 +82,7 @@ rc_style = {'cell_name':'1',
             'cell_atr_alignment_v':'0.5',
             'cell_name_size':'100',  
             'cell_type_size':'70', 
-            'cell_size_size':'70', 
+            'cell_size_size':'80', 
             'cell_datec_size':'70', 
             'cell_datem_size':'70', 
             'cell_user_size':'70', 
@@ -87,7 +90,7 @@ rc_style = {'cell_name':'1',
             'cell_atr_size':'70',
             'cell_datec_format':'D.M.Y',
             'cell_datem_format':'D.M.Y',
-            'cell_size_format':'0',
+            'cell_size_format':'2',
             'cell_date_type':'0',
             'cell_atr_format':'0',
             'date_format':'0',
@@ -100,16 +103,23 @@ rc_style = {'cell_name':'1',
             'icon_size':'16',
             'font_cell_text':'Sans 10'}
             
-rc_hotkeys = {'key_1':'0',
-            'key_2':'0',
-            'key_3':'0',
-            'key_4':'0',
-            'key_5':'0',
-            'key_6':'0',
-            'key_7':'0'}
+rc_hotkeys = {'key_1': '',
+            'key_2': '',
+            'key_3': '',
+            'key_4': '',
+            'key_5': '',
+            'key_6': '',
+            'key_7': ''}
             
 defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
+hotkeys_function_name = {'key_1': _('Copy'),
+                        'key_2': _('Remove'),
+                        'key_3': _('Properties'),
+                        'key_4': _('Rename'),
+                        'key_5': _('Make directory'),
+                        'key_6': _('Open terminal'),
+                        'key_7': _('View')}
     
 def Sum_cell_function():
     global Sum_cell
@@ -146,6 +156,7 @@ def read_rc():
                 for j in defaultrc[i].keys():
                     CP.set(i, j, defaultrc[i][j])
                 rc_dict[i] = defaultrc[i]
+                print rc_dict[i]
         if need_write:
             f = open(filerc, 'r+')
             CP.write(f)
@@ -160,6 +171,7 @@ def read_rc():
         f = open(filerc, 'w')
         CP.write(f)
         f.close()
+        rc_dict = defaultrc
         Sum_cell_function()
                 
 def save_rc():
