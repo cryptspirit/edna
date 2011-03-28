@@ -103,13 +103,13 @@ rc_style = {'cell_name':'1',
             'icon_size':'16',
             'font_cell_text':'Sans 10'}
             
-rc_hotkeys = {'key_1': '',
-            'key_2': '',
-            'key_3': '',
-            'key_4': '',
-            'key_5': '',
-            'key_6': '',
-            'key_7': ''}
+rc_hotkeys = {'key_1': 'F5',
+            'key_2': 'Delete',
+            'key_3': 'Ctrl p',
+            'key_4': 'F2',
+            'key_5': 'F7',
+            'key_6': 'Ctrl F2',
+            'key_7': 'F3'}
             
 defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
@@ -129,13 +129,16 @@ def Sum_cell_function():
         if rc_dict['style'][mc[int(t[i])]] == '1':
             p.append(mc[int(t[i])])
     Sum_cell = p
+    k = rc_dict['hotkeys'].keys()
 
 def read_rc():
     '''
     Функция чтения файла настроек
     '''
+    global key_name_in_rc
     global rc_dict
     rc_dict = {}
+    key_name_in_rc = {}
     need_write = False
     if os.path.isfile(filerc):
         CP = ConfigParser.ConfigParser()
@@ -150,11 +153,13 @@ def read_rc():
                         rc_dict[i][j] = defaultrc[i][j]
                         CP.set(i, j, defaultrc[i][j])
                         need_write = True
+                    if i == 'hotkeys' and len(rc_dict[i][j]) > 0: key_name_in_rc[rc_dict[i][j]] = j
             else:
                 CP.add_section(i)
                 need_write = True
                 for j in defaultrc[i].keys():
                     CP.set(i, j, defaultrc[i][j])
+                    if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
                 rc_dict[i] = defaultrc[i]
                 print rc_dict[i]
         if need_write:
@@ -168,6 +173,7 @@ def read_rc():
             CP.add_section(i)
             for j in defaultrc[i].keys():
                 CP.set(i, j, defaultrc[i][j])
+                if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
         f = open(filerc, 'w')
         CP.write(f)
         f.close()

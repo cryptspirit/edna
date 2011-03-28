@@ -46,6 +46,7 @@ Name_Colum = {'cell_name': _('Name'),
             'cell_user': _('User'), 
             'cell_group': _('Group'), 
             'cell_atr': _('Attribute')}
+            
 
 class miss_window(gtk.Window):
     def __init__(self, text):
@@ -54,6 +55,7 @@ class miss_window(gtk.Window):
         self.connect('key-release-event', self.key_event)
         self.set_resizable(False)
         self.set_border_width(5)
+        self.set_modal(True)
         self.set_icon(edna_function.get_theme.load_icon('gtk-dialog-info', 20, 0))
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_title(_('Error! I not can read file'))
@@ -192,6 +194,7 @@ class copy_window(gtk.Window):
         self.Exit = False
         self.Pause = False
         self.Miss = False
+        self.set_modal(True)
         self.set_resizable(False)
         vbox = gtk.VBox(False, 2)
         self.set_border_width(5)
@@ -262,7 +265,9 @@ class copy_window(gtk.Window):
         else:
             args[0].set_label(_('Start'))
         self.Pause = not self.Pause
-            
+        if self.get_modal():
+            self.set_modal(False)
+        
     def copy_timer(self):
         if self.count < len(self.list) + 1:
             self.cp_l(self.list, self.count)
@@ -388,6 +393,7 @@ class remove_window(gtk.Window):
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         self.set_resizable(False)
+        self.set_modal(True)
         vbox = gtk.VBox(False, 5)
         self.set_border_width(5)
         self.Exit = False
@@ -459,6 +465,8 @@ class remove_window(gtk.Window):
         else:
             args[0].set_label(_('_Start'))
         self.Pause = not self.Pause
+        if self.get_modal():
+            self.set_modal(False)
         
     def del_l(self, args, n):
         if len(args) > 0:
@@ -494,6 +502,7 @@ class question_window(gtk.Window):
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         self.set_resizable(False)
+        self.set_modal(True)
         vbox = gtk.VBox(False, 2)
         vbox.set_spacing(3)
         self.set_border_width(5)
@@ -572,6 +581,7 @@ class question_window_copy(gtk.Window):
         gtk.Window.__init__(self)
         self.destpath = destpath
         self.remove_after = remove_after
+        self.set_modal(True)
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         if self.remove_after:
@@ -647,6 +657,13 @@ class listen_cell(gtk.VBox):
         self.articles = None
         self.Exit_State = False
         ####################################
+        self.Hotkeys_Function = {'key_1': self.copys,
+                                'key_2': self.deleting,
+                                'key_3': '',
+                                'key_4': '',
+                                'key_5': '',
+                                'key_6': '',
+                                'key_7': ''}
         self.Current_Path = rc_modul.rc_dict['config']['panel_history%d' % n]
         ####################################
         self.scrol = gtk.ScrolledWindow()
@@ -771,11 +788,13 @@ class listen_cell(gtk.VBox):
         elif args[1].type == gtk.gdk.KEY_RELEASE:
             key = edna_function.get_key_info(args[1])
             if key == 'space': self.select_function(key)
-            if key == 'Right': self.chdir_new()
-            if key == 'Return': self.Enter_key()
-            if (key == 'BackSpace' or key == 'Left') and self.Current_Path != '/': self.back_dir()
-            if key == 'Delete' or key == 'Shift Delete': self.deleting(key)
-            if key == 'F5' : self.copys(False)
+            elif key == 'Right': self.chdir_new()
+            elif key == 'Return': self.Enter_key()
+            elif (key == 'BackSpace' or key == 'Left') and self.Current_Path != '/': self.back_dir()
+            else:
+                self.Hotkeys_Function[rc_modul.key_name_in_rc[key]]()
+            #if key == 'Delete' or key == 'Shift Delete': self.deleting(key)
+            #if key == 'F5' : self.copys(False)
             
     def Enter_key(self):
         input_list = self.get_select_now()
@@ -810,10 +829,11 @@ class listen_cell(gtk.VBox):
             for i in list_lanch.keys():
                 subprocess.Popen(i + list_lanch[i], shell=True)
                 
-    def deleting(self, key):
+    def deleting(self):
         y = question_window(self.get_select_now())
         
-    def copys(self, remove_after):
+    def copys(self):
+        remove_after = False
         y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), remove_after)
     
     def select_function(self, key):

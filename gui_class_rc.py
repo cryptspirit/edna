@@ -41,12 +41,27 @@ gf = [1.0, 0.5, 0.0]
 gfH = [_('right'), _('center'), _('left')]
 gfV = [_('up'), _('center'), _('down')]
 
+keys_not_follow = ['Shift Shift_L', 'Shift Shift_R', 'Alt Alt_L', 'Alt Alt_R', 'Escape',
+                    'Return', 'Ctrl Control_L', 'Ctrl Control_R', 'Caps_Lock',
+                    'Alt ISO_Prev_Group', 'Alt ISO_Next_Group', 'Ctrl Shift_R',
+                    'Ctrl Shift_L', 'Shift Control_R', 'Shift Control_L', 'Shift_L',
+                    'Shift_R', 'Alt_R', 'Alt_L', 'Control_R', 'Control_L', 'Tab', 
+                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', 'Shift plus',
+                    'Home', 'End', 'Page_Up', 'Page_Down', 'space',
+                    'Menu', 'grave', 'Insert', 'semicolon', 'comma', 'period',
+                    'slash', 'backslash', 'BackSpace']
+
+keys_not_follow += map(str, xrange(10))
+keys_not_follow += map(chr, xrange(65, 123))
+
 class Rc_Window(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
         self.set_title(_('Configurations'))
         self.set_position(gtk.WIN_POS_CENTER)
+        self.set_modal(True)
         #self.set_resizable(False)
+        self.Modal = True
         self.set_default_size(400, 500)
         self.set_icon(edna_function.get_theme.load_icon('gtk-preferences', 20, 0))
         vbox1 = gtk.VBox(False)
@@ -126,10 +141,41 @@ class Rc_Window(gtk.Window):
         vbox2.pack_start(hbox1, False)
         self.note.append_page(vbox2, gtk.Label(_('Appearance')))
         
+    def key_ev(self, *args):
+        key = edna_function.get_key_info(args[1])
+        if key == 'Escape':
+            args[0].hide()
+            args[0].destroy()
+        if key not in keys_not_follow:
+            if key not in rc_modul.key_name_in_rc.keys():
+                rc_modul.rc_dict['hotkeys'][args[2].get_value(args[3], 2)] = key
+                rc_modul.key_name_in_rc[key] = args[2].get_value(args[3], 2)         
+                args[2].set(args[3], 1, key)
+                args[0].hide()
+                args[0].destroy()
+            else:
+                args[4].set_label(_('The keys are already used\nenter other keys'))
+
+    def create_winkey(self, *args):
+        selection = args[2].treeview.get_selection()
+        model, iter = selection.get_selected()
+        w = gtk.Window()
+        w.set_title(_('Press keys'))
+        w.set_size_request(250, 130)
+        w.set_resizable(False)
+        w.set_transient_for(self)
+        w.set_modal(True)
+        l = gtk.Label(_('Press keys'))
+        l.modify_font(pango.FontDescription('bold'))
+        w.add(l)
+        w.connect('key-release-event', self.key_ev, model, iter, l)
+        w.show_all()
+        
     def tab_hotkeys(self):
         vbox2 = gtk.VBox(False)
         vbox2.set_border_width(3)
         lst_hotkeys = listen_hotkeys()
+        lst_hotkeys.connect('button-release-event', self.create_winkey, lst_hotkeys)
         
         button1 = gtk.Button(_('Clear'))
         button1.connect('clicked', self.clear_keys, lst_hotkeys)
@@ -142,6 +188,7 @@ class Rc_Window(gtk.Window):
         selection = args[1].treeview.get_selection()
         model, iter = selection.get_selected()
         if iter:
+            del rc_modul.key_name_in_rc[rc_modul.rc_dict['hotkeys'][model.get_value(iter, 2)]]
             rc_modul.rc_dict['hotkeys'][model.get_value(iter, 2)] = ''
             model.set(iter, 1, '')
 
