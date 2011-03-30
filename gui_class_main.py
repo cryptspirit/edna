@@ -792,7 +792,8 @@ class listen_cell(gtk.VBox):
             elif key == 'Return': self.Enter_key()
             elif (key == 'BackSpace' or key == 'Left') and self.Current_Path != '/': self.back_dir()
             else:
-                self.Hotkeys_Function[rc_modul.key_name_in_rc[key]]()
+                try: self.Hotkeys_Function[rc_modul.key_name_in_rc[key]]()
+                except KeyError: pass
             #if key == 'Delete' or key == 'Shift Delete': self.deleting(key)
             #if key == 'F5' : self.copys(False)
             
