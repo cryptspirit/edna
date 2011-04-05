@@ -26,10 +26,11 @@ import time
 import subprocess
 import gtk
 #import gio
-import mimetypes
 import gui_class_main
 import threading
 import stat
+import xdg.Mime
+import xdg.DesktopEntry
 
 
 betc = {'row_fg':3,
@@ -97,7 +98,7 @@ def deleting_files_folders(path, flag):
             
 def get_normal_flag_name(flag):
     '''
-    Преобразование Флагов клавиш в человеческий вид
+Преобразование Флагов клавиш в человеческий вид
     '''
     try:
         f = flag.value_names[0]
@@ -123,7 +124,7 @@ def get_key_info(key_box):
 
 def get_full_size(path, list=False):
     '''
-    оттавизм на удаление
+оттавизм на удаление
     '''
     #np = os.path.dirname(path)
     #return full_size(np, path, 0, [])
@@ -131,7 +132,7 @@ def get_full_size(path, list=False):
 
 def full_size_new(path, no_list):
     '''
-    Определение размера каталога
+Определение размера каталога
     '''
     summ = 0
     os_path_join = os.path.join
@@ -158,24 +159,23 @@ def full_size_new(path, no_list):
         return summ                     
 
 def get_launch(path):
-    temp = mimetypes.guess_type(path)[0]
+    '''
+Определяет по типу какой программой открывать файл по умолчанию
+    '''
+    temp = str(xdg.Mime.get_type_by_name(path))
     print temp
     if temp != None:
         ret = subprocess.Popen(['xdg-mime', 'query', 'default', temp],
-                                        stdout=subprocess.PIPE).communicate()[0]
-        if len(ret[:-1]):
-            f = open('/usr/share/applications/' + ret[:-1], 'r')
-            red = re.search(r'Exec=.*', f.read()).group()[5:]
-            f.close()
-            red = re.search(r'\S+', red).group()
-            if red:
-                return red
-            else:
-                return None
+                                        stdout=subprocess.PIPE).communicate()[0].strip('\n')
+        if ret:
+            fo_de = xdg.DesktopEntry.DesktopEntry(filename='/usr/share/applications/%s' % ret)
+            return (fo_de.getExec().split('%')[0]).strip(' ')
+        else:
+            return None
 
 def get_file_size(path):
     '''
-    Получение размера файла в байтах
+Получение размера файла в байтах
     '''
     try: t = os.path.getsize(path)
     except: t = 0
@@ -183,7 +183,7 @@ def get_file_size(path):
     
 def get_in_format_size(t):
     '''
-    Преобразование размера файла в байтах в формат указаный в настройках
+Преобразование размера файла в байтах в формат указаный в настройках
     '''
     s = ''
     if rc_modul.rc_dict['style']['cell_size_format'] == '0':
@@ -306,13 +306,14 @@ def get_typ(n):
             
 def mime_name_ico(s):
     return s.replace('/', '-')
-
+    
 def get_mime(path_i, is_fil):
     '''
     Получение mimetype
     '''
     if is_fil:
-        temp = mimetypes.guess_type(path_i)[0]
+        #temp = mimetypes.guess_type(path_i)[0]
+        temp = str(xdg.Mime.get_type_by_name(path_i))
     else:
         temp = 'application-x-directory'
     if temp:
@@ -467,10 +468,7 @@ def get_list_path(path, pattern_s, select_list):
         
         
 def main():
-    k = get_list_path('/home/mort', rc_modul.read_rc())
-    for i in k:
-        print i
-    return 0
+    file_run_for_know_mimetype('~/.bashrc')
 
 if __name__ == '__main__':
     main()
