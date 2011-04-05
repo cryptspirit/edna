@@ -157,7 +157,10 @@ class Rc_Window(gtk.Window):
                 args[4].set_label(_('The keys are already used\nenter other keys'))
 
     def create_winkey(self, *args):
-        selection = args[2].treeview.get_selection()
+        '''
+        Процедура создает окно для введения комбинации клавиш
+        '''
+        selection = args[0].get_selection()
         model, iter = selection.get_selected()
         w = gtk.Window()
         w.set_title(_('Press keys'))
@@ -172,10 +175,13 @@ class Rc_Window(gtk.Window):
         w.show_all()
         
     def tab_hotkeys(self):
+        '''
+        Процедура создания вкладки горячих клавиш
+        '''
         vbox2 = gtk.VBox(False)
         vbox2.set_border_width(3)
         lst_hotkeys = listen_hotkeys()
-        lst_hotkeys.connect('button-release-event', self.create_winkey, lst_hotkeys)
+        lst_hotkeys.treeview.connect('row-activated', self.create_winkey, lst_hotkeys) #Двойной щелчок по строке
         
         button1 = gtk.Button(_('Clear'))
         button1.connect('clicked', self.clear_keys, lst_hotkeys)
@@ -185,6 +191,9 @@ class Rc_Window(gtk.Window):
         self.note.append_page(vbox2, gtk.Label(_('Hotkeys')))
 
     def clear_keys(self, *args):
+        '''
+        Процедура очистки операции от горячих клавиш
+        '''
         selection = args[1].treeview.get_selection()
         model, iter = selection.get_selected()
         if iter:

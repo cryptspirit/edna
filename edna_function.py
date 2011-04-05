@@ -25,7 +25,7 @@ import rc_modul
 import time
 import subprocess
 import gtk
-import gio
+#import gio
 import mimetypes
 import gui_class_main
 import threading
@@ -96,6 +96,9 @@ def deleting_files_folders(path, flag):
             #    print 'галяк', path
             
 def get_normal_flag_name(flag):
+    '''
+    Преобразование Флагов клавиш в человеческий вид
+    '''
     try:
         f = flag.value_names[0]
     except:
@@ -119,11 +122,17 @@ def get_key_info(key_box):
     return k
 
 def get_full_size(path, list=False):
+    '''
+    оттавизм на удаление
+    '''
     #np = os.path.dirname(path)
     #return full_size(np, path, 0, [])
     return full_size_new(path, list)
 
 def full_size_new(path, no_list):
+    '''
+    Определение размера каталога
+    '''
     summ = 0
     os_path_join = os.path.join
     os_path_getsize = os.path.getsize
@@ -165,11 +174,17 @@ def get_launch(path):
                 return None
 
 def get_file_size(path):
+    '''
+    Получение размера файла в байтах
+    '''
     try: t = os.path.getsize(path)
     except: t = 0
     return get_in_format_size(t)
     
 def get_in_format_size(t):
+    '''
+    Преобразование размера файла в байтах в формат указаный в настройках
+    '''
     s = ''
     if rc_modul.rc_dict['style']['cell_size_format'] == '0':
         t = str(t)
@@ -291,22 +306,28 @@ def get_typ(n):
             
 def mime_name_ico(s):
     return s.replace('/', '-')
-    
-def get_cell(path, i, is_fil, cellse):
+
+def get_mime(path_i, is_fil):
     '''
-    Получение строки для списка файлов
+    Получение mimetype
     '''
-    path_i = path + i
-    ret = []
     if is_fil:
-        temp = mimetypes.guess_type(path + i)[0]
+        temp = mimetypes.guess_type(path_i)[0]
     else:
         temp = 'application-x-directory'
     if temp:
         pass
     else:
         temp = 'empty'
+    return temp
 
+def get_cell(path, i, is_fil, cellse):
+    '''
+    Получение строки для списка файлов
+    '''
+    path_i = path + i #В будующем заменить на функцию слияния из os.path
+    ret = []
+    temp = get_mime(path_i, is_fil)
     t = ''
     n = i
     if is_fil:
@@ -338,21 +359,32 @@ def get_cell(path, i, is_fil, cellse):
     ret.append(get_ico(mime_name_ico(temp)))
     return ret
     
-def get_ico(s):
+def get_ico(s, size_ico=True):
+    '''
+    Получение иконки по типу и если такой тип уже есть в словаре иконок то используеться
+    словарь если нет то в словарь добавляеться новая иконка
+    '''
     global dic_icon
-    try:
-        dic_icon.keys().index(s)
-    except:
+    if size_ico:
         try:
-            b = get_theme.load_icon(s, int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
+            dic_icon.keys().index(s)
         except:
-            return dic_icon['empty']
+            try:
+                b = get_theme.load_icon(s, int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
+            except:
+                return dic_icon['empty']
+            else:
+                dic_icon[s] = b
+                return dic_icon[s]
         else:
-            dic_icon[s] = b
             return dic_icon[s]
     else:
-        #print 'cache'
-        return dic_icon[s]
+        try:
+            b = get_theme.load_icon(s, 30, type_ico_load)
+        except:
+            return get_theme.load_icon('empty', 30, type_ico_load)
+        else:
+            return b
        
 def get_list_path(path, pattern_s, select_list):
     '''

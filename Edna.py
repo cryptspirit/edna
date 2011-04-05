@@ -22,6 +22,7 @@
 
 import gobject
 import gtk
+import pygtk
 import os
 import sys
 import time
@@ -32,6 +33,7 @@ import rc_modul
 import profile
 import gettext
 
+pygtk.require('2.0')
 gettext.install('edna', unicode=True)
 
 class Dwindow(gtk.Window):
@@ -39,7 +41,7 @@ class Dwindow(gtk.Window):
         gtk.Window.__init__(self)
         self.connect('destroy', self.exitt)
         self.set_position(gtk.WIN_POS_CENTER)
-        self.set_default_size(900, 500)
+        self.set_size_request(900, 500)
         self.set_title('Edna')
         self.set_icon_from_file('edna.svg')
         # Widget#########################

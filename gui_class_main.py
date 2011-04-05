@@ -26,7 +26,7 @@ import edna_function
 import pango
 import os
 import re
-import gio
+#import gio
 import subprocess
 import threading
 import time
@@ -645,6 +645,110 @@ class question_window_copy(gtk.Window):
         if key == 'Escape': self.destr()
         if key == 'Return': self.ok_button_click()
             
+class properties_file_window(gtk.Window):
+    '''
+    Класс окна "свойства файла"
+    '''
+    class info_row(gtk.HBox):
+        '''
+        Информационная строка 
+        '''
+        def __init__(self, head_text, text):
+            gtk.HBox.__init__(self, False, 10)
+            head_label = gtk.Label(head_text + ':')
+            head_label.modify_font(pango.FontDescription('bold'))
+            text_label = gtk.Label(text)
+            self.pack_start(head_label, False)
+            self.pack_start(text_label, False)
+        
+    def __init__(self, path_to_file):
+        gtk.Window.__init__(self)
+        self.path_to_file = path_to_file[0]
+        self.is_file = path_to_file[1]
+        self.get_info_about_file()
+        self.set_size_request(330, 400)
+        self.set_border_width(5)
+        self.set_title(_('File properties'))
+        self.set_position(gtk.WIN_POS_CENTER)
+        self.set_resizable(False)
+        vbox1 = gtk.VBox(False)
+        note1 = gtk.Notebook()
+        self.create_properties_tab(note1)
+        self.create_access_tab(note1)
+        vbox1.pack_start(note1)
+        hbox1 = gtk.HButtonBox()
+        hbox1.set_layout(gtk.BUTTONBOX_END)
+        self.button_ok = gtk.Button(stock='gtk-ok')
+        self.button_cancel = gtk.Button(stock='gtk-cancel')
+        self.button_apply = gtk.Button(stock='gtk-apply')
+        hbox1.add(self.button_ok)
+        hbox1.add(self.button_cancel)
+        hbox1.add(self.button_apply)
+        vbox1.pack_start(hbox1, False)
+        
+        self.add(vbox1)
+        self.show_all()
+        
+    def get_info_about_file(self):
+        '''
+        Создание списка свойств для отображения
+        '''
+        self.info_about_file = {}
+        k = os.path.dirname(self.path_to_file)
+        if k != '/': null_p = 1
+        else: null_p = 0
+        self.info_about_file['Name'] = self.path_to_file[len(k) + null_p:]
+        self.info_about_file['File'] = self.is_file
+        if self.is_file:
+            self.info_about_file['Type'] = edna_function.get_mime(self.path_to_file, self.info_about_file['File'])
+            self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico(self.info_about_file['Type']), False)
+        else:
+            self.info_about_file['Type'] = 'application-x-directory'
+            self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico('gtk-directory'), False)
+            
+        #print self.info_about_file['Icon']
+        
+    def create_properties_tab(self, note_object):
+        '''
+        Создание и заполнение вкладки Свойства
+        '''
+        vbox2 = gtk.VBox(False, 20)
+        vbox2.set_border_width(20)
+        hbox1 = gtk.HBox(False, 10)
+        vbox3 = gtk.VBox(False)
+        
+        icon_image = gtk.Image()
+        icon_image1 = gtk.Button()
+        icon_image.set_from_pixbuf(self.info_about_file['Icon'])
+        icon_image1.set_image(icon_image)
+        
+        entry_name = gtk.Entry()
+        entry_name.set_text(self.info_about_file['Name'])
+        entry_name.connect('changed', self.change_entry_name)
+        vbox3.pack_start(self.info_row(_('Type'), self.info_about_file['Type']), False)
+        
+        
+        hbox1.pack_start(icon_image1, False)
+        hbox1.pack_start(entry_name)
+        vbox2.pack_start(hbox1, False)
+        vbox2.pack_start(gtk.HSeparator(), False)
+        vbox2.pack_start(vbox3, False)
+        
+        note_object.append_page(vbox2, gtk.Label(_('Properties')))
+    
+    def change_entry_name(self, *args):
+        '''
+        Изминение виджета entry_name
+        '''
+        self.info_about_file['Name'] = args[0].get_text()
+    
+    def create_access_tab(self, note_object):
+        '''
+        Создание и заполнение вкладки Доступ
+        '''
+        vbox2 = gtk.VBox(False)
+        note_object.append_page(vbox2, gtk.Label(_('Access')))
+        
 class listen_cell(gtk.VBox):
     def __init__(self, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
@@ -659,7 +763,7 @@ class listen_cell(gtk.VBox):
         ####################################
         self.Hotkeys_Function = {'key_1': self.copys,
                                 'key_2': self.deleting,
-                                'key_3': '',
+                                'key_3': self.properties_file,
                                 'key_4': '',
                                 'key_5': '',
                                 'key_6': '',
@@ -757,28 +861,37 @@ class listen_cell(gtk.VBox):
         self.Select_List = []
         self.path_entry.set_text(self.Current_Path)
         
-    def get_select_now(self):
+    def get_select_now(self, only_cursor=False):
+        '''
+        Создаеться список выделеных файлов и папок
+        '''
         return_list = []
         selection = self.treeview.get_selection()
         model_sel, iter_sel = selection.get_selected()
-        path = model_sel.get_path(iter_sel)[0]
-        model = self.treeview.get_model()
-        
-        if self.Current_Path != '/':
-            nc = 1
+        if only_cursor:
+            dp = model_sel.get_value(iter_sel, self.len_u)
+            if dp != '..':
+                return dp, os.path.isfile(dp)
+            else:
+                return None
         else:
-            nc = 0
-        now_select_in = True
-        for i in xrange(nc, self.len_articles):
-            iter = model.get_iter(i)
-            if model.get_value(iter, self.len_u + 4) == 'True':
-                if path == i: now_select_in = False
-                dp = model.get_value(iter, self.len_u)
+            path = model_sel.get_path(iter_sel)[0]
+            model = self.treeview.get_model()
+            if self.Current_Path != '/':
+                nc = 1
+            else:
+                nc = 0
+            now_select_in = True
+            for i in xrange(nc, self.len_articles):
+                iter = model.get_iter(i)
+                if model.get_value(iter, self.len_u + 4) == 'True':
+                    if path == i: now_select_in = False
+                    dp = model.get_value(iter, self.len_u)
+                    return_list.append([dp, os.path.isfile(dp)])
+            dp = model_sel.get_value(iter_sel, self.len_u)
+            if now_select_in and dp != '..':
                 return_list.append([dp, os.path.isfile(dp)])
-        dp = model_sel.get_value(iter_sel, self.len_u)
-        if now_select_in and dp != '..':
-            return_list.append([dp, os.path.isfile(dp)])
-        return return_list
+            return return_list
         
     def key_event(self, *args):
         if args[1].type == gtk.gdk.KEY_PRESS:
@@ -832,6 +945,11 @@ class listen_cell(gtk.VBox):
                 
     def deleting(self):
         y = question_window(self.get_select_now())
+        
+    def properties_file(self):
+        rlist = self.get_select_now(only_cursor=True)
+        if rlist:
+            y = properties_file_window(rlist)
         
     def copys(self):
         remove_after = False
@@ -1075,15 +1193,9 @@ class listen_cell(gtk.VBox):
         pass
             
 def main():
-    #global answer
-    #answer = 0
-    h = miss_window('/home/mort/.bashrc')
-    #h.butt_miss.connect('clicked', lambda *y: buf_def(1))
-    #h.butt_again.connect('clicked', answer = 2)
-    #h.butt_miss_all.connect('clicked', answer = 3)
-    #h.butt_cancel.connect('clicked', answer = 4)
+    h = properties_file_window(['/home/mort/.bashrc', True])
+    #h = miss_window('/home/mort/.bashrc')
     h.show_all()
-    #print answer
     gtk.main()
     return 0
 
