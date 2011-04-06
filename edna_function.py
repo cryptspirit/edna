@@ -21,66 +21,225 @@
 #       MA 02110-1301, USA.
 import os
 import re
-import rc_modul
+import ConfigParser
 import time
 import subprocess
 import gtk
-#import gio
 import gui_class_main
-import threading
 import stat
 import xdg.Mime
 import xdg.DesktopEntry
+import gettext
 
-
+gettext.install('edna', unicode=True)
+###############################################################################
 betc = {'row_fg':3,
         'row_bg':2,
         'flag':1,
         'name':0,}
 
+filerc = '.ednarc'
+
+md = ['Y', 
+    'M', 
+    'D', 
+    'h', 
+    'm', 
+    's']
+
+mc = ['cell_name', 
+'cell_type', 
+'cell_size', 
+'cell_datec', 
+'cell_datem', 
+'cell_user', 
+'cell_group', 
+'cell_atr']
+
+rc_config = {'panel_history0':'/',
+            'panel_history1':'/'}
+            
+rc_style = {'cell_name':'1',  
+            'cell_type':'1', 
+            'cell_size':'1', 
+            'cell_datec':'0', 
+            'cell_datem':'0', 
+            'cell_user':'0', 
+            'cell_group':'0', 
+            'cell_atr':'0',
+            'cell_sort':'01234567',
+            'cell_name_expand':'1',  
+            'cell_type_expand':'0', 
+            'cell_size_expand':'0', 
+            'cell_datec_expand':'0', 
+            'cell_datem_expand':'0', 
+            'cell_user_expand':'0', 
+            'cell_group_expand':'0', 
+            'cell_atr_expand':'0',
+            'cell_name_alignment_h':'0.0',  
+            'cell_type_alignment_h':'1.0', 
+            'cell_size_alignment_h':'0.0', 
+            'cell_datec_alignment_h':'0.0', 
+            'cell_datem_alignment_h':'0.0', 
+            'cell_user_alignment_h':'0.0', 
+            'cell_group_alignment_h':'1.0', 
+            'cell_atr_alignment_h':'1.0',
+            'cell_name_alignment_v':'0.5',  
+            'cell_type_alignment_v':'0.5', 
+            'cell_size_alignment_v':'0.5', 
+            'cell_datec_alignment_v':'0.5', 
+            'cell_datem_alignment_v':'0.5', 
+            'cell_user_alignment_v':'0.5', 
+            'cell_group_alignment_v':'0.5', 
+            'cell_atr_alignment_v':'0.5',
+            'cell_name_size':'100',  
+            'cell_type_size':'70', 
+            'cell_size_size':'80', 
+            'cell_datec_size':'70', 
+            'cell_datem_size':'70', 
+            'cell_user_size':'70', 
+            'cell_group_size':'70', 
+            'cell_atr_size':'70',
+            'cell_datec_format':'D.M.Y',
+            'cell_datem_format':'D.M.Y',
+            'cell_size_format':'2',
+            'cell_date_type':'0',
+            'cell_atr_format':'0',
+            'date_format':'0',
+            'even_row_fg':'#DFDDF0',
+            'even_row_bg':'#454a56',
+            'odd_row_fg':'#DFDDF0',
+            'odd_row_bg':'#41517a',
+            'sel_row_fg':'#474747',
+            'sel_row_bg':'#599839',
+            'icon_size':'16',
+            'font_cell_text':'Sans 10'}
+            
+rc_hotkeys = {'key_1': 'F5',
+            'key_2': 'Delete',
+            'key_3': 'Ctrl p',
+            'key_4': 'F2',
+            'key_5': 'F7',
+            'key_6': 'Ctrl F2',
+            'key_7': 'F3'}
+            
+defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
+
+hotkeys_function_name = {'key_1': _('Copy'),
+                        'key_2': _('Remove'),
+                        'key_3': _('Properties'),
+                        'key_4': _('Rename'),
+                        'key_5': _('Make directory'),
+                        'key_6': _('Open terminal'),
+                        'key_7': _('View')}
+###############################################################################
+
+############################### edna rc (begin) ###############################
+def Sum_cell_function():
+    global Sum_cell
+    t = rc_dict['style']['cell_sort']
+    p = []
+    for i in xrange(len(t)):
+        if rc_dict['style'][mc[int(t[i])]] == '1':
+            p.append(mc[int(t[i])])
+    Sum_cell = p
+    k = rc_dict['hotkeys'].keys()
+
+def read_rc():
+    '''
+    Функция чтения файла настроек
+    '''
+    global key_name_in_rc
+    global rc_dict
+    rc_dict = {}
+    key_name_in_rc = {}
+    need_write = False
+    if os.path.isfile(filerc):
+        CP = ConfigParser.ConfigParser()
+        CP.read(filerc)
+        for i in defaultrc.keys():
+            if CP.has_section(i):
+                rc_dict[i] = {}
+                for j in defaultrc[i].keys():
+                    if CP.has_option(i, j):
+                        rc_dict[i][j] = CP.get(i, j)
+                    else:
+                        rc_dict[i][j] = defaultrc[i][j]
+                        CP.set(i, j, defaultrc[i][j])
+                        need_write = True
+                    if i == 'hotkeys' and len(rc_dict[i][j]) > 0: key_name_in_rc[rc_dict[i][j]] = j
+            else:
+                CP.add_section(i)
+                need_write = True
+                for j in defaultrc[i].keys():
+                    CP.set(i, j, defaultrc[i][j])
+                    if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
+                rc_dict[i] = defaultrc[i]
+        if need_write:
+            f = open(filerc, 'r+')
+            CP.write(f)
+            f.close()
+        Sum_cell_function()
+    else:
+        CP = ConfigParser.ConfigParser()
+        for i in defaultrc.keys():
+            CP.add_section(i)
+            for j in defaultrc[i].keys():
+                CP.set(i, j, defaultrc[i][j])
+                if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
+        f = open(filerc, 'w')
+        CP.write(f)
+        f.close()
+        rc_dict = defaultrc
+        Sum_cell_function()
+                
+def save_rc():
+    '''
+    Функция сохранения словаря настроек
+    '''
+    Sum_cell_function()
+    need_write = False
+    if os.path.isfile(filerc):
+        CP = ConfigParser.ConfigParser()
+        CP.read(filerc)
+        for i in rc_dict.keys():
+            if CP.has_section(i):
+                for j in rc_dict[i].keys():
+                    if CP.has_option(i, j):
+                        if CP.get(i, j) != rc_dict[i][j]:
+                            CP.set(i, j, rc_dict[i][j])
+                            need_write = True
+                    else:
+                        CP.set(i, j, rc_dict[i][j])
+                        need_write = True
+            else:
+                CP.add_section(i)
+                need_write = True
+                for j in rc_dict[i].keys():
+                    CP.set(i, j, rc_dict[i][j])
+        if need_write:
+            f = open(filerc, 'r+')
+            CP.write(f)
+            f.close()
+    else:
+        CP = ConfigParser.ConfigParser()
+        for i in rc_dict.keys():
+            CP.add_section(i)
+            for j in rc_dict[i].keys():
+                CP.set(i, j, rc_dict[i][j])
+        f = open(filerc, 'w')
+        CP.write(f)
+        f.close()
+################################ edna rc (end) ################################
+
+read_rc()
 type_ico_load = gtk.ICON_LOOKUP_USE_BUILTIN
-
 dic_icon = {}
-
 get_theme = gtk.icon_theme_get_default()
+dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_dict['style']['icon_size']), type_ico_load)
+dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 
-dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
-dic_icon['empty'] = get_theme.load_icon('empty', int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
-
-#def get_key_info(key_box):
-#    st = re.search(r'keyval=\S+>', key_box.string).group()[7:-1]
-#    k = key_box.keyval
-#    return st, k
-
-def buf_def(c):
-    global answer
-    answer = c
-    
-def tread_window(path):
-    gtk.gdk.threads_enter()
-    h = gui_class_main.miss_window(path)
-    h.butt_miss.connect('clicked', lambda *y: buf_def(1))
-    h.butt_again.connect('clicked', lambda *y: buf_def(2))
-    h.butt_miss_all.connect('clicked', lambda *y: buf_def(3))
-    h.butt_cancel.connect('clicked', lambda *y: buf_def(4))
-    h.show_all()
-    gtk.gdk.threads_leave()
-    
-def save_open(path, flg, miss):
-    global answer
-    answer = 0
-    try: f = open(path, flg)
-    except:
-        f = None
-        if miss:
-            pass
-        else:
-            t = threading.Timer(1, lambda *y: tread_window(path))
-            t.start()
-            t.join()
-            print answer
-    return f, answer
-
+########################## edna function (begin) ##############################
 def deleting_files_folders(path, flag):
     if os.path.islink(path):
         os.remove(path)
@@ -160,10 +319,9 @@ def full_size_new(path, no_list):
 
 def get_launch(path):
     '''
-Определяет по типу какой программой открывать файл по умолчанию
+    Определяет по типу какой программой открывать файл по умолчанию
     '''
     temp = str(xdg.Mime.get_type_by_name(path))
-    print temp
     if temp != None:
         ret = subprocess.Popen(['xdg-mime', 'query', 'default', temp],
                                         stdout=subprocess.PIPE).communicate()[0].strip('\n')
@@ -175,7 +333,7 @@ def get_launch(path):
 
 def get_file_size(path):
     '''
-Получение размера файла в байтах
+    Получение размера файла в байтах
     '''
     try: t = os.path.getsize(path)
     except: t = 0
@@ -183,10 +341,10 @@ def get_file_size(path):
     
 def get_in_format_size(t):
     '''
-Преобразование размера файла в байтах в формат указаный в настройках
+    Преобразование размера файла в байтах в формат указаный в настройках
     '''
     s = ''
-    if rc_modul.rc_dict['style']['cell_size_format'] == '0':
+    if rc_dict['style']['cell_size_format'] == '0':
         t = str(t)
         if len(t) > 3:
             l = len(t)
@@ -196,16 +354,14 @@ def get_in_format_size(t):
                     s += ' '
         else:
             s = t
-
-    elif rc_modul.rc_dict['style']['cell_size_format'] == '1':
+    elif rc_dict['style']['cell_size_format'] == '1':
         if t < 1024:
             s = str(t) + ' B'
         elif t >= 1024 and t <= 1048576:
             s = str(round(t / 1024., 2)) + ' kB'
         else:
             s = str(round(t / 1048576., 2)) + ' MB'
-            
-    elif rc_modul.rc_dict['style']['cell_size_format'] == '2':
+    elif rc_dict['style']['cell_size_format'] == '2':
         if t < 1024:
             s = str(t) + ' B'
         elif t >= 1024 and t <= 1048576:
@@ -239,10 +395,10 @@ def get_file_attr(file):
                 s += '-'
         s1 += str(u)
     f = [s, s1]
-    return f[int(rc_modul.rc_dict['style']['cell_atr_format'])]
+    return f[int(rc_dict['style']['cell_atr_format'])]
 
 def get_file_date(path, cm):
-    b = rc_modul.rc_dict['style'][cm]
+    b = rc_dict['style'][cm]
     ss = ''
     if cm == 'cell_datec_format':
         nm = 8
@@ -252,8 +408,8 @@ def get_file_date(path, cm):
         s = time.localtime(os.lstat(path)[nm])
         
         for i in xrange(len(b)):
-            if b[i] in rc_modul.md:
-                t = str(s[rc_modul.md.index(b[i])])
+            if b[i] in md:
+                t = str(s[md.index(b[i])])
                 if len(t) == 1: t = '0' + t
                 ss += t
             else:
@@ -371,7 +527,7 @@ def get_ico(s, size_ico=True):
             dic_icon.keys().index(s)
         except:
             try:
-                b = get_theme.load_icon(s, int(rc_modul.rc_dict['style']['icon_size']), type_ico_load)
+                b = get_theme.load_icon(s, int(rc_dict['style']['icon_size']), type_ico_load)
             except:
                 return dic_icon['empty']
             else:
@@ -391,7 +547,7 @@ def get_list_path(path, pattern_s, select_list):
     '''
     Получение списка файлов с описаными столбцами
     '''
-    cellse = rc_modul.Sum_cell
+    cellse = Sum_cell
     
     try: cellse.index('cell_user')
     except: pass
@@ -438,23 +594,23 @@ def get_list_path(path, pattern_s, select_list):
             try: select_list.index(m[i][len(cellse)])
             except:
                 if i % 2 != 0:
-                    color_fg = rc_modul.rc_dict['style']['odd_row_fg']
-                    color_bg = rc_modul.rc_dict['style']['odd_row_bg']
+                    color_fg = rc_dict['style']['odd_row_fg']
+                    color_bg = rc_dict['style']['odd_row_bg']
                 else:
-                    color_fg = rc_modul.rc_dict['style']['even_row_fg']
-                    color_bg = rc_modul.rc_dict['style']['even_row_bg']
+                    color_fg = rc_dict['style']['even_row_fg']
+                    color_bg = rc_dict['style']['even_row_bg']
                 fgl = 'False'
             else:
                 fgl = 'True'
-                color_fg = rc_modul.rc_dict['style']['sel_row_fg']
-                color_bg = rc_modul.rc_dict['style']['sel_row_bg']
+                color_fg = rc_dict['style']['sel_row_fg']
+                color_bg = rc_dict['style']['sel_row_bg']
         else:
             if i % 2 != 0:
-                color_fg = rc_modul.rc_dict['style']['odd_row_fg']
-                color_bg = rc_modul.rc_dict['style']['odd_row_bg']
+                color_fg = rc_dict['style']['odd_row_fg']
+                color_bg = rc_dict['style']['odd_row_bg']
             else:
-                color_fg = rc_modul.rc_dict['style']['even_row_fg']
-                color_bg = rc_modul.rc_dict['style']['even_row_bg']
+                color_fg = rc_dict['style']['even_row_fg']
+                color_bg = rc_dict['style']['even_row_bg']
             fgl = 'False'
         m[i].append(color_fg)
         m[i].append(color_bg)
@@ -462,11 +618,9 @@ def get_list_path(path, pattern_s, select_list):
     
         if m[i][len(cellse)].strip('\t\n') == pattern_s.strip('\t\n'):
             op = i
-            #print 'i', i
-    
     return m, op, fg
-        
-        
+########################### edna function (end) ###############################        
+
 def main():
     file_run_for_know_mimetype('~/.bashrc')
 

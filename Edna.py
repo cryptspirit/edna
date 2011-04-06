@@ -27,10 +27,7 @@ import os
 import sys
 import time
 import gui_class_main
-import gui_class_rc
 import edna_function
-import rc_modul
-import profile
 import gettext
 
 pygtk.require('2.0')
@@ -96,7 +93,7 @@ class Dwindow(gtk.Window):
         return self.ui.get_widget('/menubar')
     
     def config_window(self, *args):
-        rrr = gui_class_rc.Rc_Window()
+        rrr = gui_class_main.Rc_Window()
         rrr.button_ok.connect('clicked', self.upData, rrr, True)
         
     def help_about(self, *args):
@@ -109,7 +106,7 @@ class Dwindow(gtk.Window):
         
     def upData(self, *args):
         print args
-        rc_modul.save_rc()
+        edna_function.save_rc()
         self.cel[0].upData()
         self.cel[1].upData()
         
@@ -131,5 +128,4 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    #profile.run('main()')
     main()
