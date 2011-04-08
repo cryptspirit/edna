@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-28 16:04+0300\n"
+"POT-Creation-Date: 2011-04-06 11:59+0300\n"
 "PO-Revision-Date: 2011-03-17 16:11+0200\n"
 "Last-Translator:  <cryptspirit@gmail.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -18,298 +18,308 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: gui_class_main.py:41 gui_class_rc.py:31
+#: gui_class_main.py:40
 msgid "Name"
 msgstr "Имя"
 
-#: gui_class_main.py:42 gui_class_main.py:132 gui_class_rc.py:32
+#: gui_class_main.py:41 gui_class_main.py:149 gui_class_main.py:745
 msgid "Type"
 msgstr "Тип"
 
-#: gui_class_main.py:43 gui_class_main.py:124 gui_class_rc.py:33
+#: gui_class_main.py:42 gui_class_main.py:141
 msgid "Size"
 msgstr "Размер"
 
-#: gui_class_main.py:44 gui_class_rc.py:34
+#: gui_class_main.py:43
 msgid "Created"
 msgstr "Создано"
 
-#: gui_class_main.py:45 gui_class_rc.py:35
+#: gui_class_main.py:44
 msgid "Changed"
 msgstr "Изменено"
 
-#: gui_class_main.py:46 gui_class_rc.py:36
+#: gui_class_main.py:45
 msgid "User"
 msgstr "Владелец"
 
-#: gui_class_main.py:47 gui_class_rc.py:37
+#: gui_class_main.py:46
 msgid "Group"
 msgstr "Группа"
 
-#: gui_class_main.py:48 gui_class_rc.py:38
+#: gui_class_main.py:47
 msgid "Attribute"
 msgstr "Атрибуты"
 
-#: gui_class_main.py:61 gui_class_main.py:111
+#: gui_class_main.py:50
+msgid "right"
+msgstr "справа"
+
+#: gui_class_main.py:50 gui_class_main.py:51
+msgid "center"
+msgstr "вцентре"
+
+#: gui_class_main.py:50
+msgid "left"
+msgstr "слева"
+
+#: gui_class_main.py:51
+msgid "up"
+msgstr "вверху"
+
+#: gui_class_main.py:51
+msgid "down"
+msgstr "внизу"
+
+#: gui_class_main.py:78 gui_class_main.py:128
 msgid "Error! I not can read file"
 msgstr "Ошибка! Не могу прочитать файл"
 
-#: gui_class_main.py:64
+#: gui_class_main.py:81
 msgid "Exists"
 msgstr "Сушествует"
 
-#: gui_class_main.py:69
+#: gui_class_main.py:86
 msgid "Link"
 msgstr "Ссылка"
 
-#: gui_class_main.py:72
+#: gui_class_main.py:89
 msgid "Not link"
 msgstr "Не ссылка"
 
-#: gui_class_main.py:75
+#: gui_class_main.py:92
 msgid "Not exists"
 msgstr "Не сушествует"
 
-#: gui_class_main.py:100
+#: gui_class_main.py:117
 msgid "_Miss"
 msgstr "_Пропустить"
 
-#: gui_class_main.py:101
+#: gui_class_main.py:118
 msgid "_Repeat"
 msgstr "П_овторить"
 
-#: gui_class_main.py:102
+#: gui_class_main.py:119
 msgid "Miss _All"
 msgstr "Пропустить _все"
 
-#: gui_class_main.py:120
+#: gui_class_main.py:137
 msgid "File"
 msgstr "Файл"
 
-#: gui_class_main.py:128
+#: gui_class_main.py:145
 msgid "Attributes"
 msgstr "Атрибуты"
 
-#: gui_class_main.py:241 gui_class_main.py:262
+#: gui_class_main.py:258 gui_class_main.py:279
 msgid "Pause"
 msgstr "Пауза"
 
-#: gui_class_main.py:266
+#: gui_class_main.py:283
 msgid "Start"
 msgstr "Пуск"
 
-#: gui_class_main.py:401
+#: gui_class_main.py:418
 msgid "Delete"
 msgstr "Удалить"
 
-#: gui_class_main.py:419 gui_class_main.py:462
+#: gui_class_main.py:436 gui_class_main.py:479
 msgid "_Pause"
 msgstr "_Пауза"
 
-#: gui_class_main.py:466
+#: gui_class_main.py:483
 msgid "_Start"
 msgstr "_Пуск"
 
-#: gui_class_main.py:530
+#: gui_class_main.py:547
 #, python-format
 msgid "files/folders (%d th.)?:\n"
 msgstr "файлы/папки (%d шт.)?:\n"
 
-#: gui_class_main.py:533
+#: gui_class_main.py:550
 msgid "file"
 msgstr "файл"
 
-#: gui_class_main.py:535
+#: gui_class_main.py:552
 msgid "folder"
 msgstr "папка"
 
-#: gui_class_main.py:539
-#, python-format
-msgid ""
-"You want to delete\n"
-"%s%s"
-msgstr "Вы хотите удалить\n%s%s"
+#: gui_class_main.py:556
+#, fuzzy
+msgid "You want to delete"
+msgstr "Вы хотите удалить"
 
-#: gui_class_main.py:599
+#: gui_class_main.py:616
 #, python-format
 msgid "To copy %s files/folders in"
 msgstr "Копировать %s файлов/папок в"
 
-#: gui_class_rc.py:41
-msgid "right"
-msgstr "справа"
+#: gui_class_main.py:688
+#, fuzzy
+msgid "File properties"
+msgstr "Свойства файла"
 
-#: gui_class_rc.py:41 gui_class_rc.py:42
-msgid "center"
-msgstr "вцентре"
-
-#: gui_class_rc.py:41
-msgid "left"
-msgstr "слева"
-
-#: gui_class_rc.py:42
-msgid "up"
-msgstr "вверху"
-
-#: gui_class_rc.py:42
-msgid "down"
-msgstr "внизу"
-
-#: gui_class_rc.py:60
-msgid "Configurations"
-msgstr "Настройки"
-
-#: gui_class_rc.py:96
-msgid "Genaral"
-msgstr "Общие"
-
-#: gui_class_rc.py:106
-msgid "Colors"
-msgstr "Цвета"
-
-#: gui_class_rc.py:111
-msgid "Even rows"
-msgstr "Четные строки"
-
-#: gui_class_rc.py:111
-msgid "Odd rows"
-msgstr "Не четные строки"
-
-#: gui_class_rc.py:111
-msgid "Select rows"
-msgstr "Выделеные строки"
-
-#: gui_class_rc.py:123
-msgid "Foreground"
-msgstr "Передний план"
-
-#: gui_class_rc.py:124
-msgid "Background"
-msgstr "Задний план"
-
-#: gui_class_rc.py:132
-msgid "Example text"
-msgstr "Пример текста"
-
-#: gui_class_rc.py:134
-msgid "Font button"
-msgstr "Выбрать шрифт"
-
-#: gui_class_rc.py:142 gui_class_rc.py:252
-msgid "Appearance"
-msgstr "Внешний вид"
-
-#: gui_class_rc.py:157
-msgid ""
-"The keys are already used\n"
-"enter other keys"
-msgstr "Клавиши используються\n"
-"введите другие клавиши"
-
-#: gui_class_rc.py:163 gui_class_rc.py:168
-msgid "Press keys"
-msgstr "Нажмите клавиши"
-
-#: gui_class_rc.py:180
-msgid "Clear"
-msgstr "Очистить"
-
-#: gui_class_rc.py:185
-msgid "Hotkeys"
-msgstr "Горячие клавиши"
-
-#: gui_class_rc.py:241 gui_class_rc.py:301
-msgid "Columns"
-msgstr "Столбцы"
-
-#: gui_class_rc.py:266
-msgid "Expand"
-msgstr "Расширять"
-
-#: gui_class_rc.py:267
-msgid "Min size"
-msgstr "Мин разм."
-
-#: gui_class_rc.py:268
-msgid "Horizontal"
-msgstr "горизонтально"
-
-#: gui_class_rc.py:269
-msgid "Vertical"
-msgstr "вертикально"
-
-#: gui_class_rc.py:314
-msgid "Format of creation"
-msgstr "Формат создания"
-
-#: gui_class_rc.py:324
-msgid "Format of change"
-msgstr "Формат изминения"
-
-#: gui_class_rc.py:336
-msgid "in the bytes"
-msgstr "в байтах"
-
-#: gui_class_rc.py:337
-msgid "with a floating point Kb, Mb"
-msgstr "с плавающей точкой Кб, Мб"
-
-#: gui_class_rc.py:338
-msgid "with a floating point Kb, Mb, Gb"
-msgstr "с плавающей точкой Кб, Мб, Гб"
-
-#: gui_class_rc.py:341
-msgid "Size format"
-msgstr "Формат размера"
-
-#: gui_class_rc.py:347
-msgid "numerical"
-msgstr "числовой"
-
-#: gui_class_rc.py:348
-msgid "string"
-msgstr "строковый"
-
-#: gui_class_rc.py:352
-msgid "Attribute format"
-msgstr "Формат атрибутов"
-
-#: gui_class_rc.py:364
-msgid "Table"
-msgstr "Таблица"
-
-#: gui_class_rc.py:471
-msgid "Action"
-msgstr "Действие"
-
-#: gui_class_rc.py:478
-msgid "Keys"
-msgstr "Клавиши"
-
-#: rc_modul.py:116
-msgid "Copy"
-msgstr "Копировать"
-
-#: rc_modul.py:117
-msgid "Remove"
-msgstr "Удалить"
-
-#: rc_modul.py:118
+#: gui_class_main.py:754 edna_function.py:130
 msgid "Properties"
 msgstr "Свойства"
 
-#: rc_modul.py:119
+#: gui_class_main.py:767
+msgid "Access"
+msgstr "Доступ"
+
+#: gui_class_main.py:1277
+msgid "Action"
+msgstr "Действие"
+
+#: gui_class_main.py:1284
+msgid "Keys"
+msgstr "Клавиши"
+
+#: gui_class_main.py:1304
+msgid "Configurations"
+msgstr "Настройки"
+
+#: gui_class_main.py:1340
+msgid "Genaral"
+msgstr "Общие"
+
+#: gui_class_main.py:1350
+msgid "Colors"
+msgstr "Цвета"
+
+#: gui_class_main.py:1355
+msgid "Even rows"
+msgstr "Четные строки"
+
+#: gui_class_main.py:1355
+msgid "Odd rows"
+msgstr "Не четные строки"
+
+#: gui_class_main.py:1355
+msgid "Select rows"
+msgstr "Выделеные строки"
+
+#: gui_class_main.py:1367
+msgid "Foreground"
+msgstr "Передний план"
+
+#: gui_class_main.py:1368
+msgid "Background"
+msgstr "Задний план"
+
+#: gui_class_main.py:1376
+msgid "Example text"
+msgstr "Пример текста"
+
+#: gui_class_main.py:1378
+msgid "Font button"
+msgstr "Выбрать шрифт"
+
+#: gui_class_main.py:1386 gui_class_main.py:1505
+msgid "Appearance"
+msgstr "Внешний вид"
+
+#: gui_class_main.py:1401
+#, fuzzy
+msgid "The keys are already used"
+msgstr "Клавиши используються"
+
+
+#: gui_class_main.py:1401
+msgid "enter other keys"
+msgstr "введите другие клавиши"
+
+#: gui_class_main.py:1410 gui_class_main.py:1415
+msgid "Press keys"
+msgstr "Нажмите клавиши"
+
+#: gui_class_main.py:1430
+msgid "Clear"
+msgstr "Очистить"
+
+#: gui_class_main.py:1435
+msgid "Hotkeys"
+msgstr "Горячие клавиши"
+
+#: gui_class_main.py:1494 gui_class_main.py:1554
+msgid "Columns"
+msgstr "Столбцы"
+
+#: gui_class_main.py:1519
+msgid "Expand"
+msgstr "Расширять"
+
+#: gui_class_main.py:1520
+msgid "Min size"
+msgstr "Мин разм."
+
+#: gui_class_main.py:1521
+msgid "Horizontal"
+msgstr "горизонтально"
+
+#: gui_class_main.py:1522
+msgid "Vertical"
+msgstr "вертикально"
+
+#: gui_class_main.py:1567
+msgid "Format of creation"
+msgstr "Формат создания"
+
+#: gui_class_main.py:1577
+msgid "Format of change"
+msgstr "Формат изминения"
+
+#: gui_class_main.py:1589
+msgid "in the bytes"
+msgstr "в байтах"
+
+#: gui_class_main.py:1590
+msgid "with a floating point Kb, Mb"
+msgstr "с плавающей точкой Кб, Мб"
+
+#: gui_class_main.py:1591
+msgid "with a floating point Kb, Mb, Gb"
+msgstr "с плавающей точкой Кб, Мб, Гб"
+
+#: gui_class_main.py:1594
+msgid "Size format"
+msgstr "Формат размера"
+
+#: gui_class_main.py:1600
+msgid "numerical"
+msgstr "числовой"
+
+#: gui_class_main.py:1601
+msgid "string"
+msgstr "строковый"
+
+#: gui_class_main.py:1605
+msgid "Attribute format"
+msgstr "Формат атрибутов"
+
+#: gui_class_main.py:1617
+msgid "Table"
+msgstr "Таблица"
+
+#: edna_function.py:128
+msgid "Copy"
+msgstr "Копировать"
+
+#: edna_function.py:129
+msgid "Remove"
+msgstr "Удалить"
+
+#: edna_function.py:131
 msgid "Rename"
 msgstr "Переименовать"
 
-#: rc_modul.py:120
+#: edna_function.py:132
 msgid "Make directory"
 msgstr "Создать каталог"
 
-#: rc_modul.py:121
+#: edna_function.py:133
 msgid "Open terminal"
 msgstr "Открыть терминал"
 
-#: rc_modul.py:122
+#: edna_function.py:134
 msgid "View"
 msgstr "Просмотреть"

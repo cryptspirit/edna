@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-#       gui_class_main.py
+#       edna_gui_class.py
 #       
 #       Copyright 2011 CryptSpirit <cryptspirit@gmail.com>
 #       
@@ -66,6 +66,9 @@ keys_not_follow += map(chr, xrange(65, 123))
 
 ###############################  Gui class (begin) ############################
 class miss_window(gtk.Window):
+    '''
+    Класс окна ошибке доступа к файлу
+    '''
     def __init__(self, text):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
@@ -81,7 +84,7 @@ class miss_window(gtk.Window):
             f1 = _('Exists')
             f2 = edna_function.get_file_size(text)
             f3 = edna_function.get_file_attr(text)
-            f4 = str(xdg.Mime.get_type_by_name(path))
+            f4 = edna_function.get_custom_mimetype(path)
             if os.path.islink(text):
                 f5 = _('Link')
                 f6 = os.readlink(text)
@@ -168,7 +171,6 @@ class miss_window(gtk.Window):
         vbox2.pack_start(gtk.HSeparator())
         vbox2.pack_start(hbox7)
         vbox2.pack_start(gtk.HSeparator())
-        
         l = gtk.Label()
         l.set_size_request(30, -1)
         hbox1.pack_start(gtk.VSeparator(), False)
@@ -178,12 +180,10 @@ class miss_window(gtk.Window):
         hbox1.pack_start(gtk.VSeparator(), False)
         hbox1.pack_start(vbox2, True)
         hbox1.pack_start(gtk.VSeparator(), False)
-        
         vbox.pack_start(self.label_mesage)
         vbox.pack_start(self.label_file)
         vbox.pack_start(hbox1)
         vbox.pack_start(bbox)
-        
         self.add(vbox)
 
     def labe_s(self, text, r):
@@ -203,7 +203,11 @@ class miss_window(gtk.Window):
         key = edna_function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         
+        
 class copy_window(gtk.Window):
+    '''
+    Класс окна копирования
+    '''
     def __init__(self, dest, list, destpath, current_path, siz, remove_after):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
@@ -241,7 +245,6 @@ class copy_window(gtk.Window):
             self.progress2.set_size_request(450, -1)
         else:
             self.multi = False
-
         self.label_progres = gtk.Label()
         self.label_progres.set_size_request(450, -1)
         self.label_src = gtk.Label()
@@ -249,7 +252,6 @@ class copy_window(gtk.Window):
         self.label_src.set_size_request(450, -1)
         self.label_dest = gtk.Label()
         self.label_dest.set_alignment(0.0, 0.5)
-        
         self.label_dest.set_size_request(450, -1)
         tab = gtk.Table(1, 3, True)
         tab.set_col_spacings(30)
@@ -267,7 +269,6 @@ class copy_window(gtk.Window):
         vbox.pack_start(self.progress1)
         if self.multi:
             vbox.pack_start(self.progress2)
-
         vbox.pack_start(tab)
         self.add(vbox)
         self.show_all()
@@ -310,6 +311,9 @@ class copy_window(gtk.Window):
                     again = self.custom_copy(args[i][0], p1, args[i][1], 10)
                 
     def custom_copy(self, src, dst, flag, n):
+        '''
+        Непосредственно функция копирования
+        '''
         if flag:
             src_file, answer = edna_function.save_open(src, 'rb', self.Miss)
             if src_file == None:
@@ -405,6 +409,9 @@ class copy_window(gtk.Window):
         
         
 class remove_window(gtk.Window):
+    '''
+    Класс окна удаления
+    '''
     def __init__(self, dest, list):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
@@ -441,9 +448,7 @@ class remove_window(gtk.Window):
         vbox.pack_start(self.label_progres)
         vbox.pack_start(gtk.HSeparator())
         vbox.pack_start(self.label_src)
-
         vbox.pack_start(self.progress1)
-
         vbox.pack_start(tab)
         self.timer = threading.Timer(0, self.copy_timer)
         self.add(vbox)
@@ -514,6 +519,9 @@ class remove_window(gtk.Window):
         
         
 class question_window(gtk.Window):
+    '''
+    Класс окна вопроса перед удалением
+    '''
     def __init__(self, list):
         gtk.Window.__init__(self)
         self.connect('destroy', self.destr)
@@ -553,7 +561,7 @@ class question_window(gtk.Window):
             p = list[0][0][len(os.path.dirname(list[0][0])):]
             if p[0] == '/': p = p[1:]
             target_list += p + '?'
-        text = _('You want to delete\n%s%s' % (target, target_list))
+        text = _('You want to delete') + '\n%s%s' % (target, target_list)
         self.label_question = gtk.Label(text)
         self.label_question.set_alignment(0.0, 0.0)
         hbbox = gtk.HButtonBox()
@@ -565,11 +573,9 @@ class question_window(gtk.Window):
         self.butt_cancel.connect('clicked', self.destr)
         hbbox.pack_start(self.butt_ok)
         hbbox.pack_start(self.butt_cancel)
-        
         hbox.pack_start(self.icon_image)
         hbox.pack_start(self.label_question)
         vbox.pack_start(hbox)
-
         vbox.pack_start(hbbox)
         self.add(vbox)
         self.show_all()
@@ -594,6 +600,9 @@ class question_window(gtk.Window):
         
         
 class question_window_copy(gtk.Window):
+    '''
+    Класс окна вопроса перед копированием
+    '''
     def __init__(self, destpath, current_path, list, remove_after):
         gtk.Window.__init__(self)
         self.destpath = destpath
@@ -629,14 +638,11 @@ class question_window_copy(gtk.Window):
         self.butt_cancel.connect('clicked', self.destr)
         hbbox.pack_start(self.butt_ok)
         hbbox.pack_start(self.butt_cancel)
-        
         vbox.pack_start(label_question)
         vbox.pack_start(self.entry1)
-
         vbox.pack_start(hbbox)
         self.add(vbox)
         self.show_all()
-        
         
     def ok_button_click(self, *args):
         k = []
@@ -661,6 +667,7 @@ class question_window_copy(gtk.Window):
         key = edna_function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         if key == 'Return': self.ok_button_click()
+            
             
 class properties_file_window(gtk.Window):
     '''
@@ -702,7 +709,6 @@ class properties_file_window(gtk.Window):
         hbox1.add(self.button_cancel)
         hbox1.add(self.button_apply)
         vbox1.pack_start(hbox1, False)
-        
         self.add(vbox1)
         self.show_all()
         
@@ -722,8 +728,6 @@ class properties_file_window(gtk.Window):
         else:
             self.info_about_file['Type'] = 'application-x-directory'
             self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico('gtk-directory'), False)
-            
-        #print self.info_about_file['Icon']
         
     def create_properties_tab(self, note_object):
         '''
@@ -743,7 +747,6 @@ class properties_file_window(gtk.Window):
         entry_name.set_text(self.info_about_file['Name'])
         entry_name.connect('changed', self.change_entry_name)
         vbox3.pack_start(self.info_row(_('Type'), self.info_about_file['Type']), False)
-        
         
         hbox1.pack_start(icon_image1, False)
         hbox1.pack_start(entry_name)
@@ -765,7 +768,8 @@ class properties_file_window(gtk.Window):
         '''
         vbox2 = gtk.VBox(False)
         note_object.append_page(vbox2, gtk.Label(_('Access')))
-        
+
+
 class listen_cell(gtk.VBox):
     def __init__(self, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
@@ -813,7 +817,6 @@ class listen_cell(gtk.VBox):
         self.treeview.connect('focus-out-event', self.focus_trap)
         self.treeview.connect('cursor-changed', self.cursor_changed)
         
-        
         ###################################
         self.info_label = gtk.Label('info')
         ###################################
@@ -839,7 +842,6 @@ class listen_cell(gtk.VBox):
         self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
         #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
         #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
-        
         
     def timer_refresh(self):
         while not self.Exit_State:
@@ -947,7 +949,6 @@ class listen_cell(gtk.VBox):
                             list_lanch[ret] = ' \'' + i[0]  + '\''
                         else:
                             list_lanch[ret] += ' \'' + i[0]  + '\''
-                            
             for i in input_list:
                 if i[1] == False:
                     if os.path.isdir(i[0]):
@@ -999,7 +1000,6 @@ class listen_cell(gtk.VBox):
             self.articles[path][self.len_u + 2 + i] = sel_col[f[i]]
             model.set(iter, self.len_u + 2 + i, self.articles[path][self.len_u + 2 + i])
         cellse = edna_function.Sum_cell
-        
         if key == 'space':
             try:
                 ic = cellse.index('cell_size')
@@ -1010,7 +1010,6 @@ class listen_cell(gtk.VBox):
                 if os.path.isdir(n):
                     self.articles[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
                     model.set(iter, ic, self.articles[path][ic])
-            
             
     def pr(self, *args):
         if args[1].type == gtk.gdk._2BUTTON_PRESS:
@@ -1336,7 +1335,6 @@ class Rc_Window(gtk.Window):
         
     def all_page(self):
         vbox2 = gtk.VBox()
-        
         self.note.append_page(vbox2, gtk.Label(_('Genaral')))
         
     def tab_style(self):
@@ -1398,7 +1396,7 @@ class Rc_Window(gtk.Window):
                 args[0].hide()
                 args[0].destroy()
             else:
-                args[4].set_label(_('The keys are already used\nenter other keys'))
+                args[4].set_label(_('The keys are already used') + '\n' + _('enter other keys'))
 
     def create_winkey(self, *args):
         '''
@@ -1451,30 +1449,24 @@ class Rc_Window(gtk.Window):
         fontsel = dialog.fontsel
         fontsel.set_font_name(edna_function.rc_dict['style']['font_cell_text'])
         response = dialog.run()
-
         if response == gtk.RESPONSE_OK:
             edna_function.rc_dict['style']['font_cell_text'] = fontsel.get_font_name()
             args[1].modify_font(pango.FontDescription(edna_function.rc_dict['style']['font_cell_text']))
-
         dialog.destroy()
         
     def color_click(self, *args):
         dialog = gtk.ColorSelectionDialog("Changing color")
         dialog.set_transient_for(self)
         colorsel = dialog.colorsel
-        
         colorsel.set_previous_color(gtk.gdk.Color(edna_function.rc_dict['style'][args[1]]))
         colorsel.set_current_color(gtk.gdk.Color(edna_function.rc_dict['style'][args[1]]))
         colorsel.set_has_palette(True)
-
         response = dialog.run()
-
         if response == gtk.RESPONSE_OK:
             edna_function.rc_dict['style'][args[1]] = str(colorsel.get_current_color())
             args[0].modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style'][args[1]]))
             args[0].modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color(edna_function.rc_dict['style'][args[1]]))
             args[0].modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color(edna_function.rc_dict['style'][args[1]]))
-
         dialog.destroy()
             
     def tab_page(self):
@@ -1487,7 +1479,6 @@ class Rc_Window(gtk.Window):
         hhbox2 = gtk.HBox(False)#############
         hhbox1.set_border_width(3)
         tb1 = gtk.Table(2, 2, True)
-        
         ###########Rc_Cell_Cell###################
         button1 = gtk.Button(stock='gtk-go-up')
         button2 = gtk.Button(stock='gtk-go-down')
@@ -1498,9 +1489,6 @@ class Rc_Window(gtk.Window):
         cel_sort.renderer.connect('toggled', self.fixed_toggled, cel_sort.model)
         button1.connect('clicked', self.downup, cel_sort, True)
         button2.connect('clicked', self.downup, cel_sort, False)
-        
-        #########################################
-        
         #############Rc_Cell_Appearance##########
         label2 = gtk.Label(_('Appearance'))
         label2.modify_font(pango.FontDescription('bold'))
@@ -1509,12 +1497,10 @@ class Rc_Window(gtk.Window):
         #########################################
         vvbox2.pack_start(button1, True)
         vvbox2.pack_start(button2, True)
-        
         vvbox1.pack_start(label1, False)
         hhbox1.pack_start(cel_sort, True)
         hhbox1.pack_start(vvbox2, False)
         vvbox1.pack_start(hhbox1, False)
-        
         vvbox1.pack_start(label2, False)
         tb1.attach(gtk.Label(_('Expand')), 0, 1, 0, 1)
         tb1.attach(gtk.Label(_('Min size')), 1, 2, 0, 1)
@@ -1557,7 +1543,6 @@ class Rc_Window(gtk.Window):
             lb = gtk.Label(Name_Colum[edna_function.mc[i]])
             lb.set_alignment(0.0, 0.5)
             vvbox3.pack_start(lb, True)
-        
         
         hhbox2.pack_start(vvbox3, True)
         hhbox2.pack_start(tb1, False)
@@ -1644,7 +1629,6 @@ class Rc_Window(gtk.Window):
     def toggled(self, *args):
         edna_function.rc_dict['style'][args[0].cl] = str(int(args[0].get_active()))
 
-             
     def fixed_toggled(self, cell, path, model):
         iter = model.get_iter((int(path),))
         fixed = model.get_value(iter, 0)

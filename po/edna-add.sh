@@ -1,4 +1,5 @@
 #!/bin/bash
-xgettext Edna.py gui_class_main.py gui_class_rc.py rc_modul.py -o edna.pot
-msgmerge edna-ru.po edna.pot -o edna-ru.po
-#msginit -l ru -i edna.pot -o edna-ru.po
+cd ..
+echo $PWD
+xgettext Edna.py gui_class_main.py edna_function.py -o po/edna.pot
+msgmerge po/edna-ru.po po/edna.pot -o po/edna-ru.po

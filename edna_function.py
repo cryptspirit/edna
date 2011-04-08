@@ -25,7 +25,7 @@ import ConfigParser
 import time
 import subprocess
 import gtk
-import gui_class_main
+import edna_gui_class
 import stat
 import xdg.Mime
 import xdg.DesktopEntry
@@ -135,7 +135,11 @@ hotkeys_function_name = {'key_1': _('Copy'),
 ###############################################################################
 
 ############################### edna rc (begin) ###############################
+
 def Sum_cell_function():
+    '''
+    Создает список с точной последовательностью столбцов в списке
+    '''
     global Sum_cell
     t = rc_dict['style']['cell_sort']
     p = []
@@ -143,7 +147,7 @@ def Sum_cell_function():
         if rc_dict['style'][mc[int(t[i])]] == '1':
             p.append(mc[int(t[i])])
     Sum_cell = p
-    k = rc_dict['hotkeys'].keys()
+    #k = rc_dict['hotkeys'].keys()
 
 def read_rc():
     '''
@@ -241,6 +245,9 @@ dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size
 
 ########################## edna function (begin) ##############################
 def deleting_files_folders(path, flag):
+    '''
+    Удаление папок
+    '''
     if os.path.islink(path):
         os.remove(path)
     else:
@@ -257,7 +264,7 @@ def deleting_files_folders(path, flag):
             
 def get_normal_flag_name(flag):
     '''
-Преобразование Флагов клавиш в человеческий вид
+    Преобразование Флагов клавиш в человеческий вид
     '''
     try:
         f = flag.value_names[0]
@@ -273,8 +280,10 @@ def get_normal_flag_name(flag):
         else:
             return None
         
-        
 def get_key_info(key_box):
+    '''
+    Текстовое представление названий нажатых клавиш
+    '''
     k = gtk.gdk.keyval_name(key_box.keyval)
     s = get_normal_flag_name(key_box.state)
     if s:
@@ -283,7 +292,7 @@ def get_key_info(key_box):
 
 def get_full_size(path, list=False):
     '''
-оттавизм на удаление
+    оттавизм на удаление
     '''
     #np = os.path.dirname(path)
     #return full_size(np, path, 0, [])
@@ -291,7 +300,7 @@ def get_full_size(path, list=False):
 
 def full_size_new(path, no_list):
     '''
-Определение размера каталога
+    Определение размера каталога
     '''
     summ = 0
     os_path_join = os.path.join
@@ -321,7 +330,7 @@ def get_launch(path):
     '''
     Определяет по типу какой программой открывать файл по умолчанию
     '''
-    temp = str(xdg.Mime.get_type_by_name(path))
+    temp = get_custom_mimetype(path)
     if temp != None:
         ret = subprocess.Popen(['xdg-mime', 'query', 'default', temp],
                                         stdout=subprocess.PIPE).communicate()[0].strip('\n')
@@ -398,6 +407,9 @@ def get_file_attr(file):
     return f[int(rc_dict['style']['cell_atr_format'])]
 
 def get_file_date(path, cm):
+    '''
+    Получение даты создания или даты последней модификации файла 
+    '''
     b = rc_dict['style'][cm]
     ss = ''
     if cm == 'cell_datec_format':
@@ -417,22 +429,37 @@ def get_file_date(path, cm):
     return ss
     
 def get_file_uid(path):
+    '''
+    Получение индификатора владельца файла
+    '''
     return get_username(str(os.lstat(path)[4]))
     
 def get_file_gid(path):
+    '''
+    Получение индификатора группы владельца файла
+    '''
     return get_groupname(str(os.lstat(path)[5]))
 
 def get_username(uidd):
+    '''
+    Сравнение индефикатора с сушествующим списком имен пользователей
+    '''
     try: dickt_nameusers.keys().index(uidd)
     except: return uidd
     else: return dickt_nameusers[uidd][0]
     
 def get_groupname(gidd):
+    '''
+    Сравнение индефикатора с сушествующим списком имен групп
+    '''
     try: dickt_namegroups.keys().index(gidd)
     except: return gidd
     else: return dickt_namegroups[gidd][0]
     
 def get_dickt_nameusers():
+    '''
+    Получение списка имен пользователей по их индефикатору
+    '''
     global dickt_nameusers
     f = open('/etc/passwd','r')
     r = f.readlines()
@@ -443,6 +470,9 @@ def get_dickt_nameusers():
         dickt_nameusers[y[2]] = y
         
 def get_dickt_namegroups():
+    '''
+    Получение списка названий групп по их индефикатору
+    '''
     global dickt_namegroups
     f = open('/etc/group','r')
     r = f.readlines()
@@ -454,6 +484,9 @@ def get_dickt_namegroups():
         
         
 def get_typ(n):
+    '''
+    Получение расширения файла если оно есть
+    '''
     type = n.rfind('.', 1)
     if type != 0 and type != -1:
         return n[:type], n[type + 1:]
@@ -468,8 +501,7 @@ def get_mime(path_i, is_fil):
     Получение mimetype
     '''
     if is_fil:
-        #temp = mimetypes.guess_type(path_i)[0]
-        temp = str(xdg.Mime.get_type_by_name(path_i))
+        temp = get_custom_mimetype(path_i)
     else:
         temp = 'application-x-directory'
     if temp:
@@ -477,7 +509,14 @@ def get_mime(path_i, is_fil):
     else:
         temp = 'empty'
     return temp
-
+    
+def get_custom_mimetype(path):
+    '''
+    Функция получения mime-типа. Реализована отдельно для возможности легкого
+    изменения механизма получения mime-типа.
+    '''
+    return str(xdg.Mime.get_type_by_name(path))
+    
 def get_cell(path, i, is_fil, cellse):
     '''
     Получение строки для списка файлов

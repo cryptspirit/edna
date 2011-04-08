@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-28 16:04+0300\n"
+"POT-Creation-Date: 2011-04-06 11:59+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,297 +17,304 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gui_class_main.py:41 gui_class_rc.py:31
+#: gui_class_main.py:40
 msgid "Name"
 msgstr ""
 
-#: gui_class_main.py:42 gui_class_main.py:132 gui_class_rc.py:32
+#: gui_class_main.py:41 gui_class_main.py:149 gui_class_main.py:745
 msgid "Type"
 msgstr ""
 
-#: gui_class_main.py:43 gui_class_main.py:124 gui_class_rc.py:33
+#: gui_class_main.py:42 gui_class_main.py:141
 msgid "Size"
 msgstr ""
 
-#: gui_class_main.py:44 gui_class_rc.py:34
+#: gui_class_main.py:43
 msgid "Created"
 msgstr ""
 
-#: gui_class_main.py:45 gui_class_rc.py:35
+#: gui_class_main.py:44
 msgid "Changed"
 msgstr ""
 
-#: gui_class_main.py:46 gui_class_rc.py:36
+#: gui_class_main.py:45
 msgid "User"
 msgstr ""
 
-#: gui_class_main.py:47 gui_class_rc.py:37
+#: gui_class_main.py:46
 msgid "Group"
 msgstr ""
 
-#: gui_class_main.py:48 gui_class_rc.py:38
+#: gui_class_main.py:47
 msgid "Attribute"
 msgstr ""
 
-#: gui_class_main.py:61 gui_class_main.py:111
+#: gui_class_main.py:50
+msgid "right"
+msgstr ""
+
+#: gui_class_main.py:50 gui_class_main.py:51
+msgid "center"
+msgstr ""
+
+#: gui_class_main.py:50
+msgid "left"
+msgstr ""
+
+#: gui_class_main.py:51
+msgid "up"
+msgstr ""
+
+#: gui_class_main.py:51
+msgid "down"
+msgstr ""
+
+#: gui_class_main.py:78 gui_class_main.py:128
 msgid "Error! I not can read file"
 msgstr ""
 
-#: gui_class_main.py:64
+#: gui_class_main.py:81
 msgid "Exists"
 msgstr ""
 
-#: gui_class_main.py:69
+#: gui_class_main.py:86
 msgid "Link"
 msgstr ""
 
-#: gui_class_main.py:72
+#: gui_class_main.py:89
 msgid "Not link"
 msgstr ""
 
-#: gui_class_main.py:75
+#: gui_class_main.py:92
 msgid "Not exists"
 msgstr ""
 
-#: gui_class_main.py:100
+#: gui_class_main.py:117
 msgid "_Miss"
 msgstr ""
 
-#: gui_class_main.py:101
+#: gui_class_main.py:118
 msgid "_Repeat"
 msgstr ""
 
-#: gui_class_main.py:102
+#: gui_class_main.py:119
 msgid "Miss _All"
 msgstr ""
 
-#: gui_class_main.py:120
+#: gui_class_main.py:137
 msgid "File"
 msgstr ""
 
-#: gui_class_main.py:128
+#: gui_class_main.py:145
 msgid "Attributes"
 msgstr ""
 
-#: gui_class_main.py:241 gui_class_main.py:262
+#: gui_class_main.py:258 gui_class_main.py:279
 msgid "Pause"
 msgstr ""
 
-#: gui_class_main.py:266
+#: gui_class_main.py:283
 msgid "Start"
 msgstr ""
 
-#: gui_class_main.py:401
+#: gui_class_main.py:418
 msgid "Delete"
 msgstr ""
 
-#: gui_class_main.py:419 gui_class_main.py:462
+#: gui_class_main.py:436 gui_class_main.py:479
 msgid "_Pause"
 msgstr ""
 
-#: gui_class_main.py:466
+#: gui_class_main.py:483
 msgid "_Start"
 msgstr ""
 
-#: gui_class_main.py:530
+#: gui_class_main.py:547
 #, python-format
 msgid "files/folders (%d th.)?:\n"
 msgstr ""
 
-#: gui_class_main.py:533
+#: gui_class_main.py:550
 msgid "file"
 msgstr ""
 
-#: gui_class_main.py:535
+#: gui_class_main.py:552
 msgid "folder"
 msgstr ""
 
-#: gui_class_main.py:539
-#, python-format
-msgid ""
-"You want to delete\n"
-"%s%s"
+#: gui_class_main.py:556
+msgid "You want to delete"
 msgstr ""
 
-#: gui_class_main.py:599
+#: gui_class_main.py:616
 #, python-format
 msgid "To copy %s files/folders in"
 msgstr ""
 
-#: gui_class_rc.py:41
-msgid "right"
+#: gui_class_main.py:688
+msgid "File properties"
 msgstr ""
 
-#: gui_class_rc.py:41 gui_class_rc.py:42
-msgid "center"
-msgstr ""
-
-#: gui_class_rc.py:41
-msgid "left"
-msgstr ""
-
-#: gui_class_rc.py:42
-msgid "up"
-msgstr ""
-
-#: gui_class_rc.py:42
-msgid "down"
-msgstr ""
-
-#: gui_class_rc.py:60
-msgid "Configurations"
-msgstr ""
-
-#: gui_class_rc.py:96
-msgid "Genaral"
-msgstr ""
-
-#: gui_class_rc.py:106
-msgid "Colors"
-msgstr ""
-
-#: gui_class_rc.py:111
-msgid "Even rows"
-msgstr ""
-
-#: gui_class_rc.py:111
-msgid "Odd rows"
-msgstr ""
-
-#: gui_class_rc.py:111
-msgid "Select rows"
-msgstr ""
-
-#: gui_class_rc.py:123
-msgid "Foreground"
-msgstr ""
-
-#: gui_class_rc.py:124
-msgid "Background"
-msgstr ""
-
-#: gui_class_rc.py:132
-msgid "Example text"
-msgstr ""
-
-#: gui_class_rc.py:134
-msgid "Font button"
-msgstr ""
-
-#: gui_class_rc.py:142 gui_class_rc.py:252
-msgid "Appearance"
-msgstr ""
-
-#: gui_class_rc.py:157
-msgid ""
-"The keys are already used\n"
-"enter other keys"
-msgstr ""
-
-#: gui_class_rc.py:163 gui_class_rc.py:168
-msgid "Press keys"
-msgstr ""
-
-#: gui_class_rc.py:180
-msgid "Clear"
-msgstr ""
-
-#: gui_class_rc.py:185
-msgid "Hotkeys"
-msgstr ""
-
-#: gui_class_rc.py:241 gui_class_rc.py:301
-msgid "Columns"
-msgstr ""
-
-#: gui_class_rc.py:266
-msgid "Expand"
-msgstr ""
-
-#: gui_class_rc.py:267
-msgid "Min size"
-msgstr ""
-
-#: gui_class_rc.py:268
-msgid "Horizontal"
-msgstr ""
-
-#: gui_class_rc.py:269
-msgid "Vertical"
-msgstr ""
-
-#: gui_class_rc.py:314
-msgid "Format of creation"
-msgstr ""
-
-#: gui_class_rc.py:324
-msgid "Format of change"
-msgstr ""
-
-#: gui_class_rc.py:336
-msgid "in the bytes"
-msgstr ""
-
-#: gui_class_rc.py:337
-msgid "with a floating point Kb, Mb"
-msgstr ""
-
-#: gui_class_rc.py:338
-msgid "with a floating point Kb, Mb, Gb"
-msgstr ""
-
-#: gui_class_rc.py:341
-msgid "Size format"
-msgstr ""
-
-#: gui_class_rc.py:347
-msgid "numerical"
-msgstr ""
-
-#: gui_class_rc.py:348
-msgid "string"
-msgstr ""
-
-#: gui_class_rc.py:352
-msgid "Attribute format"
-msgstr ""
-
-#: gui_class_rc.py:364
-msgid "Table"
-msgstr ""
-
-#: gui_class_rc.py:471
-msgid "Action"
-msgstr ""
-
-#: gui_class_rc.py:478
-msgid "Keys"
-msgstr ""
-
-#: rc_modul.py:116
-msgid "Copy"
-msgstr ""
-
-#: rc_modul.py:117
-msgid "Remove"
-msgstr ""
-
-#: rc_modul.py:118
+#: gui_class_main.py:754 edna_function.py:130
 msgid "Properties"
 msgstr ""
 
-#: rc_modul.py:119
+#: gui_class_main.py:767
+msgid "Access"
+msgstr ""
+
+#: gui_class_main.py:1277
+msgid "Action"
+msgstr ""
+
+#: gui_class_main.py:1284
+msgid "Keys"
+msgstr ""
+
+#: gui_class_main.py:1304
+msgid "Configurations"
+msgstr ""
+
+#: gui_class_main.py:1340
+msgid "Genaral"
+msgstr ""
+
+#: gui_class_main.py:1350
+msgid "Colors"
+msgstr ""
+
+#: gui_class_main.py:1355
+msgid "Even rows"
+msgstr ""
+
+#: gui_class_main.py:1355
+msgid "Odd rows"
+msgstr ""
+
+#: gui_class_main.py:1355
+msgid "Select rows"
+msgstr ""
+
+#: gui_class_main.py:1367
+msgid "Foreground"
+msgstr ""
+
+#: gui_class_main.py:1368
+msgid "Background"
+msgstr ""
+
+#: gui_class_main.py:1376
+msgid "Example text"
+msgstr ""
+
+#: gui_class_main.py:1378
+msgid "Font button"
+msgstr ""
+
+#: gui_class_main.py:1386 gui_class_main.py:1505
+msgid "Appearance"
+msgstr ""
+
+#: gui_class_main.py:1401
+msgid "The keys are already used"
+msgstr ""
+
+#: gui_class_main.py:1401
+msgid "enter other keys"
+msgstr ""
+
+#: gui_class_main.py:1410 gui_class_main.py:1415
+msgid "Press keys"
+msgstr ""
+
+#: gui_class_main.py:1430
+msgid "Clear"
+msgstr ""
+
+#: gui_class_main.py:1435
+msgid "Hotkeys"
+msgstr ""
+
+#: gui_class_main.py:1494 gui_class_main.py:1554
+msgid "Columns"
+msgstr ""
+
+#: gui_class_main.py:1519
+msgid "Expand"
+msgstr ""
+
+#: gui_class_main.py:1520
+msgid "Min size"
+msgstr ""
+
+#: gui_class_main.py:1521
+msgid "Horizontal"
+msgstr ""
+
+#: gui_class_main.py:1522
+msgid "Vertical"
+msgstr ""
+
+#: gui_class_main.py:1567
+msgid "Format of creation"
+msgstr ""
+
+#: gui_class_main.py:1577
+msgid "Format of change"
+msgstr ""
+
+#: gui_class_main.py:1589
+msgid "in the bytes"
+msgstr ""
+
+#: gui_class_main.py:1590
+msgid "with a floating point Kb, Mb"
+msgstr ""
+
+#: gui_class_main.py:1591
+msgid "with a floating point Kb, Mb, Gb"
+msgstr ""
+
+#: gui_class_main.py:1594
+msgid "Size format"
+msgstr ""
+
+#: gui_class_main.py:1600
+msgid "numerical"
+msgstr ""
+
+#: gui_class_main.py:1601
+msgid "string"
+msgstr ""
+
+#: gui_class_main.py:1605
+msgid "Attribute format"
+msgstr ""
+
+#: gui_class_main.py:1617
+msgid "Table"
+msgstr ""
+
+#: edna_function.py:128
+msgid "Copy"
+msgstr ""
+
+#: edna_function.py:129
+msgid "Remove"
+msgstr ""
+
+#: edna_function.py:131
 msgid "Rename"
 msgstr ""
 
-#: rc_modul.py:120
+#: edna_function.py:132
 msgid "Make directory"
 msgstr ""
 
-#: rc_modul.py:121
+#: edna_function.py:133
 msgid "Open terminal"
 msgstr ""
 
-#: rc_modul.py:122
+#: edna_function.py:134
 msgid "View"
 msgstr ""
