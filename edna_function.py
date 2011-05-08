@@ -290,15 +290,7 @@ def get_key_info(key_box):
         k = s + ' ' + k
     return k
 
-def get_full_size(path, list=False):
-    '''
-    оттавизм на удаление
-    '''
-    #np = os.path.dirname(path)
-    #return full_size(np, path, 0, [])
-    return full_size_new(path, list)
-
-def full_size_new(path, no_list):
+def get_full_size(path, no_list=False):
     '''
     Определение размера каталога
     '''
@@ -325,6 +317,34 @@ def full_size_new(path, no_list):
         return summ, list_dirs + list
     else:                        
         return summ                     
+        
+def get_full_size_in_thread(path, text_object):
+    '''
+    Определение размера каталога в фоновом режиме
+    '''
+    summ = 0
+    os_path_join = os.path.join
+    os_path_getsize = os.path.getsize
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            else:
+                gtk.gdk.threads_enter()
+                text_object.set_text(get_in_format_size(summ))
+                gtk.gdk.threads_leave()
+        for name in dirs:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            else:
+                gtk.gdk.threads_enter()
+                text_object.set_text(get_in_format_size(summ))
+                gtk.gdk.threads_leave()   
+    gtk.gdk.threads_enter()
+    text_object.set_text(get_in_format_size(summ))
+    gtk.gdk.threads_leave()  
 
 def get_launch(path):
     '''

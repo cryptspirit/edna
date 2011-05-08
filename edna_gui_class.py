@@ -681,10 +681,10 @@ class properties_file_window(gtk.Window):
             gtk.HBox.__init__(self, False, 10)
             head_label = gtk.Label(head_text + ':')
             head_label.modify_font(pango.FontDescription('bold'))
-            text_label = gtk.Label(text)
             self.pack_start(head_label, False)
+            text_label = gtk.Label(text)
             self.pack_start(text_label, False)
-        
+            
     def __init__(self, path_to_file):
         gtk.Window.__init__(self)
         self.path_to_file = path_to_file[0]
@@ -711,7 +711,7 @@ class properties_file_window(gtk.Window):
         vbox1.pack_start(hbox1, False)
         self.add(vbox1)
         self.show_all()
-        
+             
     def get_info_about_file(self):
         '''
         Создание списка свойств для отображения
@@ -720,23 +720,39 @@ class properties_file_window(gtk.Window):
         k = os.path.dirname(self.path_to_file)
         if k != '/': null_p = 1
         else: null_p = 0
+        self.info_about_file['Path'] = self.path_to_file
         self.info_about_file['Name'] = self.path_to_file[len(k) + null_p:]
         self.info_about_file['File'] = self.is_file
+        self.info_about_file['Datec'] = edna_function.get_file_date(self.path_to_file, 'cell_datec_format')
+        self.info_about_file['Datem'] = edna_function.get_file_date(self.path_to_file, 'cell_datem_format')
+        
         if self.is_file:
             self.info_about_file['Type'] = edna_function.get_mime(self.path_to_file, self.info_about_file['File'])
             self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico(self.info_about_file['Type']), False)
+            self.info_about_file['Size'] = edna_function.get_file_size(self.path_to_file)
+            
         else:
             self.info_about_file['Type'] = 'application-x-directory'
             self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico('gtk-directory'), False)
+            self.info_about_file['Size'] = '0'
+            
+    def get_size_in_thread(self):
+        '''
+        Поток определения размера каталога в фоновом режиме
+        '''
+        print 'fdsf'
+        #self.text_label_size_dir.set_text(edna_function.get_in_format_size(edna_function.get_full_size(self.path_to_file)))
+        edna_function.get_in_format_size(edna_function.get_full_size_in_thread(self.path_to_file, self.text_label_size_dir))
         
     def create_properties_tab(self, note_object):
         '''
         Создание и заполнение вкладки Свойства
         '''
-        vbox2 = gtk.VBox(False, 20)
+        vbox2 = gtk.VBox(False, 15)
         vbox2.set_border_width(20)
         hbox1 = gtk.HBox(False, 10)
-        vbox3 = gtk.VBox(False)
+        vbox3 = gtk.VBox(False, 5)
+        vbox4 = gtk.VBox(False, 5)
         
         icon_image = gtk.Image()
         icon_image1 = gtk.Button()
@@ -747,13 +763,27 @@ class properties_file_window(gtk.Window):
         entry_name.set_text(self.info_about_file['Name'])
         entry_name.connect('changed', self.change_entry_name)
         vbox3.pack_start(self.info_row(_('Type'), self.info_about_file['Type']), False)
-        
+        if self.is_file:
+            vbox3.pack_start(self.info_row(_('Size'), self.info_about_file['Size']), False)
+        else:
+            size_hbox1 = gtk.HBox(False, 10)
+            head_label = gtk.Label(_('Size') + ':')
+            head_label.modify_font(pango.FontDescription('bold'))
+            size_hbox1.pack_start(head_label, False)
+            self.text_label_size_dir = gtk.Label(self.info_about_file['Size'])
+            size_hbox1.pack_start(self.text_label_size_dir, False)
+            vbox3.pack_start(size_hbox1, False)
+            self.timer_size = threading.Timer(0, self.get_size_in_thread)
+            self.timer_size.start()
+        vbox4.pack_start(self.info_row(_('Created'), self.info_about_file['Datec']), False)    
+        vbox4.pack_start(self.info_row(_('Changed'), self.info_about_file['Datem']), False)    
         hbox1.pack_start(icon_image1, False)
         hbox1.pack_start(entry_name)
         vbox2.pack_start(hbox1, False)
         vbox2.pack_start(gtk.HSeparator(), False)
         vbox2.pack_start(vbox3, False)
-        
+        vbox2.pack_start(gtk.HSeparator(), False)
+        vbox2.pack_start(vbox4, False)
         note_object.append_page(vbox2, gtk.Label(_('Properties')))
     
     def change_entry_name(self, *args):
@@ -1638,7 +1668,7 @@ class Rc_Window(gtk.Window):
 ################################  Gui class (end) #############################
             
 def main():
-    h = properties_file_window(['/home/mort/.bashrc', True])
+    h = properties_file_window(['/home/mort/Box', False])
     #h = miss_window('/home/mort/.bashrc')
     h.show_all()
     gtk.main()
