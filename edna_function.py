@@ -25,10 +25,8 @@ import ConfigParser
 import time
 import subprocess
 import gtk
-import edna_gui_class
+import edna_gui
 import stat
-import xdg.Mime
-import xdg.DesktopEntry
 import gettext
 import gio
 
@@ -114,7 +112,7 @@ rc_style = {'cell_name':'1',
             'odd_row_bg':'#41517a',
             'sel_row_fg':'#474747',
             'sel_row_bg':'#599839',
-            'icon_size':'16',
+            'icon_size':'18',
             'font_cell_text':'Sans 10'}
             
 rc_hotkeys = {'key_1': 'F5',
@@ -246,6 +244,256 @@ dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(r
 dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 
 ########################## edna function (begin) ##############################
+def save_open(path, flg, miss):
+    global answer
+    answer = 0
+    try: f = open(path, flg)
+    except:
+        f = None
+        if miss:
+            pass
+        else:
+            t = threading.Timer(1, lambda *y: tread_window(path))
+            t.start()
+            t.join()
+            print answer
+    return f, answer
+
+def get_custom_mimetype(path):
+    '''
+    Функция получения mime-типа. Реализована отдельно для возможности легкого
+    изменения механизма получения mime-типа.
+    '''
+    try:
+        f = open(path)
+        r = f.read(100)
+        f.close()
+    except: mt = 'empty'
+    else: mt = str(gio.content_type_guess(None, r, True)[0])
+    return mt
+    
+def get_file_attr(file):
+    '''
+    Получение атрибутов файла
+    '''
+    s = ''
+    s1 = ''
+    kl = {'R':4, 'W':2, 'X':1}
+    jb = os.lstat(file)[stat.ST_MODE]
+    mode = stat.S_IMODE(jb)
+    if stat.S_ISDIR(jb):
+        s += 'd'
+    else:
+        s += '-'
+    for i in 'USR', 'GRP', 'OTH':
+        u = 0
+        for j in 'R', 'W', 'X':
+            if mode & getattr(stat, 'S_I%s%s' % (j, i)):
+                s += j.lower()
+                u += kl[j]
+            else:
+                s += '-'
+        s1 += str(u)
+    f = [s, s1]
+    return f[int(rc_dict['style']['cell_atr_format'])]
+    
+def get_file_date(path, cm):
+    '''
+    Получение даты создания или даты последней модификации файла 
+    '''
+    b = rc_dict['style'][cm]
+    ss = ''
+    if cm == 'cell_datec_format':
+        nm = 8
+    else:
+        nm = 9
+    if len(b) > 0:
+        s = time.localtime(os.lstat(path)[nm])
+        
+        for i in xrange(len(b)):
+            if b[i] in md:
+                t = str(s[md.index(b[i])])
+                if len(t) == 1: t = '0' + t
+                ss += t
+            else:
+                ss += b[i] 
+    return ss
+    
+def get_file_uid(path):
+    '''
+    Получение индификатора владельца файла
+    '''
+    return get_username(str(os.lstat(path)[4]))
+
+def get_file_gid(path):
+    '''
+    Получение индификатора группы владельца файла
+    '''
+    return get_groupname(str(os.lstat(path)[5]))
+
+def get_username(uidd):
+    '''
+    Сравнение индефикатора с сушествующим списком имен пользователей
+    '''
+    try: dickt_nameusers.keys().index(uidd)
+    except: return uidd
+    else: return dickt_nameusers[uidd][0]
+
+def get_groupname(gidd):
+    '''
+    Сравнение индефикатора с сушествующим списком имен групп
+    '''
+    try: dickt_namegroups.keys().index(gidd)
+    except: return gidd
+    else: return dickt_namegroups[gidd][0]
+
+def get_file_size(path):
+    '''
+    Получение размера файла в байтах
+    '''
+    try: t = os.path.getsize(path)
+    except: t = 0
+    return get_in_format_size(t)
+
+def get_mime(path_i, is_fil):
+    '''
+    Получение mimetype
+    '''
+    if is_fil:
+        temp = get_custom_mimetype(path_i)
+    else:
+        temp = 'application-x-directory'
+    if temp:
+        pass
+    else:
+        temp = 'empty'
+    return temp
+    
+def get_ico(s, size_ico=True):
+    '''
+    Получение иконки по типу и если такой тип уже есть в словаре иконок то используеться
+    словарь если нет то в словарь добавляеться новая иконка
+    '''
+    global dic_icon
+    p = gio.content_type_get_icon(s)
+    pm = p.get_names()
+    if size_ico:
+        try:
+            dic_icon.keys().index(s)
+        except:
+            for i in pm:
+                try:
+                    b = get_theme.load_icon(i, int(rc_dict['style']['icon_size']), type_ico_load)
+                except:
+                    pass
+                else:
+                    dic_icon[s] = b
+                    return dic_icon[s]
+            if s != 'None': print s
+            return dic_icon['empty']
+        else:
+            return dic_icon[s]
+    else:
+        for i in pm:
+            print i
+            try:
+                b = get_theme.load_icon(i, 24, type_ico_load)
+            except:
+                pass
+            else:
+                return b
+        return get_theme.load_icon('empty', 24, type_ico_load)
+
+def get_full_size(path, no_list=False):
+    '''
+    Определение размера каталога
+    '''
+    summ = 0
+    os_path_join = os.path.join
+    os_path_getsize = os.path.getsize
+    if no_list:
+        list = []
+        list_append = list.append
+        list_dirs = []
+        list_dirs_append = list_dirs.append
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            if no_list: list_append([p, True])
+        for name in dirs:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            if no_list: list_dirs_append([p, False])
+    if no_list:
+        return summ, list_dirs + list
+    else:                        
+        return summ                     
+    
+def get_full_size_in_thread(path, text_object):
+    '''
+    Определение размера каталога в фоновом режиме
+    '''
+    summ = 0
+    os_path_join = os.path.join
+    os_path_getsize = os.path.getsize
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            else:
+                gtk.gdk.threads_enter()
+                text_object.set_text(get_in_format_size(summ))
+                gtk.gdk.threads_leave()
+        for name in dirs:
+            p = os_path_join(root, name)
+            try: summ += os_path_getsize(p)
+            except: pass
+            else:
+                gtk.gdk.threads_enter()
+                text_object.set_text(get_in_format_size(summ))
+                gtk.gdk.threads_leave()   
+    gtk.gdk.threads_enter()
+    text_object.set_text(get_in_format_size(summ))
+    gtk.gdk.threads_leave()  
+
+def get_launch_apps(path):
+    '''
+    Определяет по типу какими програмамми можно открывать файл
+    '''
+    mime_type = get_mime(path, True)
+    print mime_type
+    apps_list = gio.app_info_get_all_for_type(mime_type)
+    ret_list = []
+    for i in apps_list:
+        ret_list.append({'app_name':i.get_name(), 'desktop':i.get_id(), 'icon':i.get_icon().get_names()[0]})
+    return ret_list
+    
+def get_launch(path):
+    '''
+    Определяет по типу какой программой открывать файл по умолчанию
+    '''
+    temp = get_custom_mimetype(path)
+    if temp != None:
+        list_apps = gio.app_info_get_all_for_type(temp)
+        return list_apps[0]
+    else:
+        return None
+
+def get_typ(n):
+    '''
+    Получение расширения файла если оно есть
+    '''
+    type = n.rfind('.', 1)
+    if type != 0 and type != -1:
+        return n[:type], n[type + 1:]
+    else:
+        return n, ''
+    
+    
 def deleting_files_folders(path, flag):
     '''
     Удаление папок
@@ -282,6 +530,7 @@ def get_normal_flag_name(flag):
         else:
             return None
         
+    
 def get_key_info(key_box):
     '''
     Текстовое представление названий нажатых клавиш
@@ -291,85 +540,6 @@ def get_key_info(key_box):
     if s:
         k = s + ' ' + k
     return k
-
-def get_full_size(path, no_list=False):
-    '''
-    Определение размера каталога
-    '''
-    summ = 0
-    os_path_join = os.path.join
-    os_path_getsize = os.path.getsize
-    if no_list:
-        list = []
-        list_append = list.append
-        list_dirs = []
-        list_dirs_append = list_dirs.append
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            p = os_path_join(root, name)
-            try: summ += os_path_getsize(p)
-            except: pass
-            if no_list: list_append([p, True])
-        for name in dirs:
-            p = os_path_join(root, name)
-            try: summ += os_path_getsize(p)
-            except: pass
-            if no_list: list_dirs_append([p, False])
-    if no_list:
-        return summ, list_dirs + list
-    else:                        
-        return summ                     
-        
-def get_full_size_in_thread(path, text_object):
-    '''
-    Определение размера каталога в фоновом режиме
-    '''
-    summ = 0
-    os_path_join = os.path.join
-    os_path_getsize = os.path.getsize
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            p = os_path_join(root, name)
-            try: summ += os_path_getsize(p)
-            except: pass
-            else:
-                gtk.gdk.threads_enter()
-                text_object.set_text(get_in_format_size(summ))
-                gtk.gdk.threads_leave()
-        for name in dirs:
-            p = os_path_join(root, name)
-            try: summ += os_path_getsize(p)
-            except: pass
-            else:
-                gtk.gdk.threads_enter()
-                text_object.set_text(get_in_format_size(summ))
-                gtk.gdk.threads_leave()   
-    gtk.gdk.threads_enter()
-    text_object.set_text(get_in_format_size(summ))
-    gtk.gdk.threads_leave()  
-
-def get_launch(path):
-    '''
-    Определяет по типу какой программой открывать файл по умолчанию
-    '''
-    temp = get_custom_mimetype(path)
-    print temp
-    if temp != None:
-        ret = subprocess.Popen(['xdg-mime', 'query', 'default', temp],
-                                        stdout=subprocess.PIPE).communicate()[0].strip('\n')
-        if ret:
-            fo_de = xdg.DesktopEntry.DesktopEntry(filename='/usr/share/applications/%s' % ret)
-            return (fo_de.getExec().split('%')[0]).strip(' ')
-        else:
-            return None
-
-def get_file_size(path):
-    '''
-    Получение размера файла в байтах
-    '''
-    try: t = os.path.getsize(path)
-    except: t = 0
-    return get_in_format_size(t)
     
 def get_in_format_size(t):
     '''
@@ -403,81 +573,6 @@ def get_in_format_size(t):
         else:
             s = str(round(t / 1073741824., 2)) + ' GB'
     return s
-
-def get_file_attr(file):
-    '''
-    Получение атрибутов файла
-    '''
-    s = ''
-    s1 = ''
-    kl = {'R':4, 'W':2, 'X':1}
-    jb = os.lstat(file)[stat.ST_MODE]
-    mode = stat.S_IMODE(jb)
-    if stat.S_ISDIR(jb):
-        s += 'd'
-    else:
-        s += '-'
-    for i in 'USR', 'GRP', 'OTH':
-        u = 0
-        for j in 'R', 'W', 'X':
-            if mode & getattr(stat, 'S_I%s%s' % (j, i)):
-                s += j.lower()
-                u += kl[j]
-            else:
-                s += '-'
-        s1 += str(u)
-    f = [s, s1]
-    return f[int(rc_dict['style']['cell_atr_format'])]
-
-def get_file_date(path, cm):
-    '''
-    Получение даты создания или даты последней модификации файла 
-    '''
-    b = rc_dict['style'][cm]
-    ss = ''
-    if cm == 'cell_datec_format':
-        nm = 8
-    else:
-        nm = 9
-    if len(b) > 0:
-        s = time.localtime(os.lstat(path)[nm])
-        
-        for i in xrange(len(b)):
-            if b[i] in md:
-                t = str(s[md.index(b[i])])
-                if len(t) == 1: t = '0' + t
-                ss += t
-            else:
-                ss += b[i] 
-    return ss
-    
-def get_file_uid(path):
-    '''
-    Получение индификатора владельца файла
-    '''
-    return get_username(str(os.lstat(path)[4]))
-    
-def get_file_gid(path):
-    '''
-    Получение индификатора группы владельца файла
-    '''
-    return get_groupname(str(os.lstat(path)[5]))
-
-def get_username(uidd):
-    '''
-    Сравнение индефикатора с сушествующим списком имен пользователей
-    '''
-    try: dickt_nameusers.keys().index(uidd)
-    except: return uidd
-    else: return dickt_nameusers[uidd][0]
-    
-def get_groupname(gidd):
-    '''
-    Сравнение индефикатора с сушествующим списком имен групп
-    '''
-    try: dickt_namegroups.keys().index(gidd)
-    except: return gidd
-    else: return dickt_namegroups[gidd][0]
     
 def get_dickt_nameusers():
     '''
@@ -504,45 +599,6 @@ def get_dickt_namegroups():
     for i in r:
         y = i.split(':')
         dickt_namegroups[y[2]] = y
-        
-        
-def get_typ(n):
-    '''
-    Получение расширения файла если оно есть
-    '''
-    type = n.rfind('.', 1)
-    if type != 0 and type != -1:
-        return n[:type], n[type + 1:]
-    else:
-        return n, ''
-            
-def mime_name_ico(s):
-    return s.replace('/', '-')
-    
-def get_mime(path_i, is_fil):
-    '''
-    Получение mimetype
-    '''
-    if is_fil:
-        temp = get_custom_mimetype(path_i)
-    else:
-        temp = 'application-x-directory'
-    if temp:
-        pass
-    else:
-        temp = 'empty'
-    return temp
-    
-def get_custom_mimetype(path):
-    '''
-    Функция получения mime-типа. Реализована отдельно для возможности легкого
-    изменения механизма получения mime-типа.
-    '''
-    #return str(xdg.Mime.get_type_by_name(path))
-    f = open(path)
-    mt = str(gio.content_type_guess(path, f.read(100), True)[0])
-    f.close()
-    return mt
     
 def get_cell(path, i, is_fil, cellse):
     '''
@@ -583,40 +639,6 @@ def get_cell(path, i, is_fil, cellse):
     ret.append(get_ico(temp))
     return ret
     
-def get_ico(s, size_ico=True):
-    '''
-    Получение иконки по типу и если такой тип уже есть в словаре иконок то используеться
-    словарь если нет то в словарь добавляеться новая иконка
-    '''
-    global dic_icon
-    p = gio.content_type_get_icon(s)
-    pm = p.get_names()
-    if size_ico:
-        try:
-            dic_icon.keys().index(s)
-        except:
-            for i in pm:
-                try:
-                    b = get_theme.load_icon(i, int(rc_dict['style']['icon_size']), type_ico_load)
-                except:
-                    pass
-                else:
-                    dic_icon[s] = b
-                    return dic_icon[s]
-            if s != 'None': print s
-            return dic_icon['empty']
-        else:
-            return dic_icon[s]
-    else:
-        for i in pm:
-            try:
-                b = get_theme.load_icon(i, 30, type_ico_load)
-            except:
-                pass
-            else:
-                return b
-        return get_theme.load_icon('empty', 30, type_ico_load)
-       
 def get_list_path(path, pattern_s, select_list):
     '''
     Получение списка файлов с описаными столбцами
@@ -696,7 +718,7 @@ def get_list_path(path, pattern_s, select_list):
 ########################### edna function (end) ###############################        
 
 def main():
-    file_run_for_know_mimetype('~/.bashrc')
+    print get_launch_apps('/home/mort/.bashrc')
 
 if __name__ == '__main__':
     main()

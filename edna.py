@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 #
-#       Edna.py
+#       edna.py
 #       
 #       Copyright 2011 CryptSpirit <cryptspirit@gmail.com>
 #       
@@ -26,7 +26,8 @@ import pygtk
 import os
 import sys
 import time
-import edna_gui_class
+import edna_gui
+import edna_config
 import edna_function
 import gettext
 
@@ -48,8 +49,8 @@ class Dwindow(gtk.Window):
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
         self.cel = []
-        self.cel.append(edna_gui_class.listen_cell(0, self.return_path_cell))
-        self.cel.append(edna_gui_class.listen_cell(1, self.return_path_cell))
+        self.cel.append(edna_gui.listen_cell(0, self.return_path_cell))
+        self.cel.append(edna_gui.listen_cell(1, self.return_path_cell))
         self.set_focus(self.cel[0].treeview)
         self.foc_c = True
         #################################
@@ -93,7 +94,7 @@ class Dwindow(gtk.Window):
         return self.ui.get_widget('/menubar')
     
     def config_window(self, *args):
-        rrr = edna_gui_class.Rc_Window()
+        rrr = edna_config.Rc_Window()
         rrr.button_ok.connect('clicked', self.upData, rrr, True)
         
     def help_about(self, *args):
