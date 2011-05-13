@@ -728,7 +728,7 @@ class properties_file_window(gtk.Window):
         
         if self.is_file:
             self.info_about_file['Type'] = edna_function.get_mime(self.path_to_file, self.info_about_file['File'])
-            self.info_about_file['Icon'] = edna_function.get_ico(edna_function.mime_name_ico(self.info_about_file['Type']), False)
+            self.info_about_file['Icon'] = edna_function.get_ico(self.info_about_file['Type'], False)
             self.info_about_file['Size'] = edna_function.get_file_size(self.path_to_file)
             
         else:

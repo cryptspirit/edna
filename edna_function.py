@@ -30,6 +30,8 @@ import stat
 import xdg.Mime
 import xdg.DesktopEntry
 import gettext
+import gio
+
 
 gettext.install('edna', unicode=True)
 ###############################################################################
@@ -351,6 +353,7 @@ def get_launch(path):
     Определяет по типу какой программой открывать файл по умолчанию
     '''
     temp = get_custom_mimetype(path)
+    print temp
     if temp != None:
         ret = subprocess.Popen(['xdg-mime', 'query', 'default', temp],
                                         stdout=subprocess.PIPE).communicate()[0].strip('\n')
@@ -535,7 +538,11 @@ def get_custom_mimetype(path):
     Функция получения mime-типа. Реализована отдельно для возможности легкого
     изменения механизма получения mime-типа.
     '''
-    return str(xdg.Mime.get_type_by_name(path))
+    #return str(xdg.Mime.get_type_by_name(path))
+    f = open(path)
+    mt = str(gio.content_type_guess(path, f.read(100), True)[0])
+    f.close()
+    return mt
     
 def get_cell(path, i, is_fil, cellse):
     '''
@@ -572,7 +579,8 @@ def get_cell(path, i, is_fil, cellse):
         elif j == 'cell_atr':
                 ret.append(get_file_attr(path_i))
     ret.append(path_i)
-    ret.append(get_ico(mime_name_ico(temp)))
+    #ret.append(get_ico(mime_name_ico(temp)))
+    ret.append(get_ico(temp))
     return ret
     
 def get_ico(s, size_ico=True):
@@ -581,26 +589,33 @@ def get_ico(s, size_ico=True):
     словарь если нет то в словарь добавляеться новая иконка
     '''
     global dic_icon
+    p = gio.content_type_get_icon(s)
+    pm = p.get_names()
     if size_ico:
         try:
             dic_icon.keys().index(s)
         except:
-            try:
-                b = get_theme.load_icon(s, int(rc_dict['style']['icon_size']), type_ico_load)
-            except:
-                return dic_icon['empty']
-            else:
-                dic_icon[s] = b
-                return dic_icon[s]
+            for i in pm:
+                try:
+                    b = get_theme.load_icon(i, int(rc_dict['style']['icon_size']), type_ico_load)
+                except:
+                    pass
+                else:
+                    dic_icon[s] = b
+                    return dic_icon[s]
+            if s != 'None': print s
+            return dic_icon['empty']
         else:
             return dic_icon[s]
     else:
-        try:
-            b = get_theme.load_icon(s, 30, type_ico_load)
-        except:
-            return get_theme.load_icon('empty', 30, type_ico_load)
-        else:
-            return b
+        for i in pm:
+            try:
+                b = get_theme.load_icon(i, 30, type_ico_load)
+            except:
+                pass
+            else:
+                return b
+        return get_theme.load_icon('empty', 30, type_ico_load)
        
 def get_list_path(path, pattern_s, select_list):
     '''
