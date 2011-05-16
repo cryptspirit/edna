@@ -41,7 +41,7 @@ class Dwindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_size_request(900, 500)
         self.set_title('Edna')
-        self.set_icon_from_file('edna.svg')
+        self.set_icon_from_file('edna.png')
         # Widget#########################
         hdlbox = gtk.HandleBox()
         hdlbox.add(self.create_menu())
