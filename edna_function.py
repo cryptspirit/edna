@@ -29,7 +29,7 @@ import edna_gui
 import stat
 import gettext
 import gio
-
+import gobject
 
 gettext.install('edna', unicode=True)
 ###############################################################################
@@ -132,8 +132,6 @@ hotkeys_function_name = {'key_1': _('Copy'),
                         'key_5': _('Make directory'),
                         'key_6': _('Open terminal'),
                         'key_7': _('View')}
-###############################################################################
-
 ############################### edna rc (begin) ###############################
 
 def Sum_cell_function():
@@ -244,6 +242,128 @@ dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(r
 dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 
 ########################## edna function (begin) ##############################
+class Object_of_Files():
+    '''
+    Класс обработки списка файлов
+    '''
+    def __init__(self):
+        pass
+        
+    def add_path(self, path):
+        '''
+        Установка пути
+        '''
+        self.Path = path
+        self.pattern_s = ''
+        self.Select_List = []
+        if self.Path[len(self.Path) -1] != '/': self.Path += '/'
+        self.List = os.listdir(self.Path)
+        self.gioFile_list = map(gio.File, self.List)
+        self.Model = self.create_model()
+        
+        
+    def clean_now(self):
+        '''
+        Очистка
+        '''
+        self.Path = None
+        self.List = []
+        self.gioFile_list = []
+        self.Select_List = []
+        self.pattern_s = ''
+        self.Model = None
+        
+    def get_list_path(self):
+        '''
+        Получение списка файлов с описаными столбцами
+        '''
+        try: Sum_cell.index('cell_user') # Проверка на то есть ли среди столбцов столбец Владелец
+        except: pass
+        else: get_dickt_nameusers() # Если есть то получение имен пользователей
+        
+        try: Sum_cell.index('cell_group') # Проверка на то есть ли среди столбцов столбец Группа
+        except: pass
+        else: get_dickt_namegroups() # Если есть то получение названий групп
+        
+        self.len_Sum_cell = len(Sum_cell)
+        return_dir = []
+        return_fil = []
+        if self.Path != '/':
+            ttt = []
+            
+            for j in Sum_cell:
+                if j == 'cell_name':
+                    ttt.append('..')
+                elif j == 'cell_size':
+                    ttt.append('<DIR>')
+                else:
+                    ttt.append('')
+            ttt.append('..')
+            ttt.append(dic_icon['application-x-directory'])
+        self.Path_probe = os.path.isdir
+        return_dir_append = return_dir.append
+        return_fil_append = return_fil.append
+        for i in self.List:
+            if self.Path_probe(self.Path + i):
+                return_dir_append(get_cell(self.Path, i, False, Sum_cell))
+            else:
+                return_fil_append(get_cell(self.Path, i, True, Sum_cell))
+        return_dir.sort()
+        return_fil.sort()
+        m = return_dir + return_fil
+        if self.Path != '/':
+            m.insert(0, ttt)
+        op = 0
+        for i in xrange(len(m)):
+            if self.Select_List:
+                try: self.Select_List.index(m[i][self.len_Sum_cell])
+                except:
+                    if i % 2 != 0:
+                        color_fg = rc_dict['style']['odd_row_fg']
+                        color_bg = rc_dict['style']['odd_row_bg']
+                    else:
+                        color_fg = rc_dict['style']['even_row_fg']
+                        color_bg = rc_dict['style']['even_row_bg']
+                    fgl = 'False'
+                else:
+                    fgl = 'True'
+                    color_fg = rc_dict['style']['sel_row_fg']
+                    color_bg = rc_dict['style']['sel_row_bg']
+            else:
+                if i % 2 != 0:
+                    color_fg = rc_dict['style']['odd_row_fg']
+                    color_bg = rc_dict['style']['odd_row_bg']
+                else:
+                    color_fg = rc_dict['style']['even_row_fg']
+                    color_bg = rc_dict['style']['even_row_bg']
+                fgl = 'False'
+            m[i].append(color_fg)
+            m[i].append(color_bg)
+            m[i].append(fgl)
+        
+            if m[i][self.len_Sum_cell].strip('\t\n') == self.pattern_s.strip('\t\n'):
+                op = i
+        return m, op
+        
+    def create_model(self):
+        self.Table_of_File, return_select_new = self.get_list_path()
+        self.Length_Table = len(self.Table_of_File)
+        model = gtk.ListStore(
+                            gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
+                            gobject.TYPE_STRING, gobject.TYPE_STRING)
+        
+        for item in self.Table_of_File:
+            iter = model.append()
+            model.set(iter)
+            for j in xrange(len(item)):
+                model.set_value(iter, j, item[j])
+        return model
+
 def save_open(path, flg, miss):
     global answer
     answer = 0
@@ -607,6 +727,7 @@ def get_cell(path, i, is_fil, cellse):
     path_i = path + i #В будующем заменить на функцию слияния из os.path
     ret = []
     temp = get_mime(path_i, is_fil)
+    ret.append(get_ico(temp))
     t = ''
     n = i
     if is_fil:
@@ -635,90 +756,15 @@ def get_cell(path, i, is_fil, cellse):
         elif j == 'cell_atr':
                 ret.append(get_file_attr(path_i))
     ret.append(path_i)
-    #ret.append(get_ico(mime_name_ico(temp)))
-    ret.append(get_ico(temp))
     return ret
-    
-def get_list_path(path, pattern_s, select_list):
-    '''
-    Получение списка файлов с описаными столбцами
-    '''
-    cellse = Sum_cell
-    
-    try: cellse.index('cell_user')
-    except: pass
-    else: get_dickt_nameusers()
-    
-    try: cellse.index('cell_group')
-    except: pass
-    else: get_dickt_namegroups()
-    
-    if path[len(path) -1] != '/': path += '/'
-    list = os.listdir(path)
-    return_dir = []
-    return_fil = []
-    if path != '/':
-        ttt = []
-        
-        for j in cellse:
-            if j == 'cell_name':
-                ttt.append('..')
-            elif j == 'cell_size':
-                ttt.append('<DIR>')
-            else:
-                ttt.append('')
-        ttt.append('..')
-        ttt.append(dic_icon['application-x-directory'])
-    path_probe = os.path.isdir
-    return_dir_append = return_dir.append
-    return_fil_append = return_fil.append
-    for i in list:
-        if path_probe(path + i):
-            return_dir_append(get_cell(path, i, False, cellse))
-        else:
-            return_fil_append(get_cell(path, i, True, cellse))
-    return_dir.sort()
-    return_fil.sort()
-    m = return_dir + return_fil
-    if path != '/':
-        m.insert(0, ttt)
-    op = 0
-    fg = {}
-    for i in xrange(len(m)):
-        fg[m[i][len(cellse)]] = i
-        if select_list:
-            try: select_list.index(m[i][len(cellse)])
-            except:
-                if i % 2 != 0:
-                    color_fg = rc_dict['style']['odd_row_fg']
-                    color_bg = rc_dict['style']['odd_row_bg']
-                else:
-                    color_fg = rc_dict['style']['even_row_fg']
-                    color_bg = rc_dict['style']['even_row_bg']
-                fgl = 'False'
-            else:
-                fgl = 'True'
-                color_fg = rc_dict['style']['sel_row_fg']
-                color_bg = rc_dict['style']['sel_row_bg']
-        else:
-            if i % 2 != 0:
-                color_fg = rc_dict['style']['odd_row_fg']
-                color_bg = rc_dict['style']['odd_row_bg']
-            else:
-                color_fg = rc_dict['style']['even_row_fg']
-                color_bg = rc_dict['style']['even_row_bg']
-            fgl = 'False'
-        m[i].append(color_fg)
-        m[i].append(color_bg)
-        m[i].append(fgl)
-    
-        if m[i][len(cellse)].strip('\t\n') == pattern_s.strip('\t\n'):
-            op = i
-    return m, op, fg
 ########################### edna function (end) ###############################        
 
 def main():
-    print get_launch_apps('/home/mort/.bashrc')
+    path = '/home/mort'
+    p = Get_gioFile_list(path)
+    print p
+    #OOF = Object_of_Files()
+    #print OOF.add_path(path)
 
 if __name__ == '__main__':
     main()

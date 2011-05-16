@@ -796,20 +796,16 @@ class properties_file_window(gtk.Window):
         '''
         vbox2 = gtk.VBox(False)
         note_object.append_page(vbox2, gtk.Label(_('Access')))
-
-
-class listen_cell(gtk.VBox):
-    def __init__(self, n, return_path_cell):
-        gtk.VBox.__init__(self, False, 3)
-        self.pattern_s = ''
-        self.n = n
-        self.return_path_cell = return_path_cell
-        #self.Cursor = 0
-        self.Focus_State = True
-        self.Select_List = []
-        self.articles = None
-        self.Exit_State = False
-        ####################################
+        
+class File_Cells(gtk.TreeView):
+    '''
+    Класс списка файлов
+    '''
+    def __init__(self, n, path_entry=gtk.Label):
+        gtk.TreeView.__init__(self)
+        self.set_rules_hint(True)
+        self.set_grid_lines(False)
+        self.path_entry = path_entry
         self.Hotkeys_Function = {'key_1': self.copys,
                                 'key_2': self.deleting,
                                 'key_3': self.properties_file,
@@ -817,129 +813,65 @@ class listen_cell(gtk.VBox):
                                 'key_5': '',
                                 'key_6': '',
                                 'key_7': ''}
-        self.Current_Path = edna_function.rc_dict['config']['panel_history%d' % n]
-        ####################################
-        self.scrol = gtk.ScrolledWindow()
-        self.scrol.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-        self.scrol.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
-        ###################################
-        self.drive_info_label = gtk.Label('drive')
-        ###################################
-        self.path_entry = gtk.Label()
-        self.evtb = gtk.EventBox()
-        self.evtb.add(self.path_entry)
-        self.evtb.set_border_width(3)
+        self.get_selection().set_mode(gtk.SELECTION_SINGLE)
+        self.OOF = edna_function.Object_of_Files()
+        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % n])
+        self.path_entry.set_text(self.OOF.Path)
+        self.connect('key-release-event', self.key_event)
+        self.connect('key-press-event', self.key_event)
+        self.connect('button-press-event', self.pr)
+        self.connect('cursor-changed', self.cursor_changed)
         
-        self.path_entry.set_alignment(0.0, 0.5)
-        self.path_entry.set_text(self.Current_Path)
-        ###################################
-        self.treeview = gtk.TreeView()
-        self.treeview.set_rules_hint(True)
-        self.treeview.set_grid_lines(False)
+    def Cells_Refresh(self):
+        '''
+        Обновление списка файлов
+        '''
+        #self.style('even-row-color', gtk.gdk.Color('#D51A1A'))
+        #self.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
+        #self.set_property('enable-tree-lines', False)
+        self.set_model(self.OOF.Model)
+        self.__add_columns()
+        self.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
+        #self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
+        #self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
         
-        self.treeview.get_selection().set_mode(gtk.SELECTION_SINGLE)
-        self.treeview.connect('key-release-event', self.key_event)
-        self.treeview.connect('key-press-event', self.key_event)
-        self.treeview.connect('button-press-event', self.pr)
-        self.treeview.connect('focus-in-event', self.focus_trap)
-        self.treeview.connect('focus-out-event', self.focus_trap)
-        self.treeview.connect('cursor-changed', self.cursor_changed)
-        
-        ###################################
-        self.info_label = gtk.Label('info')
-        ###################################
-        self.scrol.add(self.treeview)
-        self.upData()
-        self.pack_start(self.drive_info_label, False)
-        self.pack_start(self.evtb, False)
-        self.pack_start(self.scrol)
-        self.pack_start(self.info_label, False)
-        self.Timer_func = threading.Timer(0, self.timer_refresh)
-        self.Timer_func.start()
-        
-    def upData(self):
-        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
-        self.evtb.modify_font(pango.FontDescription(edna_function.rc_dict['style']['font_cell_text']))
-        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_fg']))
-        #self.treeview.style('even-row-color', gtk.gdk.Color('#D51A1A'))
-        #self.treeview.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
-        #self.treeview.set_property('enable-tree-lines', False)
-        model = self.__create_model()
-        self.treeview.set_model(model)
-        self.__add_columns(self.treeview)
-        self.treeview.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
-        #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
-        #self.treeview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
-        
-    def timer_refresh(self):
-        while not self.Exit_State:
-            if self.Focus_State:
-                if self.Exit_State: break
-                time.sleep(1)
-                if self.Exit_State: break
-                time.sleep(1)
-                if self.Exit_State: break
-                model = self.__create_model()
-                gtk.gdk.threads_enter()
-                if model:
-                    self.treeview.set_model(model)
-                    self.treeview.set_cursor(self.return_select)
-                gtk.gdk.threads_leave()
-            
     def cursor_changed(self, *args):
-        #print args[0].get_cursor()[0]
-        selection = self.treeview.get_selection()
+        selection = self.get_selection()
         model_sel, iter_sel = selection.get_selected()
-        self.pattern_s = model_sel.get_value(iter_sel, self.len_u)
-        
-    def focus_trap(self, *args):
-        #self.treeview.set_cursor(self.treeview.is_focus())
-        #if self.treeview.is_focus():
-        #    self.treeview.set_hover_selection(False)
-        #    self.treeview.set_cursor(self.Cursor)
-        #else:
-        #    self.Cursor = self.treeview.get_cursor()[0]
-        #    #self.treeview.set_cursor(0, None, False)
-        #    self.treeview.set_hover_selection(True)
-        pass
-            
-    def ch_dir_entry(self, path):
-        self.Current_Path = path
-        self.Select_List = []
-        self.path_entry.set_text(self.Current_Path)
+        self.OOF.pattern_s = model_sel.get_value(iter_sel, self.OOF.len_Sum_cell)
         
     def get_select_now(self, only_cursor=False):
         '''
         Создаеться список выделеных файлов и папок
         '''
         return_list = []
-        selection = self.treeview.get_selection()
+        selection = self.get_selection()
         model_sel, iter_sel = selection.get_selected()
         if only_cursor:
-            dp = model_sel.get_value(iter_sel, self.len_u)
+            dp = model_sel.get_value(iter_sel, self.OOF.Length_Table)
             if dp != '..':
                 return dp, os.path.isfile(dp)
             else:
                 return None
         else:
             path = model_sel.get_path(iter_sel)[0]
-            model = self.treeview.get_model()
-            if self.Current_Path != '/':
+            model = self.get_model()
+            if self.OOF.Path != '/':
                 nc = 1
             else:
                 nc = 0
             now_select_in = True
             for i in xrange(nc, self.len_articles):
                 iter = model.get_iter(i)
-                if model.get_value(iter, self.len_u + 4) == 'True':
+                if model.get_value(iter, self.OOF.Length_Table + 4) == 'True':
                     if path == i: now_select_in = False
-                    dp = model.get_value(iter, self.len_u)
+                    dp = model.get_value(iter, self.OOF.Length_Table)
                     return_list.append([dp, os.path.isfile(dp)])
-            dp = model_sel.get_value(iter_sel, self.len_u)
+            dp = model_sel.get_value(iter_sel, self.OOF.Length_Table)
             if now_select_in and dp != '..':
                 return_list.append([dp, os.path.isfile(dp)])
             return return_list
-        
+            
     def key_event(self, *args):
         if args[1].type == gtk.gdk.KEY_PRESS:
             key = edna_function.get_key_info(args[1])
@@ -950,17 +882,17 @@ class listen_cell(gtk.VBox):
             if key == 'space': self.select_function(key)
             elif key == 'Right': self.chdir_new()
             elif key == 'Return': self.Enter_key()
-            elif (key == 'BackSpace' or key == 'Left') and self.Current_Path != '/': self.back_dir()
+            elif (key == 'BackSpace' or key == 'Left') and self.OOF.Path != '/': self.back_dir()
             else:
                 try: self.Hotkeys_Function[edna_function.key_name_in_rc[key]]()
                 except KeyError: pass
             #if key == 'Delete' or key == 'Shift Delete': self.deleting(key)
             #if key == 'F5' : self.copys(False)
-            
+    
     def Enter_key(self):
         input_list = self.get_select_now()
-        model_sel, iter_sel = self.treeview.get_selection().get_selected()
-        p = model_sel.get_value(iter_sel, self.len_u)
+        model_sel, iter_sel = self.get_selection().get_selected()
+        p = model_sel.get_value(iter_sel, self.OOF.Length_Table)
         if len(input_list) == 1 or p == '..' or os.path.isdir(p) == True:
             self.chdir_new()
         elif len(input_list) == 0:
@@ -981,11 +913,10 @@ class listen_cell(gtk.VBox):
             for i in input_list:
                 if i[1] == False:
                     if os.path.isdir(i[0]):
-                        self.pattern_s = ''
-                        self.ch_dir_entry(i[0])
-                        model = self.__create_model()
-                        self.treeview.set_model(model)
-                        self.treeview.set_cursor(self.return_select)
+                        self.OOF.add_path(i[0])
+                        self.path_entry.set_text(self.OOF.Path)
+                        self.set_model(self.OOF.Model)
+                        self.set_cursor(self.return_select)
                     break
             for i in list_lanch.keys():
                 list_lanch[i]['app'].launch_uris(list_lanch[i]['list'], None)
@@ -995,20 +926,26 @@ class listen_cell(gtk.VBox):
         y = question_window(self.get_select_now())
         
     def properties_file(self):
+        '''
+        Свойства файла
+        '''
         rlist = self.get_select_now(only_cursor=True)
         if rlist:
             y = properties_file_window(rlist)
         
     def copys(self):
+        '''
+        Копирование
+        '''
         remove_after = False
-        y = question_window_copy(self.return_path_cell(self.n), self.Current_Path, self.get_select_now(), remove_after)
+        y = question_window_copy(self.return_path_cell(self.n), self.OOF.Path, self.get_select_now(), remove_after)
     
     def select_function(self, key):
-        selection = self.treeview.get_selection()
+        selection = self.get_selection()
         model, iter = selection.get_selected()
         path = model.get_path(iter)[0]
         sel_col = {}
-        if model.get_value(iter, self.len_u + 4) == 'True':
+        if model.get_value(iter, self.OOF.Length_Table + 4) == 'True':
             if path % 2:
                 ts = 'odd'
             else:
@@ -1016,19 +953,19 @@ class listen_cell(gtk.VBox):
                 
             sel_col['fg'] = edna_function.rc_dict['style']['%s_row_fg' % ts]
             sel_col['bg'] = edna_function.rc_dict['style']['%s_row_bg' % ts]
-            try: self.Select_List.remove(model.get_value(iter, self.len_u))
+            try: self.Select_List.remove(model.get_value(iter, self.OOF.Length_Table))
             except: pass
-            self.articles[path][self.len_u + 4] = 'False'
+            self.OOF.Table_of_File[path][self.OOF.Length_Table + 4] = 'False'
         else:
             sel_col['fg'] = edna_function.rc_dict['style']['sel_row_fg']
             sel_col['bg'] = edna_function.rc_dict['style']['sel_row_bg']
-            self.articles[path][self.len_u + 4] = 'True'
-            self.Select_List.append(model.get_value(iter, self.len_u))
+            self.OOF.Table_of_File[path][self.OOF.Length_Table + 4] = 'True'
+            self.Select_List.append(model.get_value(iter, self.OOF.Length_Table))
         f = ['fg', 'bg']
-        model.set(iter, self.len_u + 4, self.articles[path][self.len_u + 4])
+        model.set(iter, self.OOF.Length_Table + 4, self.OOF.Table_of_File[path][self.OOF.Length_Table + 4])
         for i in xrange(len(f)):
-            self.articles[path][self.len_u + 2 + i] = sel_col[f[i]]
-            model.set(iter, self.len_u + 2 + i, self.articles[path][self.len_u + 2 + i])
+            self.OOF.Table_of_File[path][self.OOF.Length_Table + 2 + i] = sel_col[f[i]]
+            model.set(iter, self.OOF.Length_Table + 2 + i, self.OOF.Table_of_File[path][self.OOF.Length_Table + 2 + i])
         cellse = edna_function.Sum_cell
         if key == 'space':
             try:
@@ -1036,29 +973,32 @@ class listen_cell(gtk.VBox):
             except:
                 pass
             else:
-                n = model.get_value(iter, self.len_u)
+                n = model.get_value(iter, self.OOF.Length_Table)
                 if os.path.isdir(n):
-                    self.articles[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
-                    model.set(iter, ic, self.articles[path][ic])
+                    self.OOF.Table_of_File[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
+                    model.set(iter, ic, self.OOF.Table_of_File[path][ic])
             
     def pr(self, *args):
         if args[1].type == gtk.gdk._2BUTTON_PRESS:
             self.chdir_new()
             
     def back_dir(self):
-        self.pattern_s = self.Current_Path
-        self.Select_List = []
-        self.ch_dir_entry(os.path.dirname(self.Current_Path))
+        self.OOF.pattern_s = self.OOF.Path
+        self.OOF.Select_List = []
+        self.ch_dir_entry(os.path.dirname(self.OOF.Path))
         model = self.__create_model()
         self.treeview.set_model(model)
         #print 'r', self.return_select
         self.treeview.set_cursor(self.return_select)
                     
     def chdir_new(self):
-        selection = self.treeview.get_selection()
+        '''
+        Действие при активации пункта списка
+        '''
+        selection = self.get_selection()
         model, iter = selection.get_selected()
         u = edna_function.Sum_cell
-        dp = model.get_value(iter, len(u))
+        dp = model.get_value(iter, self.OOF.len_Sum_cell + 1)
         if dp == '..':
             self.back_dir()
             
@@ -1066,28 +1006,28 @@ class listen_cell(gtk.VBox):
             self.pattern_s = ''
             self.ch_dir_entry(dp)
             model = self.__create_model()
-            self.treeview.set_model(model)
+            self.set_model(model)
             #print 'r', self.return_select
-            self.treeview.set_cursor(self.return_select)
+            self.set_cursor(self.return_select)
             
         elif os.path.isfile(dp):
-            self.pattern_s = ''
+            self.OOF.pattern_s = ''
             ret = edna_function.get_launch(dp)
             if ret:
                 ret.launch_uris([gio.File(dp).get_uri()], None)
             print ret
             
-    def __add_columns(self, treeview):
+    def __add_columns(self):
         '''
         Создание столбцов
         '''
-        model = treeview.get_model()
-        clmn = treeview.get_columns()
+        model = self.get_model()
+        clmn = self.get_columns()
         if clmn:
             for i in clmn:
-                treeview.remove_column(i)
+                self.remove_column(i)
         u = edna_function.Sum_cell
-        for i in xrange(self.len_u):
+        for i in xrange(self.OOF.len_Sum_cell):
             alg = [float(edna_function.rc_dict['style']['%s_alignment_h' % u[i]]), float(edna_function.rc_dict['style']['%s_alignment_v' % u[i]])]
             if u[i] == 'cell_name':
                 column = gtk.TreeViewColumn()
@@ -1095,9 +1035,9 @@ class listen_cell(gtk.VBox):
                 renderer = gtk.CellRendererPixbuf()
                 renderer.set_alignment(alg[0], alg[1])
                 column.pack_start(renderer, False)
-                column.set_attributes(renderer, pixbuf=self.len_u + 1)
+                column.set_attributes(renderer, pixbuf=0)
             else:
-                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i, background=len(u) + 3, foreground=len(u) + 2)
+                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, background=self.OOF.len_Sum_cell + 3, foreground=self.OOF.len_Sum_cell + 2)
             column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
             column.expand = True
             column.set_min_width(int(edna_function.rc_dict['style']['%s_size' % u[i]]))
@@ -1111,131 +1051,58 @@ class listen_cell(gtk.VBox):
             
             if u[i] == 'cell_name':
                 column.pack_start(renderer, True)
-                column.set_attributes(renderer, text=i, background=self.len_u + 3, foreground=self.len_u + 2)
+                column.set_attributes(renderer, text=i + 1, background=self.OOF.len_Sum_cell + 3, foreground=self.OOF.len_Sum_cell + 2)
                 
             itk = int(edna_function.rc_dict['style']['%s_expand' % u[i]])
             column.set_expand(itk)
-            treeview.append_column(column)
+            self.append_column(column)
+    
+    
+    
+class listen_cell(gtk.VBox):
+    '''
+    Класс панели содкржащей списки файлов
+    '''
+    def __init__(self, n, return_path_cell):
+        gtk.VBox.__init__(self, False, 3)
+        self.pattern_s = ''
+        self.n = n
+        self.return_path_cell = return_path_cell
+        #self.Cursor = 0
+        self.Focus_State = True
+        ####################################
+        self.scrol = gtk.ScrolledWindow()
+        self.scrol.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+        self.scrol.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+        ###################################
+        self.drive_info_label = gtk.Label('drive')
+        ###################################
+        self.path_entry = gtk.Label()
+        self.evtb = gtk.EventBox()
+        self.evtb.add(self.path_entry)
+        self.evtb.set_border_width(3)
+        
+        self.path_entry.set_alignment(0.0, 0.5)
+        ###################################
+        self.treeview = File_Cells(n, self.path_entry)
+        self.info_label = gtk.Label('info')
+        ###################################
+        self.scrol.add(self.treeview)
+        self.upData()
+        self.pack_start(self.drive_info_label, False)
+        self.pack_start(self.evtb, False)
+        self.pack_start(self.scrol)
+        self.pack_start(self.info_label, False)
+        #self.Timer_func = threading.Timer(0, self.timer_refresh)
+        #self.Timer_func.start()
+        
+    def upData(self):
+        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
+        self.evtb.modify_font(pango.FontDescription(edna_function.rc_dict['style']['font_cell_text']))
+        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_fg']))
+        self.treeview.Cells_Refresh()
             
-    def __create_model(self):
-        articles_new, return_select_new, fg2 = edna_function.get_list_path(self.Current_Path, self.pattern_s, self.Select_List)
-        len_articles_new = len(articles_new)
-        if articles_new != self.articles:
-            u = edna_function.Sum_cell
-            if self.articles:
-                fg2_keys = fg2.keys()
-                if self.Select_List:
-                    for i in self.Select_List:
-                        try: fg2_keys.index(i)
-                        except: self.Select_List.remove(i)
-                    
-                try: idx = u.index('cell_size')
-                except: pass
-                else:
-                    for i in articles_new:
-                        try: h = self.fg[i[self.len_u]]
-                        except: pass
-                        else:
-                            if i[idx] == '<DIR>' and self.articles[h][idx] != '<DIR>': i[idx] = self.articles[h][idx]
-            self.fg = fg2
-            self.articles, self.return_select = articles_new, return_select_new
-            self.len_articles = len_articles_new
-            
-            self.len_u = len(u)
-            if self.len_u == 1:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 2:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 3:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 4:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 5:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 6:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 7:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gtk.gdk.Pixbuf, gobject.TYPE_STRING,
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-            elif self.len_u == 8:
-                model = gtk.ListStore(
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gtk.gdk.Pixbuf,
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-                                    
-                                    
-            for item in self.articles:
-                iter = model.append()
-                model.set(iter)
-                for j in xrange(len(item)):
-                    model.set_value(iter, j, item[j])
-            return model
-        else:
-            return None
 ################################  Gui class (end) #############################
-            
 def main():
     h = properties_file_window(['/home/mort/Box', False])
     #h = miss_window('/home/mort/.bashrc')
