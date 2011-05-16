@@ -246,6 +246,7 @@ class Object_of_Files():
     '''
     Класс обработки списка файлов
     '''
+    
     def __init__(self):
         pass
         
@@ -259,6 +260,28 @@ class Object_of_Files():
         self.Select_List = []
         self.gioFile_list = map(gio.File, os.listdir(path))
         self.Model = self.create_model()
+        
+    def remote_selection(self, gioFile_uri):
+        '''
+        Удаление из выделеных элементов списка
+        '''
+        try: self.Select_List.remove(gioFile_uri)
+        except: pass
+        
+    def add_selection(self, gioFile_uri):
+        '''
+        Добавление выделеных элементов списка
+        '''
+        try: self.Select_List.index(gioFile_uri)
+        except: self.Select_List.append(gioFile_uri)
+        
+    def now_in_selection(self, gioFile_uri):
+        '''
+        Проверка состоит ли запрашиваемый элемент в списке выделеных элементов
+        '''
+        try: self.Select_List.index(gioFile_uri)
+        except: False
+        else: True
         
     def ch_path(self, gioFile):
         '''
@@ -276,6 +299,7 @@ class Object_of_Files():
         Активация элемента списка
         '''
         gioFile = gio.File(gioFile_uri)
+        print gioFile
         if os.path.isdir(gioFile.get_path()):
             self.ch_path(gioFile)
         else:
@@ -324,13 +348,12 @@ class Object_of_Files():
                     ttt.append('<DIR>')
                 else:
                     ttt.append('')
-            ttt.append(self.gioFile_list[0].get_parent())
+            ttt.append(self.Path.get_parent().get_uri())
             
         self.Path_probe = os.path.isdir
         return_dir_append = return_dir.append
         return_fil_append = return_fil.append
         for i in self.gioFile_list:
-            print i
             if self.Path_probe(i.get_path()):
                 return_dir_append(get_cell(i, False))
             else:
@@ -479,7 +502,7 @@ def get_mime(path_i, is_fil):
     if is_fil:
         try:
             f = open(path_i)
-            r = f.read(100)
+            r = f.read(200)
             f.close()
         except: temp = 'empty'
         else: temp = str(gio.content_type_guess(None, r, True)[0])

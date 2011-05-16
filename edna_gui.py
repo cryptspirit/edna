@@ -983,13 +983,10 @@ class File_Cells(gtk.TreeView):
             self.chdir_new()
             
     def back_dir(self):
-        self.OOF.pattern_s = self.OOF.Path
-        self.OOF.Select_List = []
-        self.ch_dir_entry(os.path.dirname(self.OOF.Path))
-        model = self.__create_model()
-        self.treeview.set_model(model)
-        #print 'r', self.return_select
-        self.treeview.set_cursor(self.return_select)
+        if self.OOF.get_curent_path().get_path() != '/':
+            self.OOF.gio_activation(self.OOF.Path.get_parent().get_uri())
+            self.set_model(self.OOF.Model)
+            #self.treeview.set_cursor(self.return_select)
                     
     def chdir_new(self):
         '''
@@ -1000,7 +997,7 @@ class File_Cells(gtk.TreeView):
         dp = model.get_value(iter, self.OOF.Path_Index)
         self.OOF.gio_activation(dp)
         self.set_model(self.OOF.Model)
-        self.set_cursor(self.return_select)
+        #self.set_cursor(self.return_select)
             
     def __add_columns(self):
         '''
