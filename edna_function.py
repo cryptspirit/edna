@@ -238,7 +238,7 @@ read_rc()
 type_ico_load = gtk.ICON_LOOKUP_USE_BUILTIN
 dic_icon = {}
 get_theme = gtk.icon_theme_get_default()
-dic_icon['application-x-directory'] = get_theme.load_icon('gtk-directory', int(rc_dict['style']['icon_size']), type_ico_load)
+dic_icon['application/octet-stream'] = get_theme.load_icon('inode-directory', int(rc_dict['style']['icon_size']), type_ico_load)
 dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 
 ########################## edna function (begin) ##############################
@@ -253,24 +253,45 @@ class Object_of_Files():
         '''
         Установка пути
         '''
-        self.Path = path
-        self.pattern_s = ''
+        self.Path = gio.File(path)
+        self.Cursor_Position = None
+        os.chdir(path)
         self.Select_List = []
-        if self.Path[len(self.Path) -1] != '/': self.Path += '/'
-        self.List = os.listdir(self.Path)
-        self.gioFile_list = map(gio.File, self.List)
+        self.gioFile_list = map(gio.File, os.listdir(path))
         self.Model = self.create_model()
         
+    def ch_path(self, gioFile):
+        '''
+        Смена пути
+        '''
+        self.Cursor_Position = self.Path
+        self.Path = gioFile
+        p = gioFile.get_path()
+        os.chdir(p)
+        self.gioFile_list = [gio.File(os.path.join(p, i)) for i in os.listdir(p)]
+        self.Model = self.create_model()
+        
+    def gio_activation(self, gioFile_uri):
+        '''
+        Активация элемента списка
+        '''
+        gioFile = gio.File(gioFile_uri)
+        if os.path.isdir(gioFile.get_path()):
+            self.ch_path(gioFile)
+        else:
+            ret = get_launch(gioFile)
+            if ret:
+                ret.launch_uris([gio.File(gioFile_uri).get_uri()], None)
+            print ret
         
     def clean_now(self):
         '''
         Очистка
         '''
         self.Path = None
-        self.List = []
+        self.Cursor_Position = None
         self.gioFile_list = []
         self.Select_List = []
-        self.pattern_s = ''
         self.Model = None
         
     def get_list_path(self):
@@ -284,13 +305,18 @@ class Object_of_Files():
         try: Sum_cell.index('cell_group') # Проверка на то есть ли среди столбцов столбец Группа
         except: pass
         else: get_dickt_namegroups() # Если есть то получение названий групп
-        
+        ######################################################################
         self.len_Sum_cell = len(Sum_cell)
+        self.Path_Index = self.len_Sum_cell + 1
+        self.Background_Index = self.len_Sum_cell + 3
+        self.Foreground_Index = self.len_Sum_cell + 2
+        ######################################################################
         return_dir = []
         return_fil = []
-        if self.Path != '/':
+        if self.Path.get_path() != '/':
             ttt = []
             
+            ttt.append(dic_icon['application/octet-stream'])
             for j in Sum_cell:
                 if j == 'cell_name':
                     ttt.append('..')
@@ -298,55 +324,39 @@ class Object_of_Files():
                     ttt.append('<DIR>')
                 else:
                     ttt.append('')
-            ttt.append('..')
-            ttt.append(dic_icon['application-x-directory'])
+            ttt.append(self.gioFile_list[0].get_parent())
+            
         self.Path_probe = os.path.isdir
         return_dir_append = return_dir.append
         return_fil_append = return_fil.append
-        for i in self.List:
-            if self.Path_probe(self.Path + i):
-                return_dir_append(get_cell(self.Path, i, False, Sum_cell))
+        for i in self.gioFile_list:
+            print i
+            if self.Path_probe(i.get_path()):
+                return_dir_append(get_cell(i, False))
             else:
-                return_fil_append(get_cell(self.Path, i, True, Sum_cell))
+                return_fil_append(get_cell(i, True))
+        
         return_dir.sort()
         return_fil.sort()
+        
         m = return_dir + return_fil
-        if self.Path != '/':
+        if self.Path.get_path() != '/':
             m.insert(0, ttt)
         op = 0
+        
         for i in xrange(len(m)):
-            if self.Select_List:
-                try: self.Select_List.index(m[i][self.len_Sum_cell])
-                except:
-                    if i % 2 != 0:
-                        color_fg = rc_dict['style']['odd_row_fg']
-                        color_bg = rc_dict['style']['odd_row_bg']
-                    else:
-                        color_fg = rc_dict['style']['even_row_fg']
-                        color_bg = rc_dict['style']['even_row_bg']
-                    fgl = 'False'
-                else:
-                    fgl = 'True'
-                    color_fg = rc_dict['style']['sel_row_fg']
-                    color_bg = rc_dict['style']['sel_row_bg']
+            if i % 2 != 0:
+                color_fg = rc_dict['style']['odd_row_fg']
+                color_bg = rc_dict['style']['odd_row_bg']
             else:
-                if i % 2 != 0:
-                    color_fg = rc_dict['style']['odd_row_fg']
-                    color_bg = rc_dict['style']['odd_row_bg']
-                else:
-                    color_fg = rc_dict['style']['even_row_fg']
-                    color_bg = rc_dict['style']['even_row_bg']
-                fgl = 'False'
+                color_fg = rc_dict['style']['even_row_fg']
+                color_bg = rc_dict['style']['even_row_bg']
             m[i].append(color_fg)
             m[i].append(color_bg)
-            m[i].append(fgl)
-        
-            if m[i][self.len_Sum_cell].strip('\t\n') == self.pattern_s.strip('\t\n'):
-                op = i
-        return m, op
+        return m
         
     def create_model(self):
-        self.Table_of_File, return_select_new = self.get_list_path()
+        self.Table_of_File = self.get_list_path()
         self.Length_Table = len(self.Table_of_File)
         model = gtk.ListStore(
                             gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
@@ -379,19 +389,6 @@ def save_open(path, flg, miss):
             print answer
     return f, answer
 
-def get_custom_mimetype(path):
-    '''
-    Функция получения mime-типа. Реализована отдельно для возможности легкого
-    изменения механизма получения mime-типа.
-    '''
-    try:
-        f = open(path)
-        r = f.read(100)
-        f.close()
-    except: mt = 'empty'
-    else: mt = str(gio.content_type_guess(None, r, True)[0])
-    return mt
-    
 def get_file_attr(file):
     '''
     Получение атрибутов файла
@@ -480,9 +477,14 @@ def get_mime(path_i, is_fil):
     Получение mimetype
     '''
     if is_fil:
-        temp = get_custom_mimetype(path_i)
+        try:
+            f = open(path_i)
+            r = f.read(100)
+            f.close()
+        except: temp = 'empty'
+        else: temp = str(gio.content_type_guess(None, r, True)[0])
     else:
-        temp = 'application-x-directory'
+        temp = str(gio.content_type_guess(path_i, None, True)[0])
     if temp:
         pass
     else:
@@ -592,11 +594,11 @@ def get_launch_apps(path):
         ret_list.append({'app_name':i.get_name(), 'desktop':i.get_id(), 'icon':i.get_icon().get_names()[0]})
     return ret_list
     
-def get_launch(path):
+def get_launch(gioFile):
     '''
     Определяет по типу какой программой открывать файл по умолчанию
     '''
-    temp = get_custom_mimetype(path)
+    temp = get_mime(gioFile.get_path(), True)
     if temp != None:
         list_apps = gio.app_info_get_all_for_type(temp)
         return list_apps[0]
@@ -720,42 +722,41 @@ def get_dickt_namegroups():
         y = i.split(':')
         dickt_namegroups[y[2]] = y
     
-def get_cell(path, i, is_fil, cellse):
+def get_cell(gioFile, is_fil):
     '''
     Получение строки для списка файлов
     '''
-    path_i = path + i #В будующем заменить на функцию слияния из os.path
     ret = []
-    temp = get_mime(path_i, is_fil)
+    temp = get_mime(gioFile.get_path(), is_fil)
     ret.append(get_ico(temp))
     t = ''
-    n = i
+    n = gioFile.get_basename()
     if is_fil:
-        n, t = get_typ(i)
-    for j in cellse:
+        n, t = get_typ(gioFile.get_basename())
+    for j in Sum_cell:
         if j == 'cell_name':
             if is_fil:
                 ret.append(n)
             else:
-                ret.append(i)
+                ret.append(gioFile.get_basename())
         elif j == 'cell_type':
             ret.append(t)
         elif j == 'cell_size':
             if is_fil:
-                ret.append(get_file_size(path_i))
+                ret.append(get_file_size(gioFile.get_path()))
             else:
                 ret.append('<DIR>')
         elif j == 'cell_datec':
-                ret.append(get_file_date(path_i, 'cell_datec_format'))
+                ret.append(get_file_date(gioFile.get_path(), 'cell_datec_format'))
         elif j == 'cell_datem':
-                ret.append(get_file_date(path_i, 'cell_datem_format'))
+                ret.append(get_file_date(gioFile.get_path(), 'cell_datem_format'))
         elif j == 'cell_user':
-                ret.append(get_file_uid(path_i))
+                ret.append(get_file_uid(gioFile.get_path()))
         elif j == 'cell_group':
-                ret.append(get_file_gid(path_i))
+                ret.append(get_file_gid(gioFile.get_path()))
         elif j == 'cell_atr':
-                ret.append(get_file_attr(path_i))
-    ret.append(path_i)
+                ret.append(get_file_attr(gioFile.get_path()))
+    ret.append(gioFile.get_uri())
     return ret
 ########################### edna function (end) ###############################        
 

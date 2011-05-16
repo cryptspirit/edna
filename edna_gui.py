@@ -729,7 +729,7 @@ class properties_file_window(gtk.Window):
             self.info_about_file['App'] = edna_function.get_launch_apps(self.path_to_file)[0]
             
         else:
-            self.info_about_file['Type'] = 'application-x-directory'
+            self.info_about_file['Type'] = 'application/octet-stream'
             self.info_about_file['Icon'] = edna_function.get_ico('gtk-directory', False)
             self.info_about_file['Size'] = '0'
             
@@ -816,7 +816,7 @@ class File_Cells(gtk.TreeView):
         self.get_selection().set_mode(gtk.SELECTION_SINGLE)
         self.OOF = edna_function.Object_of_Files()
         self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % n])
-        self.path_entry.set_text(self.OOF.Path)
+        self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
         self.connect('button-press-event', self.pr)
@@ -996,26 +996,11 @@ class File_Cells(gtk.TreeView):
         Действие при активации пункта списка
         '''
         selection = self.get_selection()
-        model, iter = selection.get_selected()
-        u = edna_function.Sum_cell
-        dp = model.get_value(iter, self.OOF.len_Sum_cell + 1)
-        if dp == '..':
-            self.back_dir()
-            
-        elif os.path.isdir(dp):
-            self.pattern_s = ''
-            self.ch_dir_entry(dp)
-            model = self.__create_model()
-            self.set_model(model)
-            #print 'r', self.return_select
-            self.set_cursor(self.return_select)
-            
-        elif os.path.isfile(dp):
-            self.OOF.pattern_s = ''
-            ret = edna_function.get_launch(dp)
-            if ret:
-                ret.launch_uris([gio.File(dp).get_uri()], None)
-            print ret
+        model, iter = selection.get_selected()        
+        dp = model.get_value(iter, self.OOF.Path_Index)
+        self.OOF.gio_activation(dp)
+        self.set_model(self.OOF.Model)
+        self.set_cursor(self.return_select)
             
     def __add_columns(self):
         '''
@@ -1037,7 +1022,7 @@ class File_Cells(gtk.TreeView):
                 column.pack_start(renderer, False)
                 column.set_attributes(renderer, pixbuf=0)
             else:
-                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, background=self.OOF.len_Sum_cell + 3, foreground=self.OOF.len_Sum_cell + 2)
+                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, background=self.OOF.Background_Index, foreground=self.OOF.Foreground_Index)
             column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
             column.expand = True
             column.set_min_width(int(edna_function.rc_dict['style']['%s_size' % u[i]]))
@@ -1051,7 +1036,7 @@ class File_Cells(gtk.TreeView):
             
             if u[i] == 'cell_name':
                 column.pack_start(renderer, True)
-                column.set_attributes(renderer, text=i + 1, background=self.OOF.len_Sum_cell + 3, foreground=self.OOF.len_Sum_cell + 2)
+                column.set_attributes(renderer, text=i + 1, background=self.OOF.Background_Index, foreground=self.OOF.Foreground_Index)
                 
             itk = int(edna_function.rc_dict['style']['%s_expand' % u[i]])
             column.set_expand(itk)
