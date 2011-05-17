@@ -261,27 +261,24 @@ class Object_of_Files():
         self.gioFile_list = map(gio.File, os.listdir(path))
         self.Model = self.create_model()
         
-    def remote_selection(self, gioFile_uri):
+    def selection(self, gioFile_uri):
         '''
-        Удаление из выделеных элементов списка
-        '''
-        try: self.Select_List.remove(gioFile_uri)
-        except: pass
-        
-    def add_selection(self, gioFile_uri):
-        '''
-        Добавление выделеных элементов списка
+        Действие с выделения элементов списка
         '''
         try: self.Select_List.index(gioFile_uri)
         except: self.Select_List.append(gioFile_uri)
-        
+        else: self.Select_List.remove(gioFile_uri)
+    
+    def selection_add(self):
+        return [[i, os.path.isfile(gio.File(i).get_path())] for i in self.Select_List]
+    
     def now_in_selection(self, gioFile_uri):
         '''
         Проверка состоит ли запрашиваемый элемент в списке выделеных элементов
         '''
         try: self.Select_List.index(gioFile_uri)
-        except: False
-        else: True
+        except: return False
+        else: return True
         
     def ch_path(self, gioFile):
         '''
@@ -380,7 +377,6 @@ class Object_of_Files():
         
     def create_model(self):
         self.Table_of_File = self.get_list_path()
-        self.Length_Table = len(self.Table_of_File)
         model = gtk.ListStore(
                             gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
                             gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -507,7 +503,7 @@ def get_mime(path_i, is_fil):
         except: temp = 'empty'
         else: temp = str(gio.content_type_guess(None, r, True)[0])
     else:
-        temp = str(gio.content_type_guess(path_i, None, True)[0])
+        temp = 'application/octet-stream'
     if temp:
         pass
     else:

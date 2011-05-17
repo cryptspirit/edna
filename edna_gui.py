@@ -838,41 +838,12 @@ class File_Cells(gtk.TreeView):
     def cursor_changed(self, *args):
         selection = self.get_selection()
         model_sel, iter_sel = selection.get_selected()
-        self.OOF.pattern_s = model_sel.get_value(iter_sel, self.OOF.len_Sum_cell)
-        
-    def get_select_now(self, only_cursor=False):
-        '''
-        Создаеться список выделеных файлов и папок
-        '''
-        return_list = []
-        selection = self.get_selection()
-        model_sel, iter_sel = selection.get_selected()
-        if only_cursor:
-            dp = model_sel.get_value(iter_sel, self.OOF.Length_Table)
-            if dp != '..':
-                return dp, os.path.isfile(dp)
-            else:
-                return None
-        else:
-            path = model_sel.get_path(iter_sel)[0]
-            model = self.get_model()
-            if self.OOF.Path != '/':
-                nc = 1
-            else:
-                nc = 0
-            now_select_in = True
-            for i in xrange(nc, self.len_articles):
-                iter = model.get_iter(i)
-                if model.get_value(iter, self.OOF.Length_Table + 4) == 'True':
-                    if path == i: now_select_in = False
-                    dp = model.get_value(iter, self.OOF.Length_Table)
-                    return_list.append([dp, os.path.isfile(dp)])
-            dp = model_sel.get_value(iter_sel, self.OOF.Length_Table)
-            if now_select_in and dp != '..':
-                return_list.append([dp, os.path.isfile(dp)])
-            return return_list
+        self.OOF.Cursor_Position = gio.File(model_sel.get_value(iter_sel, self.OOF.Path_Index))
             
     def key_event(self, *args):
+        '''
+        Обработка нажатий клавиш списка
+        '''
         if args[1].type == gtk.gdk.KEY_PRESS:
             key = edna_function.get_key_info(args[1])
             print key
@@ -890,40 +861,29 @@ class File_Cells(gtk.TreeView):
             #if key == 'F5' : self.copys(False)
     
     def Enter_key(self):
-        input_list = self.get_select_now()
-        model_sel, iter_sel = self.get_selection().get_selected()
-        p = model_sel.get_value(iter_sel, self.OOF.Length_Table)
-        if len(input_list) == 1 or p == '..' or os.path.isdir(p) == True:
+        '''
+        Обработка нажатия клавиши Enter. Груповой запуск программ
+        '''
+        if os.path.isdir(self.OOF.Cursor_Position.get_path()):
             self.chdir_new()
-        elif len(input_list) == 0:
-            self.back_dir()
         else:
             list_lanch = {}
-            for i in input_list:
+            for i in self.OOF.selection_add():
                 if i[1]:
-                    ret = edna_function.get_launch(i[0])
+                    ret = edna_function.get_launch(gio.File(i[0]))
                     if ret:
                         r_name = ret.get_name()
                         try:
                             list_lanch.keys().index(r_name)
                         except:
-                            list_lanch[r_name] = {'app': ret, 'list':[gio.File(i[0]).get_uri()]}
+                            list_lanch[r_name] = {'app': ret, 'list':[i[0]]}
                         else:
-                            list_lanch[r_name]['list'].append(gio.File(i[0]).get_uri())
-            for i in input_list:
-                if i[1] == False:
-                    if os.path.isdir(i[0]):
-                        self.OOF.add_path(i[0])
-                        self.path_entry.set_text(self.OOF.Path)
-                        self.set_model(self.OOF.Model)
-                        self.set_cursor(self.return_select)
-                    break
+                            list_lanch[r_name]['list'].append(i[0])
             for i in list_lanch.keys():
                 list_lanch[i]['app'].launch_uris(list_lanch[i]['list'], None)
-                #subprocess.Popen(i + list_lanch[i], shell=True)
                 
     def deleting(self):
-        y = question_window(self.get_select_now())
+        y = question_window(self.OOF.selection_add())
         
     def properties_file(self):
         '''
@@ -941,11 +901,18 @@ class File_Cells(gtk.TreeView):
         y = question_window_copy(self.return_path_cell(self.n), self.OOF.Path, self.get_select_now(), remove_after)
     
     def select_function(self, key):
+        
         selection = self.get_selection()
         model, iter = selection.get_selected()
+        gioFile_uri = model.get_value(iter, self.OOF.Path_Index)
+        self.OOF.selection(gioFile_uri)
+        print self.OOF.selection_add()
         path = model.get_path(iter)[0]
         sel_col = {}
-        if model.get_value(iter, self.OOF.Length_Table + 4) == 'True':
+        if self.OOF.now_in_selection(gioFile_uri):
+            sel_col['fg'] = edna_function.rc_dict['style']['sel_row_fg']
+            sel_col['bg'] = edna_function.rc_dict['style']['sel_row_bg']
+        else:
             if path % 2:
                 ts = 'odd'
             else:
@@ -953,27 +920,21 @@ class File_Cells(gtk.TreeView):
                 
             sel_col['fg'] = edna_function.rc_dict['style']['%s_row_fg' % ts]
             sel_col['bg'] = edna_function.rc_dict['style']['%s_row_bg' % ts]
-            try: self.Select_List.remove(model.get_value(iter, self.OOF.Length_Table))
-            except: pass
-            self.OOF.Table_of_File[path][self.OOF.Length_Table + 4] = 'False'
-        else:
-            sel_col['fg'] = edna_function.rc_dict['style']['sel_row_fg']
-            sel_col['bg'] = edna_function.rc_dict['style']['sel_row_bg']
-            self.OOF.Table_of_File[path][self.OOF.Length_Table + 4] = 'True'
-            self.Select_List.append(model.get_value(iter, self.OOF.Length_Table))
         f = ['fg', 'bg']
-        model.set(iter, self.OOF.Length_Table + 4, self.OOF.Table_of_File[path][self.OOF.Length_Table + 4])
+        
         for i in xrange(len(f)):
-            self.OOF.Table_of_File[path][self.OOF.Length_Table + 2 + i] = sel_col[f[i]]
-            model.set(iter, self.OOF.Length_Table + 2 + i, self.OOF.Table_of_File[path][self.OOF.Length_Table + 2 + i])
+            ind = self.OOF.len_Sum_cell + i + 2
+            self.OOF.Table_of_File[path][ind] = sel_col[f[i]]
+            model.set(iter, ind, self.OOF.Table_of_File[path][ind])
+            
         cellse = edna_function.Sum_cell
         if key == 'space':
             try:
-                ic = cellse.index('cell_size')
+                ic = cellse.index('cell_size') + 1
             except:
                 pass
             else:
-                n = model.get_value(iter, self.OOF.Length_Table)
+                n = gio.File(gioFile_uri).get_path()
                 if os.path.isdir(n):
                     self.OOF.Table_of_File[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
                     model.set(iter, ic, self.OOF.Table_of_File[path][ic])
@@ -983,7 +944,7 @@ class File_Cells(gtk.TreeView):
             self.chdir_new()
             
     def back_dir(self):
-        if self.OOF.get_curent_path().get_path() != '/':
+        if self.OOF.Path.get_path() != '/':
             self.OOF.gio_activation(self.OOF.Path.get_parent().get_uri())
             self.set_model(self.OOF.Model)
             #self.treeview.set_cursor(self.return_select)
