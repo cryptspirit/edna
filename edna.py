@@ -101,7 +101,7 @@ class Dwindow(gtk.Window):
         pass
     
     def return_path_cell(self, index):
-        return self.cel[not index].Current_Path
+        return self.cel[not index].get_number_top_list()
         
     def upData(self, *args):
         print args

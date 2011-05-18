@@ -270,7 +270,10 @@ class Object_of_Files():
         else: self.Select_List.remove(gioFile_uri)
     
     def selection_add(self):
-        return [[i, os.path.isfile(gio.File(i).get_path())] for i in self.Select_List]
+        sel_list = [[i, os.path.isfile(gio.File(i).get_path())] for i in self.Select_List]
+        if self.now_in_selection(self.Cursor_Position.get_uri()) == False:
+                sel_list.append([self.Cursor_Position.get_uri(), os.path.isfile(self.Cursor_Position.get_path())])
+        return sel_list
     
     def now_in_selection(self, gioFile_uri):
         '''
@@ -296,7 +299,6 @@ class Object_of_Files():
         Активация элемента списка
         '''
         gioFile = gio.File(gioFile_uri)
-        print gioFile
         if os.path.isdir(gioFile.get_path()):
             self.ch_path(gioFile)
         else:

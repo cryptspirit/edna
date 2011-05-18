@@ -348,10 +348,11 @@ class copy_window(gtk.Window):
                 #    time_remain = str(round((time_remain / 3600), 2)) + ' hour'
                 #else:
                 #    time_remain = str(time_remain) + ' sec'
-                if i % 2 != 0: 
-                    gtk.gdk.threads_enter()  
-                    self.label_progres.set_text(str(copy_speed) + ' Kb/c, ')
-                    gtk.gdk.threads_leave()
+                
+                #if i % 2 != 0: 
+                #    gtk.gdk.threads_enter()  
+                #    self.label_progres.set_text(str(copy_speed) + ' Kb/c, ')
+                #    gtk.gdk.threads_leave()
                 ds = os.path.getsize(dst)
                 self.siz_count += block_size * n
                 if self.multi:
@@ -601,9 +602,9 @@ class question_window_copy(gtk.Window):
     '''
     def __init__(self, destpath, current_path, list, remove_after):
         gtk.Window.__init__(self)
-        self.destpath = destpath
         self.remove_after = remove_after
         self.set_modal(True)
+        self.destpath = destpath.get_path()
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         if self.remove_after:
@@ -614,8 +615,8 @@ class question_window_copy(gtk.Window):
         vbox = gtk.VBox(False, 2)
         vbox.set_spacing(3)
         self.set_border_width(5)
-        self.list = list
-        self.current_path = current_path
+        self.list = [[gio.File(i[0]).get_path(), i[1]] for i in list]
+        self.current_path = current_path.get_path()
         self.set_title(self_name)
         self.set_position(gtk.WIN_POS_CENTER)
         text = _('To copy %s files/folders in' % len(list))
@@ -624,7 +625,7 @@ class question_window_copy(gtk.Window):
         self.entry1 = gtk.Entry()
         #self.connect('key-release-event', self.key_event)
         self.entry1.set_size_request(250, -1)
-        self.entry1.set_text(destpath)
+        self.entry1.set_text(self.destpath)
         hbbox = gtk.HButtonBox()
         hbbox.set_layout(gtk.BUTTONBOX_SPREAD)
         #hbbox.set_spacings(10)
@@ -801,11 +802,13 @@ class File_Cells(gtk.TreeView):
     '''
     Класс списка файлов
     '''
-    def __init__(self, n, path_entry=gtk.Label):
+    def __init__(self, Number_this_list, return_path_cell, path_entry=gtk.Label):
         gtk.TreeView.__init__(self)
         self.set_rules_hint(True)
         self.set_grid_lines(False)
+        self.return_path_cell = return_path_cell
         self.path_entry = path_entry
+        self.Number_this_list = Number_this_list
         self.Hotkeys_Function = {'key_1': self.copys,
                                 'key_2': self.deleting,
                                 'key_3': self.properties_file,
@@ -815,7 +818,7 @@ class File_Cells(gtk.TreeView):
                                 'key_7': ''}
         self.get_selection().set_mode(gtk.SELECTION_SINGLE)
         self.OOF = edna_function.Object_of_Files()
-        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % n])
+        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % Number_this_list])
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
@@ -867,8 +870,9 @@ class File_Cells(gtk.TreeView):
         if os.path.isdir(self.OOF.Cursor_Position.get_path()):
             self.chdir_new()
         else:
+            sel_list = self.OOF.selection_add()
             list_lanch = {}
-            for i in self.OOF.selection_add():
+            for i in sel_list:
                 if i[1]:
                     ret = edna_function.get_launch(gio.File(i[0]))
                     if ret:
@@ -898,7 +902,7 @@ class File_Cells(gtk.TreeView):
         Копирование
         '''
         remove_after = False
-        y = question_window_copy(self.return_path_cell(self.n), self.OOF.Path, self.get_select_now(), remove_after)
+        y = question_window_copy(self.return_path_cell(self.Number_this_list), self.OOF.Path, self.OOF.selection_add(), remove_after)
     
     def select_function(self, key):
         
@@ -947,6 +951,7 @@ class File_Cells(gtk.TreeView):
         if self.OOF.Path.get_path() != '/':
             self.OOF.gio_activation(self.OOF.Path.get_parent().get_uri())
             self.set_model(self.OOF.Model)
+            self.path_entry.set_text(self.OOF.Path.get_path())
             #self.treeview.set_cursor(self.return_select)
                     
     def chdir_new(self):
@@ -958,6 +963,7 @@ class File_Cells(gtk.TreeView):
         dp = model.get_value(iter, self.OOF.Path_Index)
         self.OOF.gio_activation(dp)
         self.set_model(self.OOF.Model)
+        self.path_entry.set_text(self.OOF.Path.get_path())
         #self.set_cursor(self.return_select)
             
     def __add_columns(self):
@@ -1008,7 +1014,6 @@ class listen_cell(gtk.VBox):
     '''
     def __init__(self, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
-        self.pattern_s = ''
         self.n = n
         self.return_path_cell = return_path_cell
         #self.Cursor = 0
@@ -1027,7 +1032,7 @@ class listen_cell(gtk.VBox):
         
         self.path_entry.set_alignment(0.0, 0.5)
         ###################################
-        self.treeview = File_Cells(n, self.path_entry)
+        self.treeview = File_Cells(n, return_path_cell, self.path_entry)
         self.info_label = gtk.Label('info')
         ###################################
         self.scrol.add(self.treeview)
@@ -1038,6 +1043,13 @@ class listen_cell(gtk.VBox):
         self.pack_start(self.info_label, False)
         #self.Timer_func = threading.Timer(0, self.timer_refresh)
         #self.Timer_func.start()
+        
+    def get_number_top_list(self):
+        '''
+        Функция возвращает номер текущего списка (так как будующем будут
+        созданы вкладки с списками
+        '''
+        return self.treeview.OOF.Path
         
     def upData(self):
         self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
