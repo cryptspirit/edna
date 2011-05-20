@@ -72,7 +72,7 @@ class miss_window(gtk.Window):
         self.set_resizable(False)
         self.set_border_width(5)
         self.set_modal(True)
-        self.set_icon(edna_function.get_theme.load_icon('gtk-dialog-info', 20, 0))
+        self.set_icon(edna_function.icon_load_try('gtk-dialog-info', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_title(_('Error! I not can read file'))
         
@@ -217,9 +217,9 @@ class copy_window(gtk.Window):
         self.set_border_width(5)
         self.remove_after = remove_after
         if self.remove_after:
-            self.set_icon(edna_function.get_theme.load_icon('gtk-cut', 20, 0))
+            self.set_icon(edna_function.icon_load_try('gtk-cut', 20))
         else:
-            self.set_icon(edna_function.get_theme.load_icon('gtk-copy', 20, 0))
+            self.set_icon(edna_function.icon_load_try('gtk-copy', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.current_path = current_path
         self.destpath = destpath
@@ -304,7 +304,7 @@ class copy_window(gtk.Window):
                 gtk.gdk.threads_leave()
                 again = True
                 while again:
-                    again = self.custom_copy(args[i][0], p1, args[i][1], 10)
+                    again = self.custom_copy(args[i][0], p1, args[i][1], 1000)
                 
     def custom_copy(self, src, dst, flag, n):
         '''
@@ -349,10 +349,10 @@ class copy_window(gtk.Window):
                 #else:
                 #    time_remain = str(time_remain) + ' sec'
                 
-                #if i % 2 != 0: 
-                #    gtk.gdk.threads_enter()  
-                #    self.label_progres.set_text(str(copy_speed) + ' Kb/c, ')
-                #    gtk.gdk.threads_leave()
+                if i % 2 != 0: 
+                    gtk.gdk.threads_enter()  
+                    self.label_progres.set_text(str(copy_speed) + ' Kb/c, ')
+                    gtk.gdk.threads_leave()
                 ds = os.path.getsize(dst)
                 self.siz_count += block_size * n
                 if self.multi:
@@ -420,7 +420,7 @@ class remove_window(gtk.Window):
         self.Exit = False
         self.Pause = False
         self.set_title(_('Delete'))
-        self.set_icon(edna_function.get_theme.load_icon('gtk-clear', 20, 0))
+        self.set_icon(edna_function.icon_load_try('gtk-clear', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.dest = dest
         self.list = list
@@ -532,7 +532,7 @@ class question_window(gtk.Window):
         hbox.set_spacing(10)
         self.set_title(self_name)
         self.icon_image = gtk.Image()
-        pix = edna_function.get_theme.load_icon('gtk-help', 50, 0)
+        pix = edna_function.icon_load_try('gtk-help', 50)
         self.icon_image.set_from_pixbuf(pix)
         self.set_icon(pix)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -608,9 +608,9 @@ class question_window_copy(gtk.Window):
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         if self.remove_after:
-            self.set_icon(edna_function.get_theme.load_icon('gtk-cut', 20, 0))
+            self.set_icon(edna_function.icon_load_try('gtk-cut', 20))
         else:
-            self.set_icon(edna_function.get_theme.load_icon('gtk-copy', 20, 0))
+            self.set_icon(edna_function.icon_load_try('gtk-copy', 20))
         self.set_resizable(False)
         vbox = gtk.VBox(False, 2)
         vbox.set_spacing(3)
@@ -684,8 +684,8 @@ class properties_file_window(gtk.Window):
             
     def __init__(self, path_to_file):
         gtk.Window.__init__(self)
-        self.path_to_file = path_to_file[0]
-        self.is_file = path_to_file[1]
+        self.path_to_file = path_to_file.get_path()
+        self.is_file = os.path.isfile(self.path_to_file)
         self.get_info_about_file()
         self.set_size_request(330, 400)
         self.set_border_width(5)
@@ -893,9 +893,7 @@ class File_Cells(gtk.TreeView):
         '''
         Свойства файла
         '''
-        rlist = self.get_select_now(only_cursor=True)
-        if rlist:
-            y = properties_file_window(rlist)
+        y = properties_file_window(self.OOF.Cursor_Position)
         
     def copys(self):
         '''

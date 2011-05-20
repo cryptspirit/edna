@@ -30,6 +30,8 @@ import stat
 import gettext
 import gio
 import gobject
+import glib
+
 
 gettext.install('edna', unicode=True)
 ###############################################################################
@@ -233,14 +235,26 @@ def save_rc():
         CP.write(f)
         f.close()
 ################################ edna rc (end) ################################
-
 read_rc()
 type_ico_load = gtk.ICON_LOOKUP_USE_BUILTIN
 dic_icon = {}
 get_theme = gtk.icon_theme_get_default()
-dic_icon['application/octet-stream'] = get_theme.load_icon('inode-directory', int(rc_dict['style']['icon_size']), type_ico_load)
-dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
+get_theme_gnome = gtk.IconTheme()
+get_theme_gnome.set_custom_theme('gnome')
 
+def icon_load_try(name, size):
+    '''
+    Безопасная процедура загрузки иконок
+    '''
+    try:
+        return get_theme.load_icon(name, size, type_ico_load)
+    except glib.GError:
+        return get_theme_gnome.load_icon(name, size, type_ico_load)
+
+dic_icon['application/octet-stream'] = icon_load_try('inode-directory', int(rc_dict['style']['icon_size']))
+dic_icon['empty'] = icon_load_try('empty', int(rc_dict['style']['icon_size']))
+
+#dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 ########################## edna function (begin) ##############################
 class Object_of_Files():
     '''
@@ -526,7 +540,7 @@ def get_ico(s, size_ico=True):
         except:
             for i in pm:
                 try:
-                    b = get_theme.load_icon(i, int(rc_dict['style']['icon_size']), type_ico_load)
+                    b = icon_load_try(i, int(rc_dict['style']['icon_size']))
                 except:
                     pass
                 else:
@@ -540,12 +554,12 @@ def get_ico(s, size_ico=True):
         for i in pm:
             print i
             try:
-                b = get_theme.load_icon(i, 24, type_ico_load)
+                b = icon_load_try(i, 24)
             except:
                 pass
             else:
                 return b
-        return get_theme.load_icon('empty', 24, type_ico_load)
+        return icon_load_try('empty', 24)
 
 def get_full_size(path, no_list=False):
     '''
