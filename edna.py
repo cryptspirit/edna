@@ -1,6 +1,5 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
-#
 #       edna.py
 #       
 #       Copyright 2011 Podlesnyj Maxim <cryptspirit@gmail.com>
@@ -30,6 +29,7 @@ import edna_gui
 import edna_config
 import edna_function
 import gettext
+import glib
 
 pygtk.require('2.0')
 gettext.install('edna', unicode=True)
@@ -123,6 +123,8 @@ def main():
     gtk.gdk.threads_init()
     d = Dwindow()
     d.show_all()
+    #ml = glib.MainLoop()
+    #ml.run()
     gtk.main()
     return 0
 

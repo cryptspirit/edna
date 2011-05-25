@@ -114,6 +114,8 @@ rc_style = {'cell_name':'1',
             'odd_row_bg':'#41517a',
             'sel_row_fg':'#474747',
             'sel_row_bg':'#599839',
+            'cursor_row_bg':'#0C110A',
+            'cursor_row_fg':'#C0CCBC',
             'icon_size':'18',
             'font_cell_text':'Sans 10'}
             
@@ -261,8 +263,8 @@ class Object_of_Files():
     Класс обработки списка файлов
     '''
     
-    def __init__(self):
-        pass
+    def __init__(self, update_model=None):
+        self.return_update_model = update_model
         
     def add_path(self, path):
         '''
@@ -270,10 +272,15 @@ class Object_of_Files():
         '''
         self.Path = gio.File(path)
         self.Cursor_Position = None
+        self.Table_of_File = []
         os.chdir(path)
         self.Select_List = []
         self.gioFile_list = map(gio.File, os.listdir(path))
+        self.get_list_path()
         self.Model = self.create_model()
+        self.Monitor_rootdir = None
+        self.Monitor_rootdir = self.Path.monitor_directory(gio.FILE_MONITOR_NONE, None)
+        self.Monitor_rootdir.connect('changed', self.event_change_in_rootdir)
         
     def selection(self, gioFile_uri):
         '''
@@ -306,7 +313,10 @@ class Object_of_Files():
         p = gioFile.get_path()
         os.chdir(p)
         self.gioFile_list = [gio.File(os.path.join(p, i)) for i in os.listdir(p)]
+        self.get_list_path()
         self.Model = self.create_model()
+        self.Monitor_rootdir = self.Path.monitor_directory(gio.FILE_MONITOR_NONE, None)
+        self.Monitor_rootdir.connect('changed', self.event_change_in_rootdir)
         
     def gio_activation(self, gioFile_uri):
         '''
@@ -330,11 +340,43 @@ class Object_of_Files():
         self.gioFile_list = []
         self.Select_List = []
         self.Model = None
+        self.Monitor = []
+        self.Monitor_rootdir = None
+        
+    def event_change_in_rootdir(self, monitor, file1, file2, evt_type):
+        '''
+        Обработка событий происходящих с отображаемой папкой
+        '''
+        print 'РАБТАЕТ'
+        if evt_type == gio.FILE_MONITOR_EVENT_DELETED:
+            print 'Удаление', file1
+            for i in xrange(len(self.Table_of_File) - 1):
+                if file1.get_uri() == self.Table_of_File[i][self.Path_Index]:
+                    self.gioFile_list.pop(i)
+                    self.Table_of_File.pop(i)
+                    self.Model = self.create_model()
+                    if self.return_update_model: self.return_update_model()
+        elif evt_type == gio.FILE_MONITOR_EVENT_CHANGED:
+            print 'Изменение', file1
+        elif evt_type == gio.FILE_MONITOR_EVENT_CREATED:
+            print 'Создание', file1
+    
+    def changed_event(self, monitor, file1, file2, evt_type):
+        '''
+        Обработка событий происходящих с файлами
+        '''
+        if (evt_type in (gio.FILE_MONITOR_EVENT_CREATED,
+           gio.FILE_MONITOR_EVENT_DELETED)):
+           print "Changed_file1:", file1
+           print "Changed_file2:", file2
+           print "Changed_evt_type:", evt_type
+           if evt_type == gio.FILE_MONITOR_EVENT_DELETED: print 'jjjjjj'
         
     def get_list_path(self):
         '''
         Получение списка файлов с описаными столбцами
         '''
+        self.Monitor = []
         try: Sum_cell.index('cell_user') # Проверка на то есть ли среди столбцов столбец Владелец
         except: pass
         else: get_dickt_nameusers() # Если есть то получение имен пользователей
@@ -345,8 +387,9 @@ class Object_of_Files():
         ######################################################################
         self.len_Sum_cell = len(Sum_cell)
         self.Path_Index = self.len_Sum_cell + 1
-        self.Background_Index = self.len_Sum_cell + 3
-        self.Foreground_Index = self.len_Sum_cell + 2
+        self.Sort_Index = self.len_Sum_cell + 2
+        self.Background_Index = self.len_Sum_cell + 4
+        self.Foreground_Index = self.len_Sum_cell + 3
         ######################################################################
         return_dir = []
         return_fil = []
@@ -361,12 +404,18 @@ class Object_of_Files():
                     ttt.append('<DIR>')
                 else:
                     ttt.append('')
-            ttt.append(self.Path.get_parent().get_uri())
+            pr = self.Path.get_parent()
+            #self.Monitor.append(pr.monitor_file(gio.FILE_MONITOR_NONE, None))
+            #self.Monitor[len(self.Monitor) - 1].connect("changed", self.changed_event)
+            ttt.append(pr.get_uri())
+            ttt.append('0')
             
         self.Path_probe = os.path.isdir
         return_dir_append = return_dir.append
         return_fil_append = return_fil.append
         for i in self.gioFile_list:
+            #self.Monitor.append(i.monitor_file(gio.FILE_MONITOR_NONE, None))
+            #self.Monitor[len(self.Monitor) - 1].connect("changed", self.changed_event)
             if self.Path_probe(i.get_path()):
                 return_dir_append(get_cell(i, False))
             else:
@@ -389,10 +438,9 @@ class Object_of_Files():
                 color_bg = rc_dict['style']['even_row_bg']
             m[i].append(color_fg)
             m[i].append(color_bg)
-        return m
+        self.Table_of_File = m
         
     def create_model(self):
-        self.Table_of_File = self.get_list_path()
         model = gtk.ListStore(
                             gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
                             gobject.TYPE_STRING, gobject.TYPE_STRING, 
@@ -401,7 +449,7 @@ class Object_of_Files():
                             gobject.TYPE_STRING, gobject.TYPE_STRING, 
                             gobject.TYPE_STRING, gobject.TYPE_STRING, 
                             gobject.TYPE_STRING, gobject.TYPE_STRING)
-        
+    
         for item in self.Table_of_File:
             iter = model.append()
             model.set(iter)
@@ -792,6 +840,19 @@ def get_cell(gioFile, is_fil):
         elif j == 'cell_atr':
                 ret.append(get_file_attr(gioFile.get_path()))
     ret.append(gioFile.get_uri())
+    basename = gioFile.get_basename()
+    if basename[0] == '.':
+        if is_fil:
+            basename = '21' + basename[1:]
+        else:
+            basename = '10' + basename[1:]
+    else:
+        if is_fil:
+            basename = '20' + basename[1:]
+        else:
+            basename = '11' + basename[1:]
+        
+    ret.append(basename)
     return ret
 ########################### edna function (end) ###############################        
 

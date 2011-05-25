@@ -816,29 +816,49 @@ class File_Cells(gtk.TreeView):
                                 'key_5': '',
                                 'key_6': '',
                                 'key_7': ''}
-        self.get_selection().set_mode(gtk.SELECTION_SINGLE)
-        self.OOF = edna_function.Object_of_Files()
+        #self.get_selection().set_mode(gtk.SELECTION_SINGLE)
+        self.get_selection().set_mode(gtk.SELECTION_BROWSE)
+        self.OOF = edna_function.Object_of_Files(self.update_model)
         self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % Number_this_list])
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
         self.connect('button-press-event', self.pr)
         self.connect('cursor-changed', self.cursor_changed)
+        self.connect('sort-column-changed', self.after_sort_list_model)
+    
+    def update_model(self):
+        #self.set_model(self.OOF.Model)
+        pass
+        
+    def set_cursor_on_parent(self, gioFile_uri=None):
+        model = self.get_model()
+        print model
+        #for i in model:
+        #    if i[]
         
     def Cells_Refresh(self):
         '''
         Обновление списка файлов
         '''
-        #self.style('even-row-color', gtk.gdk.Color('#D51A1A'))
+        #self.set_even_row_color(gtk.gdk.Color('#D51A1A'))
         #self.style.set_property('even-row-color', gtk.gdk.Color('#4A6AA0'))
         #self.set_property('enable-tree-lines', False)
+        self.set_rules_hint(True)
         self.set_model(self.OOF.Model)
         self.__add_columns()
+         #'STATE_ACTIVE', 'STATE_INSENSITIVE', 'STATE_NORMAL', 'STATE_PRELIGHT', 'STATE_SELECTED'
         self.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
+        self.modify_base(gtk.STATE_SELECTED, gtk.gdk.Color(edna_function.rc_dict['style']['cursor_row_bg']))
+        self.modify_text(gtk.STATE_SELECTED, gtk.gdk.Color(edna_function.rc_dict['style']['cursor_row_fg']))
+        #self.modify_base(gtk.STATE_INSENSITIVE, gtk.gdk.Color(edna_function.rc_dict['style']['cursor_row_bg']))
+        self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
+        
         #self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_VERTICAL)
         #self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_BOTH)
         
     def cursor_changed(self, *args):
+        self.set_cursor_on_parent()
         selection = self.get_selection()
         model_sel, iter_sel = selection.get_selected()
         self.OOF.Cursor_Position = gio.File(model_sel.get_value(iter_sel, self.OOF.Path_Index))
@@ -902,10 +922,18 @@ class File_Cells(gtk.TreeView):
         remove_after = False
         y = question_window_copy(self.return_path_cell(self.Number_this_list), self.OOF.Path, self.OOF.selection_add(), remove_after)
     
+    def after_sort_list_model(self, gioFile_uri):
+        model = self.get_model()
+        iter = model.get_iter_from_string(self.OOF.Table_of_File[0])
+        print model.get_path(iter)
+        #for i in xrange(len(self.Table_of_File) - 1):
+        #    model.get_value(iter, self.OOF.Path_Index)
+            
     def select_function(self, key):
         
         selection = self.get_selection()
         model, iter = selection.get_selected()
+        print 'iter', iter
         gioFile_uri = model.get_value(iter, self.OOF.Path_Index)
         self.OOF.selection(gioFile_uri)
         print self.OOF.selection_add()
@@ -978,13 +1006,15 @@ class File_Cells(gtk.TreeView):
             alg = [float(edna_function.rc_dict['style']['%s_alignment_h' % u[i]]), float(edna_function.rc_dict['style']['%s_alignment_v' % u[i]])]
             if u[i] == 'cell_name':
                 column = gtk.TreeViewColumn()
-                column.set_title(Name_Colum[u[i]])                
+                column.set_title(Name_Colum[u[i]])
                 renderer = gtk.CellRendererPixbuf()
                 renderer.set_alignment(alg[0], alg[1])
                 column.pack_start(renderer, False)
+                column.set_sort_column_id(self.OOF.Sort_Index)
                 column.set_attributes(renderer, pixbuf=0)
             else:
                 column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, background=self.OOF.Background_Index, foreground=self.OOF.Foreground_Index)
+                column.set_sort_column_id(i + 1)  
             column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
             column.expand = True
             column.set_min_width(int(edna_function.rc_dict['style']['%s_size' % u[i]]))
@@ -1002,6 +1032,7 @@ class File_Cells(gtk.TreeView):
                 
             itk = int(edna_function.rc_dict['style']['%s_expand' % u[i]])
             column.set_expand(itk)
+            
             self.append_column(column)
     
     

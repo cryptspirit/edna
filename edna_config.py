@@ -178,8 +178,8 @@ class Rc_Window(gtk.Window):
         lab.modify_font(pango.FontDescription('bold'))
         #lab.set_justify(gtk.JUSTIFY_LEFT)
         lab.set_alignment(0.0, 0.5)
-        l = ['even_row', 'odd_row', 'sel_row']
-        l_name = [_('Even rows'), _('Odd rows'), _('Select rows')]
+        l = ['even_row', 'odd_row', 'sel_row', 'cursor_row']
+        l_name = [_('Even rows'), _('Odd rows'), _('Select rows'), _('Cursor rows')]
         p = ['fg', 'bg']
         bt = {}
         for i in l:
