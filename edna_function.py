@@ -347,19 +347,32 @@ class Object_of_Files():
         '''
         Обработка событий происходящих с отображаемой папкой
         '''
-        print 'РАБТАЕТ'
         if evt_type == gio.FILE_MONITOR_EVENT_DELETED:
-            print 'Удаление', file1
-            for i in xrange(len(self.Table_of_File) - 1):
+            #print 'Удаление', file1
+            for i in xrange(len(self.Table_of_File)):
                 if file1.get_uri() == self.Table_of_File[i][self.Path_Index]:
-                    self.gioFile_list.pop(i)
+                    #self.gioFile_list.pop(i)
                     self.Table_of_File.pop(i)
-                    self.Model = self.create_model()
-                    if self.return_update_model: self.return_update_model()
+                    #self.Model = self.create_model()
+                    if self.return_update_model: self.return_update_model(file1.get_uri(), 0)
+                    return
         elif evt_type == gio.FILE_MONITOR_EVENT_CHANGED:
-            print 'Изменение', file1
+            #print 'Изменение', file1
+            for i in xrange(len(self.Table_of_File)):
+                if file1.get_uri() == self.Table_of_File[i][self.Path_Index]:
+                    new_row = self.get_row_path(file1)
+                    for j in xrange(len(self.Table_of_File[i]) - 1):
+                        self.Table_of_File[i][j] = new_row[j]
+                    #self.Model = self.create_model()
+                    if self.return_update_model: self.return_update_model(file1.get_uri(), 1, new_row)
+                    return
         elif evt_type == gio.FILE_MONITOR_EVENT_CREATED:
-            print 'Создание', file1
+            #print 'Создание', file1
+            new_row = self.get_row_path(file1)
+            new_row.append(rc_dict['style']['even_row_fg'])
+            self.Table_of_File.append(new_row)
+            if self.return_update_model: self.return_update_model(file1.get_uri(), 2, new_row)
+            return
     
     def changed_event(self, monitor, file1, file2, evt_type):
         '''
@@ -371,6 +384,13 @@ class Object_of_Files():
            print "Changed_file2:", file2
            print "Changed_evt_type:", evt_type
            if evt_type == gio.FILE_MONITOR_EVENT_DELETED: print 'jjjjjj'
+        
+    def get_row_path(self, gioFile):
+        '''
+        Получение строки файла с описаными столбцами
+        '''
+        ret = get_cell(gioFile, os.path.isfile(gioFile.get_path()))
+        return ret
         
     def get_list_path(self):
         '''
@@ -388,7 +408,6 @@ class Object_of_Files():
         self.len_Sum_cell = len(Sum_cell)
         self.Path_Index = self.len_Sum_cell + 1
         self.Sort_Index = self.len_Sum_cell + 2
-        self.Background_Index = self.len_Sum_cell + 4
         self.Foreground_Index = self.len_Sum_cell + 3
         ######################################################################
         return_dir = []
@@ -430,14 +449,7 @@ class Object_of_Files():
         op = 0
         
         for i in xrange(len(m)):
-            if i % 2 != 0:
-                color_fg = rc_dict['style']['odd_row_fg']
-                color_bg = rc_dict['style']['odd_row_bg']
-            else:
-                color_fg = rc_dict['style']['even_row_fg']
-                color_bg = rc_dict['style']['even_row_bg']
-            m[i].append(color_fg)
-            m[i].append(color_bg)
+            m[i].append(rc_dict['style']['even_row_fg'])
         self.Table_of_File = m
         
     def create_model(self):
