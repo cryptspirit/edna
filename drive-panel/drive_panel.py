@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       search_gui_class.py
+#       drive_panel.py
 #       
 #       Copyright 2011 Sevka <sevka@ukr.net>
 #       
@@ -24,7 +24,7 @@ import gio
 import pynotify
 
 class DrivePanel(gtk.Toolbar):
-    def __init__(self):
+    def __init__(self, cd_callback):
         gtk.Toolbar.__init__(self)
         self.set_style(gtk.TOOLBAR_BOTH_HORIZ)
         self.set_icon_size(gtk.ICON_SIZE_MENU)
@@ -87,7 +87,7 @@ class DrivePanel(gtk.Toolbar):
             print m.get_root().get_uri()
 
 def main():
-    d = DrivePanel()
+    d = DrivePanel(None)
     w = gtk.Window()
     vbox = gtk.VBox(False, 10)
     vbox.pack_start(d, False, False)
@@ -100,6 +100,5 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    help(type(pynotify.Notification))
     main()
 
