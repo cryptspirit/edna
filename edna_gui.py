@@ -33,6 +33,8 @@ import filecmp
 import gettext
 import gio
 
+import drive_panel
+
 gettext.install('edna', unicode=True)
 ###############################################################################
 self_name = 'Edna'
@@ -827,6 +829,16 @@ class File_Cells(gtk.TreeView):
         self.connect('focus-in-event', self.__focus_trap)
         self.connect('focus-out-event', self.__focus_trap)
         
+    def drive_panel_callback(self, event):
+        '''
+        Метод-коллбек, который вызывается при кликах на драйв-панели
+        '''
+        if event.type == drive_panel.DriveEvent.TYPE_CD:
+            self.OOF.gio_activation('file://' + event.path)
+            self.set_model(self.OOF.Model)
+            self.path_entry.set_text(self.OOF.Path.get_path())
+            self.__set_custom_cursor()
+    
     def __focus_trap(self, *args):
         '''
         Ловушка для фокуса клавиатуры
@@ -1108,10 +1120,11 @@ class listen_cell(gtk.VBox):
         ###################################
         self.treeview = File_Cells(n, return_path_cell, self.path_entry)
         self.info_label = gtk.Label('info')
+        self.drive_panel = drive_panel.DrivePanel(self.treeview.drive_panel_callback)
         ###################################
         self.scrol.add(self.treeview)
         self.upData()
-        self.pack_start(self.drive_info_label, False)
+        self.pack_start(self.drive_panel, False)
         self.pack_start(self.evtb, False)
         self.pack_start(self.scrol)
         self.pack_start(self.info_label, False)
