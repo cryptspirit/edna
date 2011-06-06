@@ -58,6 +58,9 @@ class DrivePanel(gtk.Toolbar):
             события. В качестве параметра будет передан объект DriveEvent
         '''
         gtk.Toolbar.__init__(self)
+        self.tooltips = gtk.Tooltips()
+        self.set_tooltips(True)
+        self.set_can_focus(False)
         self.callback = callback
         self.set_style(gtk.TOOLBAR_BOTH_HORIZ)
         self.set_icon_size(gtk.ICON_SIZE_MENU)
@@ -86,11 +89,13 @@ class DrivePanel(gtk.Toolbar):
         # рут и хоум
         b = gtk.ToolButton(gtk.STOCK_HARDDISK)
         b.set_label('/')
+        b.set_tooltip(self.tooltips, '/')
         b.connect('clicked', self.clicked, Drive('/','/'))
         self.insert(b, self.get_n_items())
         
         b = gtk.ToolButton(gtk.STOCK_HOME)
         b.set_label('~')
+        b.set_tooltip(self.tooltips, os.path.expanduser('~'))
         b.connect('clicked', self.clicked, Drive('Home', os.path.expanduser('~')))
         self.insert(b, self.get_n_items())
         
@@ -106,6 +111,7 @@ class DrivePanel(gtk.Toolbar):
             image = gtk.Image()
             image.set_from_gicon(volume.get_icon(),gtk.ICON_SIZE_MENU)
             b = gtk.ToolButton(image, volume.get_name())
+            b.set_tooltip(self.tooltips, volume.get_mount().get_root().get_path() if volume.get_mount() else volume.get_name())
             b.set_is_important(True)
             b.connect('clicked', self.clicked, volume)
             self.insert(b, self.get_n_items())
@@ -117,6 +123,7 @@ class DrivePanel(gtk.Toolbar):
                 image = gtk.Image()
                 image.set_from_gicon(mount.get_icon(),gtk.ICON_SIZE_MENU)
                 b = gtk.ToolButton(image, mount.get_name())
+                b.set_tooltip(self.tooltips, mount.get_root().get_path())
                 b.set_is_important(True)
                 b.connect('clicked', self.clicked, mount)
                 self.insert(b, self.get_n_items())

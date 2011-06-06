@@ -30,6 +30,7 @@ import edna_config
 import edna_function
 import gettext
 import glib
+from search.search_gui_class import SearchWindow
 
 pygtk.require('2.0')
 gettext.install('edna', unicode=True)
@@ -69,6 +70,9 @@ class Dwindow(gtk.Window):
     def create_menu(self):
         ui_string = """<ui>
         <menubar>
+            <menu name='Commands' action='Commands'>
+                <menuitem action='Search'/>
+            </menu>
             <menu name='Configurations' action='Configurations'>
                 <menuitem action='Config'/>
             </menu>
@@ -80,6 +84,8 @@ class Dwindow(gtk.Window):
         </ui>
         """
         actions = [
+            ('Commands', None, '_Commands'),
+            ('Search', gtk.STOCK_FIND, None, None, None, self.search_window),
             ('Configurations', None, '_Configurations'),
             ('Config', gtk.STOCK_PREFERENCES, None, None, None, self.config_window),
             ('HelpMenu', gtk.STOCK_HELP),
@@ -96,7 +102,10 @@ class Dwindow(gtk.Window):
     def config_window(self, *args):
         rrr = edna_config.Rc_Window()
         rrr.button_ok.connect('clicked', self.upData, rrr, True)
-        
+    
+    def search_window(self, *args):
+        search_window = SearchWindow(self.cel[0].treeview.OOF.Path.get_path())
+    
     def help_about(self, *args):
         pass
     

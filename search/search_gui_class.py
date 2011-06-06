@@ -123,6 +123,9 @@ class SearchWindow(gtk.Window):
             self.buttonPause.set_label(_('Pause search'))
             self.searchThread.contin() 
             
+    def closeSearch(self, sender):
+        self.hide()
+        
     def _startSpinner(self):
         self.spinner.start()
     
@@ -261,7 +264,7 @@ class SearchWindow(gtk.Window):
         buttonBox.add(self.buttonPause)
         buttonBox.add(self.buttonClose)
 
-        self.buttonClose.connect('clicked', progexit)
+        self.buttonClose.connect('clicked', self.closeSearch)
         self.buttonStart.connect('clicked', self.startSearch)
         self.buttonStop.connect('clicked', self.stopSearch)
         self.buttonPause.connect('clicked',self.pauseSearch)
@@ -278,7 +281,7 @@ class SearchWindow(gtk.Window):
         vbox.pack_start(buttonBox, False, True, 0)
         self.add(vbox)
 
-        self.connect('destroy',progexit)
+        self.connect('destroy', self.closeSearch)
 
         self.show_all()
         maxLabelWidth = max(label1.get_allocation()[2], label2.get_allocation()[2], label3.get_allocation()[2])
@@ -287,8 +290,6 @@ class SearchWindow(gtk.Window):
         label3.set_size_request(maxLabelWidth,-1)
         self.statusBox.set_visible(False)
         
-def progexit(*args):
-    gtk.main_quit()
 
 def main():
     searchWindow = SearchWindow('/home/sevka')
