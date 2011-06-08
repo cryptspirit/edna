@@ -1137,8 +1137,10 @@ class listen_cell(gtk.VBox):
         elif event.type == drive_panel.DriveEvent.TYPE_UNMOUNT:
             if self.treeview.OOF.Path.get_path().startswith(event.path):
                 self.treeview.change_dir('/')
-            if self.return_path_cell(self.n).get_path().startswith(event.path):
-                print 'change dir in another panel'
+            self.return_path_cell().get_panel_opponent(self.n).treeview.OOF.Path.get_path()
+            if self.return_path_cell().get_panel_opponent(self.n).treeview.OOF.Path.get_path().startswith(event.path):
+                self.return_path_cell().get_panel_opponent(self.n).treeview.change_dir('/')
+                
     def get_number_top_list(self):
         '''
         Функция возвращает номер текущего списка (так как будующем будут

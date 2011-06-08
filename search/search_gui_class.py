@@ -295,9 +295,11 @@ class SearchWindow(gtk.Window):
         self.connect('delete-event', self.closeSearch)
         
     
-    def show_all(self):
+    def show_all(self, folder = None):
         gtk.Window.show_all(self)
-        
+        if folder and os.path.exists(folder):
+            self.folder = folder
+            self.fileChooser.set_current_folder(self.folder)
         maxLabelWidth = max(self.label1.get_allocation()[2], self.label2.get_allocation()[2], self.label3.get_allocation()[2])
         self.label1.set_size_request(maxLabelWidth,-1)
         self.label2.set_size_request(maxLabelWidth,-1)

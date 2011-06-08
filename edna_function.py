@@ -291,8 +291,13 @@ class Panel_Pile():
         Возвращает путь в панели оппонента
         '''
         return self.Panel_Box[self.__find_name_panel_opponent(Panel_Name)].treeview.OOF.Path
-
-
+    
+    def get_panel_opponent(self, Panel_Name):
+        '''
+        Возвращает соседнюю панель
+        '''
+        return self.Panel_Box[self.__find_name_panel_opponent(Panel_Name)]
+    
 class Object_of_Files():
     '''
     Класс обработки списка файлов

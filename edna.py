@@ -104,18 +104,21 @@ class Dwindow(gtk.Window):
         self.ui.add_ui_from_string(ui_string)
         self.add_accel_group(self.ui.get_accel_group())
         return self.ui.get_widget('/menubar')
+    
     def run_terminal(self, folder, command = None):
-        print edna_function.get_user_shell()
-        os.system("gnome-terminal --working-directory /home/sevka/tmp")
+        current_panel = self.panel_pile.get_panel('0') if self.panel_pile.get_panel('0').treeview.has_focus() else self.panel_pile.get_panel('1')
+        os.system("gnome-terminal --working-directory \"" + current_panel.treeview.OOF.Path.get_path() + "\"")
         
     def config_window(self, *args):
         rrr = edna_config.Rc_Window()
         rrr.button_ok.connect('clicked', self.upData, rrr, True)
     
     def search_window(self, *args):
+        current_panel = self.panel_pile.get_panel('0') if self.panel_pile.get_panel('0').treeview.has_focus() else self.panel_pile.get_panel('1')
         if not self.search:
-            self.search = SearchWindow(self.cel[0].treeview.OOF.Path.get_path())
-        self.search.show_all()
+            
+            self.search = SearchWindow(current_panel.treeview.OOF.Path.get_path())
+        self.search.show_all(current_panel.treeview.OOF.Path.get_path())
     
     def help_about(self, *args):
         pass
