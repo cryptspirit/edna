@@ -258,6 +258,41 @@ dic_icon['empty'] = icon_load_try('empty', int(rc_dict['style']['icon_size']))
 
 #dic_icon['empty'] = get_theme.load_icon('empty', int(rc_dict['style']['icon_size']), type_ico_load)
 ########################## edna function (begin) ##############################
+class Panel_Pile():
+    '''
+    Класс обработки панелей
+    '''
+    def __init__(self):
+        self.Panel_Box = {}
+        
+    def add_panel(self, Panel_Object, Panel_Name):
+        '''
+        Добавление панели
+        '''
+        self.Panel_Box[Panel_Name] = Panel_Object
+        
+    def __find_name_panel_opponent(self, Panel_Name):
+        '''
+        Поиск имени панели оппонента
+        '''
+        for i in self.Panel_Box.keys():
+            # Элементарный поиск панели оппонента в будующем необходимо заменить на более изящний
+            if i != Panel_Name:
+                return i
+        
+    def get_panel(self, Panel_Name):
+        '''
+        Возвращает панели по имени
+        '''
+        return self.Panel_Box[Panel_Name]
+        
+    def get_path_in_panel_opponent(self, Panel_Name):
+        '''
+        Возвращает путь в панели оппонента
+        '''
+        return self.Panel_Box[self.__find_name_panel_opponent(Panel_Name)].treeview.OOF.Path
+
+
 class Object_of_Files():
     '''
     Класс обработки списка файлов
