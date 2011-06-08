@@ -31,7 +31,7 @@ import gettext
 import gio
 import gobject
 import glib
-
+import getpass
 
 gettext.install('edna', unicode=True)
 ###############################################################################
@@ -901,6 +901,23 @@ def get_cell(gioFile, is_fil):
         
     ret.append(basename)
     return ret
+
+def get_user_shell():
+    """Get the user's shell defined in /etc/passwd ."""
+    data = None
+    try:
+        # Read out the data in /etc/passwd
+        with open('/etc/passwd') as f:
+            data = f.readlines()
+    except e:
+        print "Something unexpected happened!"
+        raise e
+    for i in data:
+        tmp = i.split(":")
+        # Check for the entry of the currently logged in user
+        if tmp[0] == getpass.getuser(): 
+            return i.split(":")[-1:][0].strip('\n')
+
 ########################### edna function (end) ###############################        
 
 def main():
