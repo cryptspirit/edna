@@ -48,15 +48,18 @@ class Dwindow(gtk.Window):
         self.vbox1 = gtk.VBox(False, 5)
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
-        self.cel = []
-        self.cel.append(edna_gui.listen_cell(0, self.return_path_cell))
-        self.cel.append(edna_gui.listen_cell(1, self.return_path_cell))
-        self.set_focus(self.cel[0].treeview)
+        self.panel_pile = edna_function.Panel_Pile()
+        #self.cel = []
+        #self.cel.append(edna_gui.listen_cell(0, self.return_path_cell))
+        #self.cel.append(edna_gui.listen_cell(1, self.return_path_cell))
+        self.panel_pile.add_panel(edna_gui.listen_cell('0', self.return_panel_pile), '0')
+        self.panel_pile.add_panel(edna_gui.listen_cell('1', self.return_panel_pile), '1')
+        self.set_focus(self.panel_pile.get_panel('0').treeview)
         self.foc_c = True
         #################################
         #BOX############################
         for i in xrange(2):
-            self.hpannel1.pack_start(self.cel[i])
+            self.hpannel1.pack_start(self.panel_pile.get_panel(str(i)))
         self.vbox1.pack_start(hdlbox, False)
         self.vbox1.pack_start(self.hpannel1)
         ################################
@@ -100,8 +103,11 @@ class Dwindow(gtk.Window):
     def help_about(self, *args):
         pass
     
-    def return_path_cell(self, index):
-        return self.cel[not index].get_number_top_list()
+    def return_panel_pile(self):
+        '''
+        Возвращает объект обработки панелей
+        '''
+        return self.panel_pile
         
     def upData(self, *args):
         print args
@@ -115,7 +121,7 @@ class Dwindow(gtk.Window):
             for i in self.cel: i.Focus_State = self.is_focus()
         
     def exitt(self, *args):
-        for i in self.cel: i.Exit_State = True
+        #for i in self.cel: i.Exit_State = True
         args[0].hide()
         gtk.main_quit()
         

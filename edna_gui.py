@@ -801,11 +801,11 @@ class File_Cells(gtk.TreeView):
     '''
     Класс списка файлов
     '''
-    def __init__(self, Number_this_list, return_path_cell, path_entry=gtk.Label):
+    def __init__(self, Number_this_list, return_panel_pile, path_entry=gtk.Label):
         gtk.TreeView.__init__(self)
         self.set_rules_hint(True)
         self.set_grid_lines(False)
-        self.return_path_cell = return_path_cell
+        self.return_panel_pile = return_panel_pile
         self.path_entry = path_entry
         self.Number_this_list = Number_this_list
         self.Hotkeys_Function = {'key_1': self.copys,
@@ -818,7 +818,7 @@ class File_Cells(gtk.TreeView):
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
         self.OOF = edna_function.Object_of_Files(self.update_model)
-        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%d' % Number_this_list])
+        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%s' % Number_this_list])
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
@@ -858,7 +858,7 @@ class File_Cells(gtk.TreeView):
                         if i == len(self.OOF.Table_of_File):
                             self.set_cursor(len(self.OOF.Table_of_File) - 1)
                         else:
-                            self.set_cursor(len(self.OOF.Table_of_File))
+                            self.set_cursor(i)
                     model.remove(iter)
                     return
         elif operation == 1:
@@ -961,7 +961,7 @@ class File_Cells(gtk.TreeView):
         Копирование
         '''
         remove_after = False
-        y = question_window_copy(self.return_path_cell(self.Number_this_list), self.OOF.Path, self.OOF.selection_add(), remove_after)
+        y = question_window_copy(self.return_panel_pile().get_path_in_panel_opponent(self.Number_this_list), self.OOF.Path, self.OOF.selection_add(), remove_after)
     
     def return_path_parent_row(self, gioFile_uri):
         model = self.get_model()
