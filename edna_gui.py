@@ -829,16 +829,6 @@ class File_Cells(gtk.TreeView):
         self.connect('focus-in-event', self.__focus_trap)
         self.connect('focus-out-event', self.__focus_trap)
         
-    def drive_panel_callback(self, event):
-        '''
-        Метод-коллбек, который вызывается при кликах на драйв-панели
-        '''
-        if event.type == drive_panel.DriveEvent.TYPE_CD:
-            self.OOF.gio_activation('file://' + event.path)
-            self.set_model(self.OOF.Model)
-            self.path_entry.set_text(self.OOF.Path.get_path())
-            self.__set_custom_cursor()
-    
     def __focus_trap(self, *args):
         '''
         Ловушка для фокуса клавиатуры
@@ -1046,7 +1036,13 @@ class File_Cells(gtk.TreeView):
         self.set_model(self.OOF.Model)
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.__set_custom_cursor()
-            
+        
+    def change_dir(self, path):
+        self.OOF.gio_activation('file://' + path)
+        self.set_model(self.OOF.Model)
+        self.path_entry.set_text(self.OOF.Path.get_path())
+        self.__set_custom_cursor()
+
     def __add_columns(self):
         '''
         Создание столбцов
@@ -1120,7 +1116,8 @@ class listen_cell(gtk.VBox):
         ###################################
         self.treeview = File_Cells(n, return_path_cell, self.path_entry)
         self.info_label = gtk.Label('info')
-        self.drive_panel = drive_panel.DrivePanel(self.treeview.drive_panel_callback)
+        self.drive_panel = drive_panel.DrivePanel(self.drive_panel_callback)
+        self.drive_panel.set_border_width(0)
         ###################################
         self.scrol.add(self.treeview)
         self.upData()
@@ -1131,6 +1128,17 @@ class listen_cell(gtk.VBox):
         #self.Timer_func = threading.Timer(0, self.timer_refresh)
         #self.Timer_func.start()
         
+    def drive_panel_callback(self, event):
+        '''
+        Метод-коллбек, который вызывается при кликах на драйв-панели
+        '''
+        if event.type == drive_panel.DriveEvent.TYPE_CD:
+            self.treeview.change_dir(event.path)
+        elif event.type == drive_panel.DriveEvent.TYPE_UNMOUNT:
+            if self.treeview.OOF.Path.get_path().startswith(event.path):
+                self.treeview.change_dir('/')
+            if self.return_path_cell(self.n).get_path().startswith(event.path):
+                print 'change dir in another panel'
     def get_number_top_list(self):
         '''
         Функция возвращает номер текущего списка (так как будующем будут

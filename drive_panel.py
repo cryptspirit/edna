@@ -22,6 +22,7 @@
 import gtk
 import gio
 import os
+import pynotify
 
 class Drive():
     '''
@@ -43,7 +44,7 @@ class DriveEvent():
     
     def __init__(self, type, param):
         self.type = type
-        if type == self.TYPE_CD:
+        if type in (self.TYPE_CD, self.TYPE_UNMOUNT):
             self.path = param
         
 class DrivePanel(gtk.Toolbar):
@@ -59,8 +60,8 @@ class DrivePanel(gtk.Toolbar):
         gtk.Toolbar.__init__(self)
         self.set_can_focus(False)
         self.callback = callback
-        self.set_style(gtk.TOOLBAR_BOTH_HORIZ)
-        self.set_icon_size(gtk.ICON_SIZE_MENU)
+        self.set_style(gtk.TOOLBAR_BOTH_HORIZ)  #TOOLBAR_ICONS
+        self.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
         self.vm = gio.VolumeMonitor()
         self.vm.connect('volume-added', self.volume_changed)
         self.vm.connect('volume-removed', self.volume_changed)
@@ -93,13 +94,15 @@ class DrivePanel(gtk.Toolbar):
         try:
             a.unmount_finish(b)
         except:
-            print "Cannot unmount"
+            n = pynotify.Notification('Edna', 'Cannot unmount ' + a.get_root().get_path(), gtk.STOCK_DIALOG_ERROR)
+            n.show()
     def eject_callback(self,a,b):
         try:
             a.eject_finish(b)
         except:
             print "Cannot eject"
     def drive_unmount(self, a, mount):
+        self.callback(DriveEvent(DriveEvent.TYPE_UNMOUNT, mount.get_root().get_path()))
         if mount.can_unmount():
             mount.unmount(self.unmount_callback)
             
@@ -160,7 +163,11 @@ class DrivePanel(gtk.Toolbar):
             if mount.get_root().get_uri() not in uris:
                 image = gtk.Image()
                 image.set_from_gicon(mount.get_icon(),gtk.ICON_SIZE_MENU)
-                b = gtk.ToolButton(image, mount.get_name())
+                if mount.can_eject() or mount.can_unmount():
+                    b = gtk.MenuToolButton(image, mount.get_name())
+                    b.set_menu(self.create_menu(mount))
+                else:
+                    b = gtk.ToolButton(image, mount.get_name())
                 b.set_tooltip_text(mount.get_root().get_path())
                 b.set_is_important(True)
                 b.connect('clicked', self.clicked, mount)

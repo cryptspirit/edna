@@ -36,6 +36,7 @@ pygtk.require('2.0')
 gettext.install('edna', unicode=True)
 
 class Dwindow(gtk.Window):
+    search = None
     def __init__(self):
         gtk.Window.__init__(self)
         self.connect('destroy', self.exitt)
@@ -46,7 +47,7 @@ class Dwindow(gtk.Window):
         # Widget#########################
         hdlbox = gtk.HandleBox()
         hdlbox.add(self.create_menu())
-        self.vbox1 = gtk.VBox(False, 5)
+        self.vbox1 = gtk.VBox(False, 0)
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
         self.cel = []
@@ -72,6 +73,7 @@ class Dwindow(gtk.Window):
         <menubar>
             <menu name='Commands' action='Commands'>
                 <menuitem action='Search'/>
+                <menuitem action='RunTerminal'/>
             </menu>
             <menu name='Configurations' action='Configurations'>
                 <menuitem action='Config'/>
@@ -86,6 +88,7 @@ class Dwindow(gtk.Window):
         actions = [
             ('Commands', None, '_Commands'),
             ('Search', gtk.STOCK_FIND, None, None, None, self.search_window),
+            ('RunTerminal', gtk.STOCK_EXECUTE, _("Run terminal"), None, None, self.run_terminal),
             ('Configurations', None, '_Configurations'),
             ('Config', gtk.STOCK_PREFERENCES, None, None, None, self.config_window),
             ('HelpMenu', gtk.STOCK_HELP),
@@ -98,13 +101,18 @@ class Dwindow(gtk.Window):
         self.ui.add_ui_from_string(ui_string)
         self.add_accel_group(self.ui.get_accel_group())
         return self.ui.get_widget('/menubar')
-    
+    def run_terminal(self, folder, command = None):
+        print edna_function.get_user_shell()
+        os.system("gnome-terminal --working-directory /home/sevka/tmp")
+        
     def config_window(self, *args):
         rrr = edna_config.Rc_Window()
         rrr.button_ok.connect('clicked', self.upData, rrr, True)
     
     def search_window(self, *args):
-        search_window = SearchWindow(self.cel[0].treeview.OOF.Path.get_path())
+        if not self.search:
+            self.search = SearchWindow(self.cel[0].treeview.OOF.Path.get_path())
+        self.search.show_all()
     
     def help_about(self, *args):
         pass

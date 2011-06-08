@@ -117,15 +117,20 @@ class SearchWindow(gtk.Window):
         if self.paused:
             self._stopSpinner()
             self.buttonPause.set_label(_('Continue search'))
+            self.buttonPause.set_image(self.imageContinue)
             self.searchThread.pause() 
         else:
             self._startSpinner()
             self.buttonPause.set_label(_('Pause search'))
+            self.buttonPause.set_image(self.imagePause)
             self.searchThread.contin() 
             
-    def closeSearch(self, sender):
+    def closeSearch(self, sender,event = None):
+        if hasattr(self, 'searchThread') and self.searchThread.status != self.searchThread.STATUS_STOPPED:
+            self.stopSearch()
         self.hide()
-        
+        return True
+    
     def _startSpinner(self):
         self.spinner.start()
     
@@ -158,14 +163,12 @@ class SearchWindow(gtk.Window):
         self.set_default_size(800,500)
         vbox = gtk.VBox(False, 10)
         
-        self.tooltips = gtk.Tooltips()
-        
         #main params
         mainParamsVBox = gtk.VBox(False,10)
 
         hbox1 = gtk.HBox(False,0)
-        label1 = gtk.Label(_('File name'))
-        label1.set_alignment(0,0.5)
+        self.label1 = gtk.Label(_('File name'))
+        self.label1.set_alignment(0,0.5)
         self.fileNameEntry = gtk.Entry()
         self.exactCB = gtk.CheckButton(_('Exact'))
         self.caseCB = gtk.CheckButton(_('Case sensitive'))
@@ -175,7 +178,7 @@ class SearchWindow(gtk.Window):
         self.fileTypeCombo.append_text(_('Files only'))
         self.fileTypeCombo.append_text(_('Folders only'))
         self.fileTypeCombo.set_active(0)
-        hbox1.pack_start(label1, False, False, 10)
+        hbox1.pack_start(self.label1, False, False, 10)
         hbox1.pack_start(self.fileNameEntry, True, True)
         hbox1.pack_start(self.fileTypeCombo, False, False,10)
         hbox1.pack_start(self.exactCB, False, False,10)
@@ -185,25 +188,25 @@ class SearchWindow(gtk.Window):
         self.regexCB.connect('clicked',self.regexCBClick)
 
         hbox2 = gtk.HBox(False,0)
-        label2 = gtk.Label(_('Search in folder'))
-        label2.set_alignment(0,0.5)
+        self.label2 = gtk.Label(_('Search in folder'))
+        self.label2.set_alignment(0,0.5)
         self.fileChooser = gtk.FileChooserButton(_('Select folder'))
         self.fileChooser.set_action(gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
         if self.folder:
             self.fileChooser.set_current_folder(self.folder)
         self.folderRecursiveCB = gtk.CheckButton(_('Recursive'))
         self.folderRecursiveCB.set_active(True)
-        hbox2.pack_start(label2, False, False, 10)
+        hbox2.pack_start(self.label2, False, False, 10)
         hbox2.pack_start(self.fileChooser, True, True)
         hbox2.pack_start(self.folderRecursiveCB, False, False, 10)
 
         hbox3 = gtk.HBox(False,0)
-        label3 = gtk.Label(_('Search for text'))
-        label3.set_alignment(0,0.5)
+        self.label3 = gtk.Label(_('Search for text'))
+        self.label3.set_alignment(0,0.5)
         self.textEntry = gtk.Entry()
         self.textCaseCB = gtk.CheckButton(_('Case sensitive'))
         self.textRegexCB = gtk.CheckButton(_('Regex'))
-        hbox3.pack_start(label3, False, False, 10)
+        hbox3.pack_start(self.label3, False, False, 10)
         hbox3.pack_start(self.textEntry, True, True)
         hbox3.pack_start(self.textCaseCB, False, False, 10)
         hbox3.pack_start(self.textRegexCB, False, False, 10)
@@ -220,10 +223,10 @@ class SearchWindow(gtk.Window):
         
         self.useLocateCB = gtk.CheckButton(_('Use UNIX \'locate\' command'))
         self.useLocateCB.set_active(True)
-        self.tooltips.set_tip(self.useLocateCB, 'Possibly slow for text search')        
+        self.useLocateCB.set_tooltip_text('Possibly slow for text search')        
         self.hiddenCB = gtk.CheckButton(_('Process hidden files and folders'))
         self.linksCB = gtk.CheckButton(_('Follow simlinks'))
-        self.tooltips.set_tip(self.linksCB, 'Attention! Dead locks possible! ') 
+        self.linksCB.set_tooltip_text('Attention! Dead locks possible! ') 
         self.linksCB.set_active(True)
         addParamsVBox1.pack_start(self.useLocateCB, False, False)
         addParamsVBox1.pack_start(self.hiddenCB, False, False)
@@ -253,12 +256,19 @@ class SearchWindow(gtk.Window):
         
         #button box
         buttonBox = gtk.HButtonBox()
+        buttonBox.set_layout(gtk.BUTTONBOX_END)
+        buttonBox.set_spacing(10)
         buttonBox.set_border_width(10)
-        self.buttonStart = gtk.Button(_('Start search'))
-        self.buttonStop = gtk.Button(_('Stop search'))
+        self.buttonStart = gtk.Button(_('Start search'),gtk.STOCK_FIND)
+        self.buttonStop = gtk.Button(_('Stop search'), gtk.STOCK_STOP)
+        self.imagePause = gtk.Image()
+        self.imagePause.set_from_stock(gtk.STOCK_MEDIA_PAUSE, gtk.ICON_SIZE_BUTTON)
+        self.imageContinue = gtk.Image()
+        self.imageContinue.set_from_stock(gtk.STOCK_MEDIA_PLAY, gtk.ICON_SIZE_BUTTON)
         self.buttonPause = gtk.ToggleButton(_('Pause search'))
+        self.buttonPause.set_image(self.imagePause)
         self.buttonPause.set_mode(True)
-        self.buttonClose = gtk.Button(_('Close'))
+        self.buttonClose = gtk.Button(_('Close'), gtk.STOCK_CLOSE)
         buttonBox.add(self.buttonStart)
         buttonBox.add(self.buttonStop)
         buttonBox.add(self.buttonPause)
@@ -281,18 +291,22 @@ class SearchWindow(gtk.Window):
         vbox.pack_start(buttonBox, False, True, 0)
         self.add(vbox)
 
-        self.connect('destroy', self.closeSearch)
-
-        self.show_all()
-        maxLabelWidth = max(label1.get_allocation()[2], label2.get_allocation()[2], label3.get_allocation()[2])
-        label1.set_size_request(maxLabelWidth,-1)
-        label2.set_size_request(maxLabelWidth,-1)
-        label3.set_size_request(maxLabelWidth,-1)
-        self.statusBox.set_visible(False)
+        #self.connect('destroy', self.closeSearch)
+        self.connect('delete-event', self.closeSearch)
         
+    
+    def show_all(self):
+        gtk.Window.show_all(self)
+        
+        maxLabelWidth = max(self.label1.get_allocation()[2], self.label2.get_allocation()[2], self.label3.get_allocation()[2])
+        self.label1.set_size_request(maxLabelWidth,-1)
+        self.label2.set_size_request(maxLabelWidth,-1)
+        self.label3.set_size_request(maxLabelWidth,-1)
+        self.statusBox.set_visible(False)
 
 def main():
     searchWindow = SearchWindow('/home/sevka')
+    searchWindow.show_all()
     gtk.main()
     return 0
 
