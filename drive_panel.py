@@ -107,6 +107,7 @@ class DrivePanel(gtk.Toolbar):
             mount.unmount(self.unmount_callback)
             
     def drive_eject(self, a, mount):
+        self.callback(DriveEvent(DriveEvent.TYPE_UNMOUNT, mount.get_root().get_path()))
         if mount.can_eject():
             mount.eject(self.eject_callback)        
             
