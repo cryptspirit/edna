@@ -1,24 +1,4 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-#
-#       edna_gui.py
-#       
-#       Copyright 2011 CryptSpirit <cryptspirit@gmail.com>
-#       
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 2 of the License, or
-#       (at your option) any later version.
-#       
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
-#       
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
 
 import gobject
 import gtk
@@ -561,7 +541,7 @@ class question_window(gtk.Window):
             p = list[0][0][len(os.path.dirname(list[0][0])):]
             if p[0] == '/': p = p[1:]
             target_list += p + '?'
-        text = _('You want to delete') + '\n%s%s' % (target, target_list)
+        text = _('You want to delete') + '\n%s%s' % (target, unicode(target_list, 'utf8'))
         self.label_question = gtk.Label(text)
         self.label_question.set_alignment(0.0, 0.0)
         hbbox = gtk.HButtonBox()
@@ -803,12 +783,13 @@ class File_Cells(gtk.TreeView):
     '''
     Класс списка файлов
     '''
-    def __init__(self, Number_this_list, return_panel_pile, path_entry=gtk.Label):
+    def __init__(self, number_of_panel, Number_this_list, return_panel_pile, path_entry=gtk.Label):
         gtk.TreeView.__init__(self)
         self.set_rules_hint(True)
         self.set_grid_lines(False)
         self.return_panel_pile = return_panel_pile
         self.path_entry = path_entry
+        self.number_of_panel = number_of_panel
         self.Number_this_list = Number_this_list
         self.Hotkeys_Function = {'key_1': self.copys,
                                 'key_2': self.deleting,
@@ -819,7 +800,7 @@ class File_Cells(gtk.TreeView):
                                 'key_7': ''}
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
-        self.OOF = edna_function.Object_of_Files(self.update_model)
+        self.OOF = edna_function.Object_of_Files(self.number_of_panel, self.update_model)
         self.OOF.add_path(edna_function.rc_dict['config']['panel_history%s' % Number_this_list])
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
@@ -828,7 +809,7 @@ class File_Cells(gtk.TreeView):
         self.connect('cursor-changed', self.cursor_changed)
         self.connect('focus-in-event', self.__focus_trap)
         self.connect('focus-out-event', self.__focus_trap)
-        
+
     def __focus_trap(self, *args):
         '''
         Ловушка для фокуса клавиатуры
@@ -850,7 +831,7 @@ class File_Cells(gtk.TreeView):
         '''
         Реакция списка на изменения в файловой системе
         '''
-        model = self.get_model()
+        model = self.get_model().get_model()
         if operation == 0:
             #Удаление
             for i in xrange(len(self.OOF.Table_of_File) + 1):
@@ -890,7 +871,7 @@ class File_Cells(gtk.TreeView):
                     }
                     class "GtkTreeView" style "treeview-style"
                     """ % (edna_function.rc_dict['style']['even_row_bg'], edna_function.rc_dict['style']['odd_row_bg'])
-        self.set_rules_hint(True)
+        #self.set_rules_hint(True)
         self.set_model(self.OOF.Model)
         self.__add_columns()
         self.__set_custom_cursor()
@@ -976,18 +957,20 @@ class File_Cells(gtk.TreeView):
         
         selection = self.get_selection()
         model, iter = selection.get_selected()
-        print 'iter', iter
-        gioFile_uri = model.get_value(iter, self.OOF.Path_Index)
+        
+        print 'iter', model
+        gioFile_uri = model.get_value(iter, self.OOF.Path_Index)        
         self.OOF.selection(gioFile_uri)
-        print self.OOF.selection_add()
         path = model.get_path(iter)[0]
+        iter1 = model.convert_iter_to_child_iter(None, iter)
         sel_col = {}
         if self.OOF.now_in_selection(gioFile_uri):
             sel_col = edna_function.rc_dict['style']['sel_row_fg']
         else:
             sel_col = edna_function.rc_dict['style']['even_row_fg']
         self.OOF.Table_of_File[path][self.OOF.Foreground_Index] = sel_col
-        model.set(iter, self.OOF.Foreground_Index, self.OOF.Table_of_File[path][self.OOF.Foreground_Index])
+        print type(model.get_model())
+        model.get_model().set(iter1, self.OOF.Foreground_Index, self.OOF.Table_of_File[path][self.OOF.Foreground_Index])
             
         cellse = edna_function.Sum_cell
         if key == 'space':
@@ -999,7 +982,7 @@ class File_Cells(gtk.TreeView):
                 n = gio.File(gioFile_uri).get_path()
                 if os.path.isdir(n):
                     self.OOF.Table_of_File[path][ic] = edna_function.get_in_format_size(edna_function.get_full_size(n))
-                    model.set(iter, ic, self.OOF.Table_of_File[path][ic])
+                    model.get_model().set(iter1, ic, self.OOF.Table_of_File[path][ic])
             
     def pr(self, *args):
         if args[1].type == gtk.gdk._2BUTTON_PRESS:
@@ -1085,7 +1068,7 @@ class File_Cells(gtk.TreeView):
                 
             itk = int(edna_function.rc_dict['style']['%s_expand' % u[i]])
             column.set_expand(itk)
-            
+            #column.set_sort_indicator(True)
             self.append_column(column)
     
     
@@ -1094,12 +1077,13 @@ class listen_cell(gtk.VBox):
     '''
     Класс панели содкржащей списки файлов
     '''
-    def __init__(self, n, return_path_cell):
+    def __init__(self, number_of_panel, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
         self.n = n
         self.return_path_cell = return_path_cell
         #self.Cursor = 0
         self.Focus_State = True
+        self.number_of_panel = number_of_panel
         ####################################
         self.scrol = gtk.ScrolledWindow()
         self.scrol.set_shadow_type(gtk.SHADOW_ETCHED_IN)
@@ -1114,7 +1098,7 @@ class listen_cell(gtk.VBox):
         
         self.path_entry.set_alignment(0.0, 0.5)
         ###################################
-        self.treeview = File_Cells(n, return_path_cell, self.path_entry)
+        self.treeview = File_Cells(self.number_of_panel, n, return_path_cell, self.path_entry)
         self.info_label = gtk.Label('info')
         self.drive_panel = drive_panel.DrivePanel(self.drive_panel_callback)
         self.drive_panel.set_border_width(0)

@@ -1,24 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#       edna_function.py
-#       
-#       Copyright 2011 CryptSpirit <cryptspirit@gmail.com>
-#       
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 2 of the License, or
-#       (at your option) any later version.
-#       
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
-#       
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
+
+
 import os
 import re
 import ConfigParser
@@ -59,7 +41,9 @@ mc = ['cell_name',
 'cell_atr']
 
 rc_config = {'panel_history0':'/',
-            'panel_history1':'/'}
+            'panel_history1':'/',
+            'panel_sort0':'0',
+            'panel_sort1':'0'}
             
 rc_style = {'cell_name':'1',  
             'cell_type':'1', 
@@ -303,8 +287,9 @@ class Object_of_Files():
     Класс обработки списка файлов
     '''
     
-    def __init__(self, update_model=None):
+    def __init__(self, number_of_panel, update_model=None):
         self.return_update_model = update_model
+        self.number_of_panel = number_of_panel
         
     def add_path(self, path):
         '''
@@ -494,21 +479,51 @@ class Object_of_Files():
         
     def create_model(self):
         model = gtk.ListStore(
-                            gtk.gdk.Pixbuf, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING, 
-                            gobject.TYPE_STRING, gobject.TYPE_STRING)
+                            gtk.gdk.Pixbuf, str, 
+                            str, str, 
+                            str, str, 
+                            str, str, 
+                            str, str, 
+                            str, str, 
+                            str, str)
     
         for item in self.Table_of_File:
             iter = model.append()
             model.set(iter)
             for j in xrange(len(item)):
                 model.set_value(iter, j, item[j])
-        return model
-
+                
+        hl_model_sort = gtk.TreeModelSort(model)
+        
+        t = rc_dict['config']['panel_sort%s' % self.number_of_panel]
+        if len(t) == 1:
+            sort_order = gtk.SORT_ASCENDING
+            t = int(t)
+        else:
+            sort_order = gtk.SORT_DESCENDING
+            t = int(t[1:])
+        if t < len(Sum_cell) and Sum_cell[t] == 'cell_name':
+            t = self.Sort_Index
+        else:
+            t = 1
+        hl_model_sort.set_sort_column_id(t, sort_order)
+        hl_model_sort.connect('sort-column-changed', self.__change_sort)
+        return hl_model_sort
+        
+    def __change_sort(self, *args):
+        n = args[0].get_sort_column_id()
+        if n[0]:
+            number = n[0]
+            if n[1] == gtk.SORT_DESCENDING:
+                h = '-'
+            else:
+                h = ''
+            if number == self.Sort_Index: Sum_cell.index('cell_name')
+            rc_dict['config']['panel_sort%s' % self.number_of_panel] = h + str(number)
+            print self.Sort_Index
+            print rc_dict['config']['panel_sort%s' % self.number_of_panel]
+            if self.Path.get_uri() != 'file:///': print 'root'
+        
 def save_open(path, flg, miss):
     global answer
     answer = 0

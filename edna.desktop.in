@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Edna
+_GenericName=File Manager
+_Comment=A two panel file manager on gtk2
+Exec=edna
+Terminal=false
+Type=Application
+Icon=edna
+Categories=GTK;Utility;
