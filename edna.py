@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 #
 #       edna.py
@@ -20,10 +20,15 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-import edna
+import edna_filemanager
+import pygtk
+from edna_filemanager import root_window
+
+
+pygtk.require('2.0')
 
 def main():
-    edna.main()
+    edna_filemanager.main()
     return 0
 
 if __name__ == '__main__':

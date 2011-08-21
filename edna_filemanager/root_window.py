@@ -12,7 +12,7 @@ import edna_config
 import edna_function
 import gettext
 import glib
-from search.search_gui_class import SearchWindow
+from edna_filemanager.search.search_gui_class import SearchWindow
 
 gettext.install('edna', unicode=True)
 
@@ -24,7 +24,8 @@ class Dwindow(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_size_request(900, 500)
         self.set_title('Edna')
-        #self.set_icon_from_file('edna.png')
+        try: self.set_icon_from_file('%s/share/pixmaps/edna.svg' % sys.prefix)
+        except: pass
         # Widget#########################
         hdlbox = gtk.HandleBox()
         hdlbox.add(self.create_menu())

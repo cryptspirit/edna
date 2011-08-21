@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-import pygtk
-import root_window
 import gtk
-
-pygtk.require('2.0')
- 
         
 def main():
     gtk.gdk.threads_init()

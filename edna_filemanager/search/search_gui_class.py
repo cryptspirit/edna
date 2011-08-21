@@ -26,6 +26,7 @@ import gettext
 from search_thread_class import SearchThread, SearchParams
 gettext.install('edna', unicode=True)
 
+
 class SearchWindow(gtk.Window):
     '''
     Класс окна поиска
