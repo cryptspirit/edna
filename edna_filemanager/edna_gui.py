@@ -28,18 +28,7 @@ Name_Colum = {'cell_name': _('Name'),
             'cell_group': _('Group'), 
             'cell_atr': _('Attribute')}
 
-keys_not_follow = ['Shift Shift_L', 'Shift Shift_R', 'Alt Alt_L', 'Alt Alt_R', 'Escape',
-                    'Return', 'Ctrl Control_L', 'Ctrl Control_R', 'Caps_Lock',
-                    'Alt ISO_Prev_Group', 'Alt ISO_Next_Group', 'Ctrl Shift_R',
-                    'Ctrl Shift_L', 'Shift Control_R', 'Shift Control_L', 'Shift_L',
-                    'Shift_R', 'Alt_R', 'Alt_L', 'Control_R', 'Control_L', 'Tab', 
-                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', 'Shift plus',
-                    'Home', 'End', 'Page_Up', 'Page_Down', 'space',
-                    'Menu', 'grave', 'Insert', 'semicolon', 'comma', 'period',
-                    'slash', 'backslash', 'BackSpace']
 
-keys_not_follow += map(str, xrange(10))
-keys_not_follow += map(chr, xrange(65, 123))
 ###############################################################################
 
 ###############################  Gui class (begin) ############################
@@ -797,11 +786,12 @@ class File_Cells(gtk.TreeView):
                                 'key_4': '',
                                 'key_5': '',
                                 'key_6': '',
-                                'key_7': ''}
+                                'key_7': '',
+                                'key_8': self.show_hide_file}
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
         self.OOF = edna_function.Object_of_Files(self.number_of_panel, self.update_model)
-        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%s' % Number_this_list])
+        self.OOF.add_path(edna_function.rc_dict['config']['panel_history%s' % self.Number_this_list])
         self.path_entry.set_text(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
@@ -827,6 +817,12 @@ class File_Cells(gtk.TreeView):
                 color_bg = edna_function.rc_dict['style']['even_row_bg']
             self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.Color(color_bg))
             self.modify_text(gtk.STATE_ACTIVE, gtk.gdk.Color(color_fg))
+    
+    def refresh_cells(self):
+        '''
+        Обновление списка файлов
+        '''
+        self.change_dir(self.OOF.Path.get_path())
     
     def update_model(self, gioFile_uri, operation, data=None):
         '''
@@ -940,6 +936,13 @@ class File_Cells(gtk.TreeView):
         '''
         y = properties_file_window(self.OOF.Cursor_Position)
         
+    def show_hide_file(self):
+        '''
+        показать скрытые файлы
+        '''
+        edna_function.rc_dict['style']['show_hide_files'] = str(int(not int(edna_function.rc_dict['style']['show_hide_files'])))
+        self.return_panel_pile().relist_panel()
+        
     def copys(self):
         '''
         Копирование
@@ -1019,6 +1022,7 @@ class File_Cells(gtk.TreeView):
         self.OOF.gio_activation(dp)
         self.set_model(self.OOF.Model)
         self.path_entry.set_text(self.OOF.Path.get_path())
+        edna_function.rc_dict['config']['panel_history%s' % self.Number_this_list] = self.OOF.Path.get_path()
         self.__set_custom_cursor()
         
     def change_dir(self, path):

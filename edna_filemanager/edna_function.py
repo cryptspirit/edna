@@ -22,7 +22,12 @@ betc = {'row_fg':3,
         'flag':1,
         'name':0,}
 
-filerc = '.ednarc'
+filerc = os.path.join(os.getenv('XDG_CONFIG_HOME'), 'edna') 
+if os.path.isdir(filerc):
+    pass
+else:
+    os.makedirs(filerc)
+filerc = os.path.join(filerc, 'edna.conf')
 
 md = ['Y', 
     'M', 
@@ -45,7 +50,12 @@ rc_config = {'panel_history0':'/',
             'panel_sort0':'0',
             'panel_sort1':'0'}
             
-rc_style = {'cell_name':'1',  
+rc_style = {
+            'window_maximize':'0',  
+            'window_size':'295, 185',  
+            'window_position':'200, 300',  
+            'show_hide_files':'0',  
+            'cell_name':'1',  
             'cell_type':'1', 
             'cell_size':'1', 
             'cell_datec':'0', 
@@ -109,7 +119,8 @@ rc_hotkeys = {'key_1': 'F5',
             'key_4': 'F2',
             'key_5': 'F7',
             'key_6': 'Ctrl F2',
-            'key_7': 'F3'}
+            'key_7': 'F3',
+            'key_8': 'Ctrl h'}
             
 defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
@@ -119,7 +130,20 @@ hotkeys_function_name = {'key_1': _('Copy'),
                         'key_4': _('Rename'),
                         'key_5': _('Make directory'),
                         'key_6': _('Open terminal'),
-                        'key_7': _('View')}
+                        'key_7': _('View'),
+                        'key_8': _('Show hide files')}
+                        
+keys_not_follow = ['Shift Shift_L', 'Shift Shift_R', 'Alt Alt_L', 'Alt Alt_R', 'Escape',
+                    'Return', 'Ctrl Control_L', 'Ctrl Control_R', 'Caps_Lock',
+                    'Alt ISO_Prev_Group', 'Alt ISO_Next_Group', 'Ctrl Shift_R',
+                    'Ctrl Shift_L', 'Shift Control_R', 'Shift Control_L', 'Shift_L',
+                    'Shift_R', 'Alt_R', 'Alt_L', 'Control_R', 'Control_L', 'Tab', 
+                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', 'Shift plus',
+                    'Home', 'End', 'Page_Up', 'Page_Down', 'space',
+                    'Menu', 'grave', 'Insert', 'semicolon', 'comma', 'period',
+                    'slash', 'backslash', 'BackSpace']
+keys_not_follow += map(str, xrange(10))
+keys_not_follow += map(chr, xrange(65, 123))
 ############################### edna rc (begin) ###############################
 
 def Sum_cell_function():
@@ -276,6 +300,13 @@ class Panel_Pile():
         '''
         return self.Panel_Box[self.__find_name_panel_opponent(Panel_Name)].treeview.OOF.Path
     
+    def relist_panel(self):
+        '''
+        Переопрашивает списки панелей
+        '''
+        for i in self.Panel_Box.keys():
+            self.Panel_Box[i].treeview.refresh_cells()
+    
     def get_panel_opponent(self, Panel_Name):
         '''
         Возвращает соседнюю панель
@@ -291,6 +322,16 @@ class Object_of_Files():
         self.return_update_model = update_model
         self.number_of_panel = number_of_panel
         
+    def __gen_listdir__(self, path):
+        """
+        Генерация списка файлов
+        """
+        show_hide_files = int(rc_dict['style']['show_hide_files'])
+        if show_hide_files:
+            return map(gio.File, os.listdir(path))
+        else:
+            return [gio.File(i) for i in os.listdir(path) if i[0] != '.']
+        
     def add_path(self, path):
         '''
         Установка пути
@@ -300,7 +341,7 @@ class Object_of_Files():
         self.Table_of_File = []
         os.chdir(path)
         self.Select_List = []
-        self.gioFile_list = map(gio.File, os.listdir(path))
+        self.gioFile_list = self.gioFile_list = self.__gen_listdir__(path)
         self.get_list_path()
         self.Model = self.create_model()
         self.Monitor_rootdir = None
@@ -328,7 +369,7 @@ class Object_of_Files():
         try: self.Select_List.index(gioFile_uri)
         except: return False
         else: return True
-        
+    
     def ch_path(self, gioFile):
         '''
         Смена пути
@@ -337,7 +378,7 @@ class Object_of_Files():
         self.Path = gioFile
         p = gioFile.get_path()
         os.chdir(p)
-        self.gioFile_list = [gio.File(os.path.join(p, i)) for i in os.listdir(p)]
+        self.gioFile_list = self.__gen_listdir__(p)
         self.get_list_path()
         self.Model = self.create_model()
         self.Monitor_rootdir = self.Path.monitor_directory(gio.FILE_MONITOR_NONE, None)

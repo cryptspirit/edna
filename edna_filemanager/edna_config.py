@@ -198,7 +198,7 @@ class Rc_Window(gtk.Window):
         if key == 'Escape':
             args[0].hide()
             args[0].destroy()
-        if key not in keys_not_follow:
+        if key not in edna_function.keys_not_follow:
             if key not in edna_function.key_name_in_rc.keys():
                 edna_function.rc_dict['hotkeys'][args[2].get_value(args[3], 2)] = key
                 edna_function.key_name_in_rc[key] = args[2].get_value(args[3], 2)         

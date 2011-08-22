@@ -21,8 +21,7 @@ class Dwindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
         self.connect('destroy', self.exitt)
-        self.set_position(gtk.WIN_POS_CENTER)
-        self.set_size_request(900, 500)
+        self.__set_window_properties_from_configfile__()
         self.set_title('Edna')
         try: self.set_icon_from_file('%s/share/pixmaps/edna.svg' % sys.prefix)
         except: pass
@@ -37,7 +36,6 @@ class Dwindow(gtk.Window):
         self.panel_pile.add_panel(edna_gui.listen_cell('1', '1', self.return_panel_pile), '1')
        # self.set_focus(self.panel_pile.get_panel('0').treeview)
         self.set_focus_chain((self.panel_pile.get_panel("0"), self.panel_pile.get_panel("1"), ))
-        self.foc_c = True
         #################################
         #BOX############################
         for i in xrange(2):
@@ -49,9 +47,6 @@ class Dwindow(gtk.Window):
         #self.connect('key-release-event', self.key_c)
         #self.connect('key-press-event', self.key_c)
         self.add(self.vbox1)
-        self.foc = self.is_focus()
-        #self.connect('focus', self.focuss)
-        print self.get_focus_chain()
         
     def create_menu(self):
         ui_string = """<ui>
@@ -87,6 +82,31 @@ class Dwindow(gtk.Window):
         self.add_accel_group(self.ui.get_accel_group())
         return self.ui.get_widget('/menubar')
     
+    def __set_window_properties_from_configfile__(self):
+        """
+        Применение свойств окна из конфигурационного файла
+        """
+        if int(edna_function.rc_dict['style']['window_maximize']):
+            self.maximize()
+        else:
+            self.unmaximize()
+            
+        window_size = map(int, edna_function.rc_dict['style']['window_size'].split(','))
+        self.resize(gtk.gdk.screen_width() - window_size[0], gtk.gdk.screen_height() - window_size[1])
+        #print edna_function.rc_dict['style']['window_position']
+        #self.move
+        #self.set_position(gtk.WIN_POS_CENTER)
+        
+    
+    def __get_window_properties_to_configfile__(self):
+        """
+        Запись свойств окна для конфигурационного файла
+        """
+        edna_function.rc_dict['style']['window_size'] = ', '.join(map(str, self.get_size()))
+        edna_function.rc_dict['style']['window_maximize'] = str(self.maximize_initially)
+        #print self.get_position() # не работает без оконного декоратора (проверить)
+        edna_function.save_rc()
+    
     def run_terminal(self, folder, command = None):
         current_panel = self.panel_pile.get_panel('0') if self.panel_pile.get_panel('0').treeview.has_focus() else self.panel_pile.get_panel('1')
         os.system("gnome-terminal --working-directory \"" + current_panel.treeview.OOF.Path.get_path() + "\"")
@@ -117,12 +137,8 @@ class Dwindow(gtk.Window):
         self.cel[0].upData()
         self.cel[1].upData()
         
-    def focuss(self, *args):
-        if self.foc != self.is_focus():
-            self.foc = self.is_focus()
-            for i in self.cel: i.Focus_State = self.is_focus()
-        
     def exitt(self, *args):
         #for i in self.cel: i.Exit_State = True
+        self.__get_window_properties_to_configfile__()
         args[0].hide()
         gtk.main_quit()
