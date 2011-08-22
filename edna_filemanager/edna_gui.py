@@ -814,6 +814,7 @@ class File_Cells(gtk.TreeView):
         '''
         Ловушка для фокуса клавиатуры
         '''
+
         if self.is_focus():
             pass
         else:
@@ -1075,7 +1076,7 @@ class File_Cells(gtk.TreeView):
     
 class listen_cell(gtk.VBox):
     '''
-    Класс панели содкржащей списки файлов
+    Класс панели содержащей списки файлов
     '''
     def __init__(self, number_of_panel, n, return_path_cell):
         gtk.VBox.__init__(self, False, 3)
@@ -1109,6 +1110,7 @@ class listen_cell(gtk.VBox):
         self.pack_start(self.evtb, False)
         self.pack_start(self.scrol)
         self.pack_start(self.info_label, False)
+        self.set_focus_chain((self.treeview, ))
         #self.Timer_func = threading.Timer(0, self.timer_refresh)
         #self.Timer_func.start()
         

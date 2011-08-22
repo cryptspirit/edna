@@ -33,25 +33,25 @@ class Dwindow(gtk.Window):
         self.hpannel1 = gtk.HBox(True,5)
         self.hpannel1.set_border_width(5)
         self.panel_pile = edna_function.Panel_Pile()
-        #self.cel = []
-        #self.cel.append(edna_gui.listen_cell(0, self.return_path_cell))
-        #self.cel.append(edna_gui.listen_cell(1, self.return_path_cell))
         self.panel_pile.add_panel(edna_gui.listen_cell('0', '0', self.return_panel_pile), '0')
         self.panel_pile.add_panel(edna_gui.listen_cell('1', '1', self.return_panel_pile), '1')
-        self.set_focus(self.panel_pile.get_panel('0').treeview)
+       # self.set_focus(self.panel_pile.get_panel('0').treeview)
+        self.set_focus_chain((self.panel_pile.get_panel("0"), self.panel_pile.get_panel("1"), ))
         self.foc_c = True
         #################################
         #BOX############################
         for i in xrange(2):
             self.hpannel1.pack_start(self.panel_pile.get_panel(str(i)))
         self.vbox1.pack_start(hdlbox, False)
+
         self.vbox1.pack_start(self.hpannel1)
         ################################
         #self.connect('key-release-event', self.key_c)
         #self.connect('key-press-event', self.key_c)
         self.add(self.vbox1)
         self.foc = self.is_focus()
-        self.connect('focus', self.focuss)
+        #self.connect('focus', self.focuss)
+        print self.get_focus_chain()
         
     def create_menu(self):
         ui_string = """<ui>

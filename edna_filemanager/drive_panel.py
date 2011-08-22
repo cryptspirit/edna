@@ -40,7 +40,6 @@ class DrivePanel(gtk.Toolbar):
             события. В качестве параметра будет передан объект DriveEvent
         '''
         gtk.Toolbar.__init__(self)
-        self.set_can_focus(False)
         self.callback = callback
         self.set_style(gtk.TOOLBAR_BOTH_HORIZ)  #TOOLBAR_ICONS
         self.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
