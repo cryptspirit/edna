@@ -12,7 +12,7 @@ import time
 import filecmp
 import gettext
 import gio
-
+import app_choose
 import drive_panel
 
 gettext.install('edna', unicode=True)
@@ -656,6 +656,7 @@ class properties_file_window(gtk.Window):
             
     def __init__(self, path_to_file):
         gtk.Window.__init__(self)
+        self.get_modal()
         self.path_to_file = path_to_file.get_path()
         self.is_file = os.path.isfile(self.path_to_file)
         self.get_info_about_file()
@@ -727,6 +728,8 @@ class properties_file_window(gtk.Window):
         icon_image.set_from_pixbuf(self.info_about_file['Icon'])
         icon_image1.set_image(icon_image)
         
+        icon_image1.connect('clicked', self.__show_app_choose_windows__)
+        
         entry_name = gtk.Entry()
         entry_name.set_text(self.info_about_file['Name'])
         entry_name.connect('changed', self.change_entry_name)
@@ -754,7 +757,14 @@ class properties_file_window(gtk.Window):
         vbox2.pack_start(gtk.HSeparator(), False)
         vbox2.pack_start(vbox4, False)
         note_object.append_page(vbox2, gtk.Label(_('Properties')))
-    
+        
+    def __show_app_choose_windows__(self, *args):
+        '''
+        Запуск окна выбора приложения
+        '''
+        choose_app_window = app_choose.Apps_Choose_Window(self.info_about_file['Type'])
+        choose_app_window.show_all()
+        
     def change_entry_name(self, *args):
         '''
         Изминение виджета entry_name

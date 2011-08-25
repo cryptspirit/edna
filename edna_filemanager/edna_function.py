@@ -782,7 +782,13 @@ def get_launch_apps(path):
     apps_list = gio.app_info_get_all_for_type(mime_type)
     ret_list = []
     for i in apps_list:
-        ret_list.append({'app_name':i.get_name(), 'desktop':i.get_id(), 'icon':i.get_icon().get_names()[0]})
+        name = i.get_name()
+        if name: pass
+        else: name = ''
+        icon = i.get_icon()
+        if icon: icon = icon.get_names()[0]
+        else: icon = ''
+        ret_list.append({'app_name':name, 'desktop':i.get_id(), 'icon':icon})
     return ret_list
     
 def get_launch(gioFile):
