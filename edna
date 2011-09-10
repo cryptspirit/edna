@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
 #       edna.py
@@ -20,14 +20,16 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
+import __builtin__
 import edna_filemanager
 import pygtk
-from edna_filemanager import root_window
-
 
 pygtk.require('2.0')
 
+__builtin__.edna_builtin = {}
+
 def main():
+    
     edna_filemanager.main()
     return 0
 

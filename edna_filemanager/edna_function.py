@@ -115,12 +115,12 @@ rc_style = {
             
 rc_hotkeys = {'key_1': 'F5',
             'key_2': 'Delete',
-            'key_3': 'Ctrl p',
+            'key_3': '<Control>p',
             'key_4': 'F2',
             'key_5': 'F7',
-            'key_6': 'Ctrl F2',
+            'key_6': '<Control>F2',
             'key_7': 'F3',
-            'key_8': 'Ctrl h'}
+            'key_8': '<Control>h'}
             
 defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
@@ -133,12 +133,12 @@ hotkeys_function_name = {'key_1': _('Copy'),
                         'key_7': _('View'),
                         'key_8': _('Show hide files')}
                         
-keys_not_follow = ['Shift Shift_L', 'Shift Shift_R', 'Alt Alt_L', 'Alt Alt_R', 'Escape',
-                    'Return', 'Ctrl Control_L', 'Ctrl Control_R', 'Caps_Lock',
-                    'Alt ISO_Prev_Group', 'Alt ISO_Next_Group', 'Ctrl Shift_R',
-                    'Ctrl Shift_L', 'Shift Control_R', 'Shift Control_L', 'Shift_L',
+keys_not_follow = ['<Shift>Shift_L', '<Shift>Shift_R', '<Alt>Alt_L', '<Alt>Alt_R', 'Escape',
+                    'Return', '<Control>Control_L', '<Control>Control_R', 'Caps_Lock',
+                    '<Alt>ISO_Prev_Group', '<Alt>ISO_Next_Group', '<Control>Shift_R',
+                    '<Control>Shift_L', '<Shift>Control_R', '<Shift>Control_L', 'Shift_L',
                     'Shift_R', 'Alt_R', 'Alt_L', 'Control_R', 'Control_L', 'Tab', 
-                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', 'Shift plus',
+                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', '<Shift>plus',
                     'Home', 'End', 'Page_Up', 'Page_Down', 'space',
                     'Menu', 'grave', 'Insert', 'semicolon', 'comma', 'period',
                     'slash', 'backslash', 'BackSpace']
@@ -843,7 +843,7 @@ def get_normal_flag_name(flag):
         if f == 'GDK_SHIFT_MASK':
             return 'Shift'
         elif f == 'GDK_CONTROL_MASK':
-            return 'Ctrl'
+            return 'Control'
         elif f == 'GDK_MOD1_MASK':
             return 'Alt'
         else:
@@ -857,7 +857,7 @@ def get_key_info(key_box):
     k = gtk.gdk.keyval_name(key_box.keyval)
     s = get_normal_flag_name(key_box.state)
     if s:
-        k = s + ' ' + k
+        k = '<%s>%s' % (s, k)
     return k
     
 def get_in_format_size(t):

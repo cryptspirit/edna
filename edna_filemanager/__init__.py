@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import gtk
+import root_window
         
 def main():
     gtk.gdk.threads_init()

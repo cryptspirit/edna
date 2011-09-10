@@ -1,14 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Необходимо поставить пакеты для сборки deb файла install python-distutils-extra и python-stdeb
 # сборка пакета python setup.py --command-packages=stdeb.command bdist_deb
 # установка в псевдокорень для проверки python setup.py install --prefix=/tmp
-#  /usr/lib/python2.7/Tools/i18n/msgfmt.py
 
 
 from distutils.core import setup
-#from DistUtilsExtra.command import *
+from DistUtilsExtra.command import *
 import os, sys
 import glob
 
@@ -27,10 +26,9 @@ def build_mo():
     return mo_files
 
 def main():
-    os.rename('edna.py', 'edna')
     setup(name='edna',
-    version='0.0.1',
-    description='a two panel file manager',
+    version='0.0.1a',
+    description='two panel file manager',
     author='Maxim Podlesnyj',
     author_email='cryptspirit@gmail.com',
     url='https://github.com/cryptspirit/edna',
@@ -42,9 +40,8 @@ def main():
                 (share_folder + 'pixmaps', glob.glob('icon/*'))
                 ] + build_mo(),
     scripts=['edna'],
-    #classifiers=['Development Status :: 5 - Production/Stable', 'Intended Audience :: End Users/Desktop', 'License :: OSI Approved :: GNU General Public License (GPL)', 'Operating System :: POSIX :: Linux'],
-    long_description='notsdfsdfsdfad')
-    os.rename('edna', 'edna.py')
+    classifiers=['Development Status :: 1 - Planning', 'Intended Audience :: End Users/Desktop', 'License :: OSI Approved :: GNU General Public License (GPL)', 'Operating System :: POSIX :: Linux'],
+    long_description='This two-panel file manager written in Python programming language version 2.6 and above, using the framework Gtk 2 for unix-like operating systems.')
     
 if __name__ == '__main__':
     main()  
