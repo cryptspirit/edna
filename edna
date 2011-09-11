@@ -21,16 +21,54 @@
 #       MA 02110-1301, USA.
 
 import __builtin__
-import edna_filemanager
+
+__builtin__.edna_builtin = {}
+edna_builtin = __builtin__.edna_builtin
+
+from edna_filemanager.tools import conf
+from edna_filemanager.root_window import Root_Window
 import pygtk
+import gtk
 
 pygtk.require('2.0')
 
-__builtin__.edna_builtin = {}
+def init_root_window():
+    '''
+    Иницилизация главного окна
+    '''
+    Edna_Window = Root_Window()
+    Edna_Window.connect('destroy', edna_exit)
+    Edna_Window.show_all()
+    return Edna_Window
+
+def edna_exit(*args):
+    '''
+    Выход
+    '''
+    args[0].__get_window_properties_to_configfile__()
+    args[0].hide()
+    gtk.main_quit()
+
+def load_config():
+    '''
+    Получение конфигураций и их запись в общее пространство имен
+    '''
+    global edna_builtin
+    edna_builtin['config_file'] = conf.get_path_to_conf()
+    config_from_file = conf.read_rc(edna_builtin['config_file'])
+    edna_builtin['sequence of columns'] = conf.sequence_of_columns_function(config_from_file[0])
+    edna_builtin['configuration'] = config_from_file[0]
+    edna_builtin['hotkey conf'] = config_from_file[1]
+    
 
 def main():
+    gtk.gdk.threads_init()
+    load_config()
+    Edna_Window = init_root_window()
     
-    edna_filemanager.main()
+    gtk.gdk.threads_enter()
+    gtk.main()
+    gtk.gdk.threads_leave()
     return 0
 
 if __name__ == '__main__':
