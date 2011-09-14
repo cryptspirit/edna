@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import __builtin__
-
-edna_builtin = __builtin__.edna_builtin
+from __builtin__ import edna_builtin
 
 import gtk
 import gio
 import os
+import pango
+from edna_filemanager import function
+from edna_filemanager.tools import icons_work
 
 class Object_of_Files():
     '''
@@ -176,7 +177,7 @@ class Object_of_Files():
         if self.Path.get_path() != '/':
             ttt = []
             
-            ttt.append(dic_icon['application/octet-stream'])
+            ttt.append(edna_builtin['icons container']['application/octet-stream'])
             for j in edna_builtin['sequence of columns']:
                 if j == 'cell_name':
                     ttt.append('..')
@@ -197,9 +198,9 @@ class Object_of_Files():
             #self.Monitor.append(i.monitor_file(gio.FILE_MONITOR_NONE, None))
             #self.Monitor[len(self.Monitor) - 1].connect("changed", self.changed_event)
             if self.Path_probe(i.get_path()):
-                return_dir_append(get_cell(i, False))
+                return_dir_append(function.get_cell(i, False))
             else:
-                return_fil_append(get_cell(i, True))
+                return_fil_append(function.get_cell(i, True))
         
         return_dir.sort()
         return_fil.sort()
@@ -538,22 +539,22 @@ class File_List_Widget(gtk.TreeView):
             alg = [float(edna_builtin['configuration']['style']['%s_alignment_h' % u[i]]), float(edna_builtin['configuration']['style']['%s_alignment_v' % u[i]])]
             if u[i] == 'cell_name':
                 column = gtk.TreeViewColumn()
-                column.set_title(Name_Colum[u[i]])
+                column.set_title(edna_builtin['structures']['colums name'][u[i]])
                 renderer = gtk.CellRendererPixbuf()
                 renderer.set_alignment(alg[0], alg[1])
                 column.pack_start(renderer, False)
                 column.set_sort_column_id(self.OOF.Sort_Index)
                 column.set_attributes(renderer, pixbuf=0)
             else:
-                #column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, background=self.OOF.Background_Index, foreground=self.OOF.Foreground_Index)
-                column = gtk.TreeViewColumn(Name_Colum[u[i]], renderer, text=i + 1, foreground=self.OOF.Foreground_Index)
+                #column = gtk.TreeViewColumn(edna_builtin['structures']['colums name'][u[i]], renderer, text=i + 1, background=self.OOF.Background_Index, foreground=self.OOF.Foreground_Index)
+                column = gtk.TreeViewColumn(edna_builtin['structures']['colums name'][u[i]], renderer, text=i + 1, foreground=self.OOF.Foreground_Index)
                 column.set_sort_column_id(i + 1)  
             column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
             column.expand = True
             column.set_min_width(int(edna_builtin['configuration']['style']['%s_size' % u[i]]))
             
             renderer = gtk.CellRendererText()
-            #renderer.set_data(Name_Colum[u[i]], i)
+            #renderer.set_data(edna_builtin['structures']['colums name'][u[i]], i)
             renderer.set_alignment(alg[0], alg[1])
             #renderer.set_property('background-set' , True)
             renderer.set_property('foreground-set' , True)

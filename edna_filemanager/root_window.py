@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import __builtin__
+from __builtin__ import edna_builtin
 
-edna_builtin = __builtin__.edna_builtin
-
-import gobject
+#import gobject
 import gtk
-import pygtk
-import os
-import sys
-import time
+#import pygtk
+#import os
+#import sys
+#import time
 #import edna_config
-import panel_objects
 import gettext
-import glib
+#import glib
+from edna_filemanager import function
+from edna_filemanager.tools import conf
+from edna_filemanager import panel_objects
 #from edna_filemanager.search.search_gui_class import SearchWindow
 
 gettext.install('edna', unicode=True)
@@ -26,8 +26,8 @@ class Root_Window(gtk.Window):
         self.set_title('Edna')
         try: self.set_icon_from_file('%s/share/pixmaps/edna.svg' % sys.prefix)
         except: pass
-        hdlbox = gtk.HandleBox()
-        hdlbox.add(self.create_menu())
+        self.hdlbox = gtk.HandleBox()
+        self.hdlbox.add(self.create_menu())
         self.__container_init__()
         self.__container_pack__()
         
@@ -38,7 +38,7 @@ class Root_Window(gtk.Window):
         '''
         for i in xrange(2):
             self.hpannel1.pack_start(self.panel_pile.get_panel(str(i)))
-        self.vbox1.pack_start(hdlbox, False)
+        self.vbox1.pack_start(self.hdlbox, False)
         self.vbox1.pack_start(self.hpannel1)
         self.add(self.vbox1)
     
@@ -118,7 +118,7 @@ class Root_Window(gtk.Window):
         edna_builtin['configuration']['style']['window_size'] = ', '.join(map(str, self.get_size()))
         edna_builtin['configuration']['style']['window_maximize'] = str(self.maximize_initially)
         #print self.get_position() # не работает без оконного декоратора (проверить)
-        edna_function.save_rc()
+        conf.save_rc(edna_builtin['config_file'], edna_builtin['configuration'])
     
     def run_terminal(self, folder, command = None):
         current_panel = self.panel_pile.get_panel('0') if self.panel_pile.get_panel('0').treeview.has_focus() else self.panel_pile.get_panel('1')

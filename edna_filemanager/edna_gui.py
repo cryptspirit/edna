@@ -2,8 +2,7 @@
 
 import gobject
 import gtk
-import edna_function
-import pango
+import function
 import os
 import re
 import subprocess
@@ -12,21 +11,12 @@ import time
 import filecmp
 import gettext
 import gio
-import app_choose
-import drive_panel
+from edna_filemanager.apps import app_choose
+from edna_filemanager.widgets import drive_panel
 
 gettext.install('edna', unicode=True)
 ###############################################################################
 self_name = 'Edna'
-
-Name_Colum = {'cell_name': _('Name'), 
-            'cell_type': _('Type'), 
-            'cell_size': _('Size'), 
-            'cell_datec': _('Created'), 
-            'cell_datem': _('Changed'), 
-            'cell_user': _('User'), 
-            'cell_group': _('Group'), 
-            'cell_atr': _('Attribute')}
 
 
 ###############################################################################
@@ -43,15 +33,15 @@ class miss_window(gtk.Window):
         self.set_resizable(False)
         self.set_border_width(5)
         self.set_modal(True)
-        self.set_icon(edna_function.icon_load_try('gtk-dialog-info', 20))
+        self.set_icon(function.icon_load_try('gtk-dialog-info', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_title(_('Error! I not can read file'))
         
         if os.path.exists(text):
             f1 = _('Exists')
-            f2 = edna_function.get_file_size(text)
-            f3 = edna_function.get_file_attr(text)
-            f4 = edna_function.get_custom_mimetype(path)
+            f2 = function.get_file_size(text)
+            f3 = function.get_file_attr(text)
+            f4 = function.get_custom_mimetype(path)
             if os.path.islink(text):
                 f5 = _('Link')
                 f6 = os.readlink(text)
@@ -167,7 +157,7 @@ class miss_window(gtk.Window):
         self.destroy
     
     def key_event(self, *args):
-        key = edna_function.get_key_info(args[1])
+        key = function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         
         
@@ -188,9 +178,9 @@ class copy_window(gtk.Window):
         self.set_border_width(5)
         self.remove_after = remove_after
         if self.remove_after:
-            self.set_icon(edna_function.icon_load_try('gtk-cut', 20))
+            self.set_icon(function.icon_load_try('gtk-cut', 20))
         else:
-            self.set_icon(edna_function.icon_load_try('gtk-copy', 20))
+            self.set_icon(function.icon_load_try('gtk-copy', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.current_path = current_path
         self.destpath = destpath
@@ -282,7 +272,7 @@ class copy_window(gtk.Window):
         Непосредственно функция копирования
         '''
         if flag:
-            src_file, answer = edna_function.save_open(src, 'rb', self.Miss)
+            src_file, answer = function.save_open(src, 'rb', self.Miss)
             if src_file == None:
                 if self.Miss:
                     return False
@@ -372,7 +362,7 @@ class copy_window(gtk.Window):
         self.destroy
     
     def key_event(self, *args):
-        key = edna_function.get_key_info(args[1])
+        key = function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         
         
@@ -391,7 +381,7 @@ class remove_window(gtk.Window):
         self.Exit = False
         self.Pause = False
         self.set_title(_('Delete'))
-        self.set_icon(edna_function.icon_load_try('gtk-clear', 20))
+        self.set_icon(function.icon_load_try('gtk-clear', 20))
         self.set_position(gtk.WIN_POS_CENTER)
         self.dest = dest
         self.list = list
@@ -440,7 +430,7 @@ class remove_window(gtk.Window):
                 gtk.gdk.threads_enter()
                 self.label_src.set_text(args[i][0])
                 gtk.gdk.threads_leave()
-                edna_function.deleting_files_folders(args[i][0], args[i][1])
+                function.deleting_files_folders(args[i][0], args[i][1])
                 self.count += 1
                 gtk.gdk.threads_enter()
                 self.progress1.set_text(str(int((self.count * 1.00 / self.n) * 100)) + ' %')
@@ -465,7 +455,7 @@ class remove_window(gtk.Window):
                 gtk.gdk.threads_enter()
                 self.label_src.set_text(args[i][0])
                 gtk.gdk.threads_leave()
-                edna_function.deleting_files_folders(args[i][0], args[i][1])
+                function.deleting_files_folders(args[i][0], args[i][1])
                 self.count += 1
                 gtk.gdk.threads_enter()
                 self.progress1.set_text(str(int((self.count * 1.00 / self.n) * 100)) + ' %')
@@ -482,7 +472,7 @@ class remove_window(gtk.Window):
         self.destroy
         
     def key_event(self, *args):
-        key = edna_function.get_key_info(args[1])
+        key = function.get_key_info(args[1])
         if key == 'Escape': self.destr()        
         
         
@@ -504,7 +494,7 @@ class question_window(gtk.Window):
         hbox.set_spacing(10)
         self.set_title(self_name)
         self.icon_image = gtk.Image()
-        pix = edna_function.icon_load_try('gtk-help', 50)
+        pix = function.icon_load_try('gtk-help', 50)
         self.icon_image.set_from_pixbuf(pix)
         self.set_icon(pix)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -554,7 +544,7 @@ class question_window(gtk.Window):
         for i in args[1]:
                 if i[1] == False:
                     if os.path.isdir(i[0]):
-                        k += edna_function.get_full_size(i[0], True)[1]
+                        k += function.get_full_size(i[0], True)[1]
         self.hide()
         r = remove_window(args[1], k)
         self.destr()
@@ -564,7 +554,7 @@ class question_window(gtk.Window):
         self.destroy
         
     def key_event(self, *args):
-        key = edna_function.get_key_info(args[1])
+        key = function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         
         
@@ -580,9 +570,9 @@ class question_window_copy(gtk.Window):
         self.connect('destroy', self.destr)
         self.connect('key-release-event', self.key_event)
         if self.remove_after:
-            self.set_icon(edna_function.icon_load_try('gtk-cut', 20))
+            self.set_icon(function.icon_load_try('gtk-cut', 20))
         else:
-            self.set_icon(edna_function.icon_load_try('gtk-copy', 20))
+            self.set_icon(function.icon_load_try('gtk-copy', 20))
         self.set_resizable(False)
         vbox = gtk.VBox(False, 2)
         vbox.set_spacing(3)
@@ -621,7 +611,7 @@ class question_window_copy(gtk.Window):
                     siz += os.path.getsize(i[0])
                 else:
                     if os.path.isdir(i[0]):
-                        buf = edna_function.get_full_size(i[0], True)
+                        buf = function.get_full_size(i[0], True)
                         k += buf[1]
                         siz += buf[0]
         self.hide()
@@ -633,7 +623,7 @@ class question_window_copy(gtk.Window):
         self.destroy
         
     def key_event(self, *args):
-        key = edna_function.get_key_info(args[1])
+        key = function.get_key_info(args[1])
         if key == 'Escape': self.destr()
         if key == 'Return': self.ok_button_click()
             
@@ -693,25 +683,25 @@ class properties_file_window(gtk.Window):
         self.info_about_file['Path'] = self.path_to_file
         self.info_about_file['Name'] = self.path_to_file[len(k) + null_p:]
         self.info_about_file['File'] = self.is_file
-        self.info_about_file['Datec'] = edna_function.get_file_date(self.path_to_file, 'cell_datec_format')
-        self.info_about_file['Datem'] = edna_function.get_file_date(self.path_to_file, 'cell_datem_format')
+        self.info_about_file['Datec'] = function.get_file_date(self.path_to_file, 'cell_datec_format')
+        self.info_about_file['Datem'] = function.get_file_date(self.path_to_file, 'cell_datem_format')
         
         if self.is_file:
-            self.info_about_file['Type'] = edna_function.get_mime(self.path_to_file, self.info_about_file['File'])
-            self.info_about_file['Icon'] = edna_function.get_ico(self.info_about_file['Type'], False)
-            self.info_about_file['Size'] = edna_function.get_file_size(self.path_to_file)
-            self.info_about_file['App'] = edna_function.get_launch_apps(self.path_to_file)[0]
+            self.info_about_file['Type'] = function.get_mime(self.path_to_file, self.info_about_file['File'])
+            self.info_about_file['Icon'] = function.get_ico(self.info_about_file['Type'], False)
+            self.info_about_file['Size'] = function.get_file_size(self.path_to_file)
+            self.info_about_file['App'] = function.get_launch_apps(self.path_to_file)[0]
             
         else:
             self.info_about_file['Type'] = 'application/octet-stream'
-            self.info_about_file['Icon'] = edna_function.get_ico('gtk-directory', False)
+            self.info_about_file['Icon'] = function.get_ico('gtk-directory', False)
             self.info_about_file['Size'] = '0'
             
     def get_size_in_thread(self):
         '''
         Поток определения размера каталога в фоновом режиме
         '''
-        edna_function.get_in_format_size(edna_function.get_full_size_in_thread(self.path_to_file, self.text_label_size_dir))
+        function.get_in_format_size(function.get_full_size_in_thread(self.path_to_file, self.text_label_size_dir))
         
     def create_properties_tab(self, note_object):
         '''
@@ -777,20 +767,3 @@ class properties_file_window(gtk.Window):
         '''
         vbox2 = gtk.VBox(False)
         note_object.append_page(vbox2, gtk.Label(_('Access')))
-        
-
-    
-    
-    
-
-################################  Gui class (end) #############################
-def main():
-    h = properties_file_window(['/home/mort/Box', False])
-    #h = miss_window('/home/mort/.bashrc')
-    h.show_all()
-    gtk.main()
-    return 0
-
-if __name__ == '__main__':
-    main()
-

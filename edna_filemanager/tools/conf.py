@@ -6,9 +6,7 @@
 
 import ConfigParser
 import os
-import __builtin__
-
-edna_builtin = __builtin__.edna_builtin
+from __builtin__ import edna_builtin
 
 rc_config = {'panel_history0':'/',
             'panel_history1':'/',
@@ -89,18 +87,6 @@ rc_hotkeys = {'key_1': 'F5',
             
 defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
 
-
-                        
-keys_not_follow = ['<Shift>Shift_L', '<Shift>Shift_R', '<Alt>Alt_L', '<Alt>Alt_R', 'Escape',
-                    'Return', '<Control>Control_L', '<Control>Control_R', 'Caps_Lock',
-                    '<Alt>ISO_Prev_Group', '<Alt>ISO_Next_Group', '<Control>Shift_R',
-                    '<Control>Shift_L', '<Shift>Control_R', '<Shift>Control_L', 'Shift_L',
-                    'Shift_R', 'Alt_R', 'Alt_L', 'Control_R', 'Control_L', 'Tab', 
-                    'Left', 'Up', 'Right', 'Down', 'minus', 'equal', '<Shift>plus',
-                    'Home', 'End', 'Page_Up', 'Page_Down', 'space',
-                    'Menu', 'grave', 'Insert', 'semicolon', 'comma', 'period',
-                    'slash', 'backslash', 'BackSpace']
-
 mc = ['cell_name', 
 'cell_type', 
 'cell_size', 
@@ -109,10 +95,6 @@ mc = ['cell_name',
 'cell_user', 
 'cell_group', 
 'cell_atr']
-
-keys_not_follow += map(str, xrange(10))
-keys_not_follow += map(chr, xrange(65, 123))
-
 
 def get_path_to_conf():
     '''
@@ -182,11 +164,11 @@ def read_rc(filerc):
         rc_dict = defaultrc
     return rc_dict, key_name_in_rc
                 
-def save_rc():
+def save_rc(filerc, rc_dict):
     '''
     Функция сохранения словаря настроек
     '''
-    sequence_of_columns_function(rc_dict)
+    #sequence_of_columns_function(rc_dict)
     need_write = False
     if os.path.isfile(filerc):
         CP = ConfigParser.ConfigParser()

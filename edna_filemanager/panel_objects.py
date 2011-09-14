@@ -4,9 +4,14 @@
 Объекты панели
 '''
 
+import __builtin__
+
+edna_builtin = __builtin__.edna_builtin
+
 import gtk
 from widgets import list_widgets
 from widgets import drive_panel
+import pango
 
 class Panel_Widget(gtk.VBox):
     '''
@@ -69,9 +74,9 @@ class Panel_Widget(gtk.VBox):
         return self.treeview.OOF.Path
         
     def upData(self):
-        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_bg']))
-        self.evtb.modify_font(pango.FontDescription(edna_function.rc_dict['style']['font_cell_text']))
-        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_function.rc_dict['style']['even_row_fg']))
+        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_builtin['configuration']['style']['even_row_bg']))
+        self.evtb.modify_font(pango.FontDescription(edna_builtin['configuration']['style']['font_cell_text']))
+        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_builtin['configuration']['style']['even_row_fg']))
         self.treeview.Cells_Refresh()
 
 class Panel_Pile():
