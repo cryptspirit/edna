@@ -146,7 +146,7 @@ def get_mime(path_i, is_fil):
     if is_fil:
         try:
             f = open(path_i)
-            r = f.read(200)
+            r = f.read(400)
             f.close()
         except: temp = 'empty'
         else: temp = str(gio.content_type_guess(None, r, True)[0])
@@ -272,34 +272,6 @@ def deleting_files_folders(path, flag):
             #except:
             #    print 'галяк', path
             
-def get_normal_flag_name(flag):
-    '''
-    Преобразование Флагов клавиш в человеческий вид
-    '''
-    try:
-        f = flag.value_names[0]
-    except:
-        return None
-    else:
-        if f == 'GDK_SHIFT_MASK':
-            return 'Shift'
-        elif f == 'GDK_CONTROL_MASK':
-            return 'Control'
-        elif f == 'GDK_MOD1_MASK':
-            return 'Alt'
-        else:
-            return None
-        
-    
-def get_key_info(key_box):
-    '''
-    Текстовое представление названий нажатых клавиш
-    '''
-    k = gtk.gdk.keyval_name(key_box.keyval)
-    s = get_normal_flag_name(key_box.state)
-    if s:
-        k = '<%s>%s' % (s, k)
-    return k
     
 def get_in_format_size(t):
     '''

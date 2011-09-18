@@ -53,6 +53,13 @@ class Panel_Widget(gtk.VBox):
         #self.Timer_func = threading.Timer(0, self.timer_refresh)
         #self.Timer_func.start()
         
+    def get_action_file_list(self):
+        '''
+        Возвращает активный список файлов
+        '''
+        # Метод создается в спешке. его необходимо доработать и расширить
+        return self.treeview
+        
     def __drive_panel_callback__(self, event):
         '''
         Метод-коллбек, который вызывается при кликах на драйв-панели
@@ -103,7 +110,7 @@ class Panel_Pile():
         
     def get_panel(self, Panel_Name):
         '''
-        Возвращает панели по имени
+        Возвращает панель по имени
         '''
         return self.Panel_Box[Panel_Name]
         
@@ -120,6 +127,14 @@ class Panel_Pile():
         for i in self.Panel_Box.keys():
             self.Panel_Box[i].treeview.refresh_cells()
     
+    def where_the_focus(self):
+        '''
+        Возвращает активную панель и ее имя
+        '''
+        for i in self.Panel_Box.keys():
+            if self.Panel_Box[i].get_focus_child():
+                return self.Panel_Box[i], i
+            
     def get_panel_opponent(self, Panel_Name):
         '''
         Возвращает соседнюю панель

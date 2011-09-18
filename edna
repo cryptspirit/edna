@@ -29,12 +29,14 @@ import gtk
 from edna_filemanager import load
 
 pygtk.require('2.0')
+edna_builtin['project name'] = 'Edna'
 
 def main():
     gtk.gdk.threads_init()
     load.load_structures()
     load.load_config()
     load.load_icons_container()
+    load.load_actions()
     Edna_Window = load.init_root_window()
     
     gtk.gdk.threads_enter()

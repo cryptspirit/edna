@@ -36,14 +36,14 @@ keys_not_follow += map(chr, xrange(65, 123))
 '''
 Переводы имен функций и команд
 '''
-hotkeys_function_name = {'key_1': _('Copy'),
-                        'key_2': _('Remove'),
-                        'key_3': _('Properties'),
-                        'key_4': _('Rename'),
-                        'key_5': _('Make directory'),
-                        'key_6': _('Open terminal'),
-                        'key_7': _('View'),
-                        'key_8': _('Show hide files')}
+hotkeys_function_name = {'action_1': _('Copy'),
+                        'action_2': _('Remove'),
+                        'action_3': _('Properties'),
+                        'action_4': _('Rename'),
+                        'action_5': _('Make directory'),
+                        'action_6': _('Open terminal'),
+                        'action_7': _('View'),
+                        'action_8': _('Show hide files')}
 
 def return_project_structures():
     dict = {}

@@ -7,6 +7,7 @@ import gio
 import os
 import pango
 from edna_filemanager import function
+from edna_filemanager.tools import keybind
 from edna_filemanager.tools import icons_work
 
 class Object_of_Files():
@@ -274,14 +275,6 @@ class File_List_Widget(gtk.TreeView):
         self.path_entry = path_entry
         self.number_of_panel = number_of_panel
         self.Number_this_list = Number_this_list
-        self.Hotkeys_Function = {'key_1': self.copys,
-                                'key_2': self.deleting,
-                                'key_3': self.properties_file,
-                                'key_4': '',
-                                'key_5': '',
-                                'key_6': '',
-                                'key_7': '',
-                                'key_8': self.show_hide_file}
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
         self.OOF = Object_of_Files(self.number_of_panel, self.update_model)
@@ -383,18 +376,15 @@ class File_List_Widget(gtk.TreeView):
         Обработка нажатий клавиш списка
         '''
         if args[1].type == gtk.gdk.KEY_PRESS:
-            key = edna_function.get_key_info(args[1])
+            key = keybind.get_key_info(args[1])
             print key
             if key == 'Shift Up' or key == 'Shift Down': self.select_function(key)
         elif args[1].type == gtk.gdk.KEY_RELEASE:
-            key = edna_function.get_key_info(args[1])
+            key = keybind.get_key_info(args[1])
             if key == 'space': self.select_function(key)
             elif key == 'Right': self.chdir_new()
             elif key == 'Return': self.Enter_key()
             elif (key == 'BackSpace' or key == 'Left') and self.OOF.Path != '/': self.back_dir()
-            else:
-                try: self.Hotkeys_Function[edna_function.key_name_in_rc[key]]()
-                except KeyError: pass
             #if key == 'Delete' or key == 'Shift Delete': self.deleting(key)
             #if key == 'F5' : self.copys(False)
     
@@ -421,29 +411,6 @@ class File_List_Widget(gtk.TreeView):
             for i in list_lanch.keys():
                 list_lanch[i]['app'].launch_uris(list_lanch[i]['list'], None)
                 
-    def deleting(self):
-        y = question_window(self.OOF.selection_add())
-        
-    def properties_file(self):
-        '''
-        Свойства файла
-        '''
-        y = properties_file_window(self.OOF.Cursor_Position)
-        
-    def show_hide_file(self):
-        '''
-        показать скрытые файлы
-        '''
-        edna_builtin['configuration']['style']['show_hide_files'] = str(int(not int(edna_builtin['configuration']['style']['show_hide_files'])))
-        self.return_panel_pile().relist_panel()
-        
-    def copys(self):
-        '''
-        Копирование
-        '''
-        remove_after = False
-        y = question_window_copy(self.return_panel_pile().get_path_in_panel_opponent(self.Number_this_list), self.OOF.Path, self.OOF.selection_add(), remove_after)
-    
     def return_path_parent_row(self, gioFile_uri):
         model = self.get_model()
         for i in xrange(len(self.OOF.Table_of_File)):

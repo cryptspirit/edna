@@ -23,7 +23,7 @@ class Root_Window(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
         self.__set_window_properties_from_configfile__()
-        self.set_title('Edna')
+        self.set_title(edna_builtin['project name'])
         try: self.set_icon_from_file('%s/share/pixmaps/edna.svg' % sys.prefix)
         except: pass
         self.hdlbox = gtk.HandleBox()

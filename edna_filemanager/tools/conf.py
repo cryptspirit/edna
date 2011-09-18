@@ -7,6 +7,7 @@
 import ConfigParser
 import os
 from __builtin__ import edna_builtin
+from edna_filemanager.tools import keybind
 
 rc_config = {'panel_history0':'/',
             'panel_history1':'/',
@@ -76,16 +77,7 @@ rc_style = {
             'icon_size':'18',
             'font_cell_text':'Sans 10'}
             
-rc_hotkeys = {'key_1': 'F5',
-            'key_2': 'Delete',
-            'key_3': '<Control>p',
-            'key_4': 'F2',
-            'key_5': 'F7',
-            'key_6': '<Control>F2',
-            'key_7': 'F3',
-            'key_8': '<Control>h'}
-            
-defaultrc = {'config': rc_config, 'hotkeys': rc_hotkeys, 'style': rc_style}
+defaultrc = {'config': rc_config, 'hotkeys': keybind.default_rc_hotkeys, 'style': rc_style}
 
 mc = ['cell_name', 
 'cell_type', 
@@ -139,13 +131,13 @@ def read_rc(filerc):
                         rc_dict[i][j] = defaultrc[i][j]
                         CP.set(i, j, defaultrc[i][j])
                         need_write = True
-                    if i == 'hotkeys' and len(rc_dict[i][j]) > 0: key_name_in_rc[rc_dict[i][j]] = j
+                    if i == 'hotkeys' and len(rc_dict[i][j]) > 0: key_name_in_rc[j] = rc_dict[i][j]
             else:
                 CP.add_section(i)
                 need_write = True
                 for j in defaultrc[i].keys():
                     CP.set(i, j, defaultrc[i][j])
-                    if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
+                    if i == 'hotkeys': key_name_in_rc[j] = defaultrc[i][j]
                 rc_dict[i] = defaultrc[i]
         if need_write:
             f = open(filerc, 'r+')
@@ -157,7 +149,7 @@ def read_rc(filerc):
             CP.add_section(i)
             for j in defaultrc[i].keys():
                 CP.set(i, j, defaultrc[i][j])
-                if i == 'hotkeys': key_name_in_rc[defaultrc[i][j]] = j
+                if i == 'hotkeys': key_name_in_rc[j] = defaultrc[i][j]
         f = open(filerc, 'w')
         CP.write(f)
         f.close()
