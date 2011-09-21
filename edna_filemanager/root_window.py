@@ -5,7 +5,7 @@ from __builtin__ import edna_builtin
 #import gobject
 import gtk
 #import pygtk
-#import os
+import os
 #import sys
 #import time
 #import edna_config
@@ -14,7 +14,7 @@ import gettext
 from edna_filemanager import function
 from edna_filemanager.tools import conf
 from edna_filemanager import panel_objects
-#from edna_filemanager.search.search_gui_class import SearchWindow
+from edna_filemanager.search.search_gui_class import SearchWindow
 
 gettext.install('edna', unicode=True)
 

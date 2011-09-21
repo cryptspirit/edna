@@ -267,19 +267,19 @@ class File_List_Widget(gtk.TreeView):
     '''
     Класс списка файлов
     '''
-    def __init__(self, number_of_panel, Number_this_list, return_panel_pile, path_entry=gtk.Label):
+    def __init__(self, number_of_panel, Number_this_list, return_panel_pile, path_panel=gtk.HBox):
         gtk.TreeView.__init__(self)
         self.set_rules_hint(True)
         self.set_grid_lines(False)
         self.return_panel_pile = return_panel_pile
-        self.path_entry = path_entry
+        self.path_panel = path_panel
         self.number_of_panel = number_of_panel
         self.Number_this_list = Number_this_list
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
         self.OOF = Object_of_Files(self.number_of_panel, self.update_model)
         self.OOF.add_path(edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list])
-        self.path_entry.set_text(self.OOF.Path.get_path())
+        self.path_panel.refresh(self.OOF.Path.get_path())
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
         self.connect('button-press-event', self.pr)
@@ -470,7 +470,7 @@ class File_List_Widget(gtk.TreeView):
         if self.OOF.Path.get_path() != '/':
             self.OOF.gio_activation(self.OOF.Path.get_parent().get_uri())
             self.set_model(self.OOF.Model)
-            self.path_entry.set_text(self.OOF.Path.get_path())
+            self.path_panel.refresh(self.OOF.Path.get_path())
             self.__set_custom_cursor()
                     
     def chdir_new(self):
@@ -482,14 +482,14 @@ class File_List_Widget(gtk.TreeView):
         dp = model.get_value(iter, self.OOF.Path_Index)
         self.OOF.gio_activation(dp)
         self.set_model(self.OOF.Model)
-        self.path_entry.set_text(self.OOF.Path.get_path())
+        self.path_panel.refresh(self.OOF.Path.get_path())
         edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list] = self.OOF.Path.get_path()
         self.__set_custom_cursor()
         
     def change_dir(self, path):
         self.OOF.gio_activation('file://' + path)
         self.set_model(self.OOF.Model)
-        self.path_entry.set_text(self.OOF.Path.get_path())
+        self.path_panel.refresh(self.OOF.Path.get_path())
         self.__set_custom_cursor()
 
     def __add_columns(self):

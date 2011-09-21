@@ -11,6 +11,7 @@ edna_builtin = __builtin__.edna_builtin
 import gtk
 from widgets import list_widgets
 from widgets import drive_panel
+from widgets import path_panel
 import pango
 
 class Panel_Widget(gtk.VBox):
@@ -30,6 +31,9 @@ class Panel_Widget(gtk.VBox):
         self.scrol.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
         ###################################
         self.drive_info_label = gtk.Label('drive')
+        #label->set_markup('<span color="blue"><u>'.$title."</u></span>");
+        
+        self.path_panel = path_panel.PathPanel(self.__path_panel_callback__)
         ###################################
         self.path_entry = gtk.Label()
         self.evtb = gtk.EventBox()
@@ -38,7 +42,7 @@ class Panel_Widget(gtk.VBox):
         
         self.path_entry.set_alignment(0.0, 0.5)
         ###################################
-        self.treeview = list_widgets.File_List_Widget(self.number_of_panel, n, return_path_cell, self.path_entry)
+        self.treeview = list_widgets.File_List_Widget(self.number_of_panel, n, return_path_cell, self.path_panel)
         self.info_label = gtk.Label('info')
         self.drive_panel = drive_panel.DrivePanel(self.__drive_panel_callback__)
         self.drive_panel.set_border_width(0)
@@ -46,7 +50,8 @@ class Panel_Widget(gtk.VBox):
         self.scrol.add(self.treeview)
         self.upData()
         self.pack_start(self.drive_panel, False)
-        self.pack_start(self.evtb, False)
+        self.pack_start(self.path_panel, False)
+        #self.pack_start(self.evtb, False)
         self.pack_start(self.scrol)
         self.pack_start(self.info_label, False)
         self.set_focus_chain((self.treeview, ))
@@ -72,7 +77,14 @@ class Panel_Widget(gtk.VBox):
             self.return_path_cell().get_panel_opponent(self.n).treeview.OOF.Path.get_path()
             if self.return_path_cell().get_panel_opponent(self.n).treeview.OOF.Path.get_path().startswith(event.path):
                 self.return_path_cell().get_panel_opponent(self.n).treeview.change_dir('/')
-                
+    
+    def __path_panel_callback__(self, event):
+        '''
+        Метод-коллбек, который вызывается при кликах на path-панели
+        '''
+        if event.type == path_panel.PathEvent.TYPE_CD:
+            self.treeview.change_dir(event.path)
+    
     def get_number_top_list(self):
         '''
         Функция возвращает номер текущего списка (так как будующем будут
