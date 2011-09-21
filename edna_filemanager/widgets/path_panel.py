@@ -35,6 +35,10 @@ class PathPanel(gtk.HBox):
         self.path = None
     
     def refresh(self, path):
+        '''
+        Перерисовка панели при смене активного каталога
+        :param path: новый каталог
+        '''
         for child in self.get_children():
             self.remove(child)
         pathToCD = '/'
@@ -42,7 +46,6 @@ class PathPanel(gtk.HBox):
             items = ['']
         else:
             items = path.split('/')
-#        print "----------------------"
         
         if not self.longest_common_path:
             self.longest_common_path = self.path
@@ -54,7 +57,7 @@ class PathPanel(gtk.HBox):
                     self.longest_common_path = path
             else:
                 self.longest_common_path = path
-#        print self.longest_common_path
+        k = 0
         for item in items:
             pathToCD = os.path.join(pathToCD, item)
             if item != '' or len(items) == 1:
@@ -62,7 +65,10 @@ class PathPanel(gtk.HBox):
             eventBox = gtk.EventBox()
             eventBox.add(gtk.Label(item))
             eventBox.connect('button-press-event', self.path_clicked, pathToCD)
+            eventBox.connect('enter-notify-event', self.mouse_enter, k)
+            eventBox.connect('leave-notify-event', self.mouse_leave, k)
             self.pack_start(eventBox, False, False)
+            k += 1
         if self.longest_common_path and len(self.longest_common_path) > len(path):
             items2 = self.longest_common_path.split('/')
             i = 0
@@ -75,10 +81,25 @@ class PathPanel(gtk.HBox):
                     label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color('#c0c0c0'))
                     eventBox.add(label)
                     eventBox.connect('button-press-event', self.path_clicked, pathToCD)
+                    eventBox.connect('enter-notify-event', self.mouse_enter, k)
+                    eventBox.connect('leave-notify-event', self.mouse_leave, k)
                     self.pack_start(eventBox, False, False)
+                    k += 1
         self.path = path
         self.show_all()
         
     def path_clicked(self, sender, b, path):
         self.callback(PathEvent(PathEvent.TYPE_CD, path))
+    
+    def mouse_enter(self, sender, b, n):
+        children = self.get_children()
+        for i in range(0,n+1):
+            children[i].get_children()[0].modify_fg(gtk.STATE_PRELIGHT, gtk.gdk.Color('#ff0000'))
+            children[i].get_children()[0].set_state(gtk.STATE_PRELIGHT)
+    
+    def mouse_leave(self, sender, b, n):
+        children = self.get_children()
+        for i in range(0,n+1):
+            pass
+            children[i].get_children()[0].set_state(gtk.STATE_NORMAL)
             
