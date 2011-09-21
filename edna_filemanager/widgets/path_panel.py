@@ -31,7 +31,8 @@ class PathPanel(gtk.HBox):
         '''
         gtk.HBox.__init__(self)
         self.callback = callback
-        self.refresh('/home/sevka/projects')
+        self.longest_common_path = None
+        self.path = None
     
     def refresh(self, path):
         for child in self.get_children():
@@ -41,6 +42,19 @@ class PathPanel(gtk.HBox):
             items = ['']
         else:
             items = path.split('/')
+#        print "----------------------"
+        
+        if not self.longest_common_path:
+            self.longest_common_path = self.path
+        else:
+            commonPath = os.path.commonprefix([path,self.path])
+            commonPath2 = os.path.commonprefix([path,self.longest_common_path])
+            if commonPath:
+                if len(path) > len(self.longest_common_path) or path != commonPath2:
+                    self.longest_common_path = path
+            else:
+                self.longest_common_path = path
+#        print self.longest_common_path
         for item in items:
             pathToCD = os.path.join(pathToCD, item)
             if item != '' or len(items) == 1:
@@ -49,6 +63,20 @@ class PathPanel(gtk.HBox):
             eventBox.add(gtk.Label(item))
             eventBox.connect('button-press-event', self.path_clicked, pathToCD)
             self.pack_start(eventBox, False, False)
+        if self.longest_common_path and len(self.longest_common_path) > len(path):
+            items2 = self.longest_common_path.split('/')
+            i = 0
+            for item in items2:
+                i += 1
+                if i > len(items):
+                    pathToCD = os.path.join(pathToCD, item)
+                    eventBox = gtk.EventBox()
+                    label = gtk.Label('/' + item)
+                    label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color('#c0c0c0'))
+                    eventBox.add(label)
+                    eventBox.connect('button-press-event', self.path_clicked, pathToCD)
+                    self.pack_start(eventBox, False, False)
+        self.path = path
         self.show_all()
         
     def path_clicked(self, sender, b, path):
