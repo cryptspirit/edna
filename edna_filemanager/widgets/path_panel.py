@@ -90,6 +90,9 @@ class PathPanel(gtk.HBox):
             self.pathHBox.show()
             self.pathEntry.hide()
     
+    def edit_path(self):
+        self.editBtn.set_active(not self.editBtn.get_active())
+    
     def __edit_focus_out__(self, widget, event):
         '''
         Метод вызывается при потере фокуса path entry

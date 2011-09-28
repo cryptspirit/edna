@@ -15,7 +15,8 @@ default_rc_hotkeys = {'action_1': 'F5',
                         'action_5': 'F7',
                         'action_6': '<Control>F2',
                         'action_7': 'F3',
-                        'action_8': '<Control>h'}
+                        'action_8': '<Control>h',
+                        'action_9': '<Control>l'}
 
 
 def get_normal_flag_name(flag):
