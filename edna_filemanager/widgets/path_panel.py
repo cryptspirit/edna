@@ -144,7 +144,10 @@ class PathPanel(gtk.HBox):
                 if i > len(items):
                     pathToCD = os.path.join(pathToCD, item)
                     eventBox = gtk.EventBox()
-                    label = gtk.Label('/' + item)
+                    if i == (len(items) + 1) and len(items) == 1 and items[0] == '':
+                        label = gtk.Label(item)
+                    else:
+                        label = gtk.Label('/' + item)
                     label.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color('#c0c0c0'))
                     eventBox.add(label)
                     eventBox.connect('button-press-event', self.__path_clicked__, pathToCD)
