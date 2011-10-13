@@ -43,7 +43,8 @@ hotkeys_function_name = {'action_1': _('Copy'),
                         'action_5': _('Make directory'),
                         'action_6': _('Open terminal'),
                         'action_7': _('View'),
-                        'action_8': _('Show hide files')}
+                        'action_8': _('Show hide files'),
+                        'action_9': _('Enter path')}
 
 def return_project_structures():
     dict = {}

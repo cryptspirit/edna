@@ -20,7 +20,8 @@ def load_actions():
                     'action_5': None,
                     'action_6': None,
                     'action_7': None,
-                    'action_8': __show_hide_file__}
+                    'action_8': __show_hide_file__,
+                    'action_9': __edit_path__}
                      
     return Actions_dict
 
@@ -53,3 +54,10 @@ def __show_hide_file__(accel_group, Edna_Window, keyval, modifier):
     '''
     edna_builtin['configuration']['style']['show_hide_files'] = str(int(not int(edna_builtin['configuration']['style']['show_hide_files'])))
     self.return_panel_pile().relist_panel()
+    
+def __edit_path__(accel_group, Edna_Window, keyval, modifier):
+    '''
+    Редактировать path
+    '''
+    panel_for_action, name_panel_for_action = Edna_Window.panel_pile.where_the_focus()
+    panel_for_action.path_panel.edit_path()
