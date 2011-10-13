@@ -15,35 +15,38 @@ class Object_of_Files():
     Класс обработки списка файлов
     '''
     
-    def __init__(self, number_of_panel, update_model=None):
+    def __init__(self, number_of_panel, update_model=None, callback=None):
         self.return_update_model = update_model
         self.number_of_panel = number_of_panel
+        self.callback = callback
         
-    def __gen_listdir__(self, path):
+    def __gen_listdir__(self, gioFile):
         """
         Генерация списка файлов
         """
         show_hide_files = int(edna_builtin['configuration']['style']['show_hide_files'])
+        listdir = os.listdir(gioFile.get_path())
         if show_hide_files:
-            return map(gio.File, os.listdir(path))
+            return map(gio.File, listdir)
         else:
-            return [gio.File(i) for i in os.listdir(path) if i[0] != '.']
+            return [gio.File(i) for i in listdir if i[0] != '.']
         
-    def add_path(self, path):
+    def add_path(self, gioFile):
         '''
         Установка пути
         '''
-        self.Path = gio.File(path)
+        self.Path = gioFile
         self.Cursor_Position = None
         self.Table_of_File = []
-        os.chdir(path)
+        os.chdir(gioFile.get_path())
         self.Select_List = []
-        self.gioFile_list = self.gioFile_list = self.__gen_listdir__(path)
+        self.gioFile_list = self.gioFile_list = self.__gen_listdir__(self.Path)
         self.get_list_path()
         self.Model = self.create_model()
         self.Monitor_rootdir = None
         self.Monitor_rootdir = self.Path.monitor_directory(gio.FILE_MONITOR_NONE, None)
         self.Monitor_rootdir.connect('changed', self.event_change_in_rootdir)
+        if self.callback: self.callback(self.Path)
         
     def selection(self, gioFile_uri):
         '''
@@ -73,25 +76,24 @@ class Object_of_Files():
         '''
         self.Cursor_Position = self.Path
         self.Path = gioFile
-        p = gioFile.get_path()
-        os.chdir(p)
-        self.gioFile_list = self.__gen_listdir__(p)
+        os.chdir(gioFile.get_path())
+        self.gioFile_list = self.__gen_listdir__(self.Path)
         self.get_list_path()
         self.Model = self.create_model()
         self.Monitor_rootdir = self.Path.monitor_directory(gio.FILE_MONITOR_NONE, None)
         self.Monitor_rootdir.connect('changed', self.event_change_in_rootdir)
+        if self.callback: self.callback(self.Path)
         
-    def gio_activation(self, gioFile_uri):
+    def gio_activation(self, gioFile):
         '''
         Активация элемента списка
         '''
-        gioFile = gio.File(gioFile_uri)
         if os.path.isdir(gioFile.get_path()):
             self.ch_path(gioFile)
         else:
             ret = get_launch(gioFile)
             if ret:
-                ret.launch_uris([gio.File(gioFile_uri).get_uri()], None)
+                ret.launch_uris([gioFile.get_uri()], None)
             print ret
         
     def clean_now(self):
@@ -233,7 +235,8 @@ class Object_of_Files():
                 
         hl_model_sort = gtk.TreeModelSort(model)
         
-        t = edna_builtin['configuration']['config']['panel_sort%s' % self.number_of_panel]
+        #t = edna_builtin['configuration']['config']['panel_sort%s' % self.number_of_panel]
+        t = '0'
         if len(t) == 1:
             sort_order = gtk.SORT_ASCENDING
             t = int(t)
@@ -263,23 +266,36 @@ class Object_of_Files():
             if self.Path.get_uri() != 'file:///': print 'root'
 
 
-class File_List_Widget(gtk.TreeView):
+class File_List_Widget(gtk.ScrolledWindow):
     '''
     Класс списка файлов
     '''
-    def __init__(self, number_of_panel, Number_this_list, return_panel_pile, path_panel=gtk.HBox):
+    def __init__(self, start_path, callback=None):
+        gtk.ScrolledWindow.__init__(self)
+        self.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+        self.treeview = Files_List(start_path, callback)
+        self.add(self.treeview)
+        
+    def change_dir(self, path):
+        self.treeview.change_dir(path)
+    
+class Files_List(gtk.TreeView):
+    '''
+    Список файлов
+    '''
+    def __init__(self, start_path, callback=None):
         gtk.TreeView.__init__(self)
         self.set_rules_hint(True)
         self.set_grid_lines(False)
-        self.return_panel_pile = return_panel_pile
-        self.path_panel = path_panel
-        self.number_of_panel = number_of_panel
-        self.Number_this_list = Number_this_list
+        #self.return_panel_pile = return_panel_pile
+        #self.number_of_panel = number_of_panel
+        #self.Number_this_list = Number_this_list
         #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.get_selection().set_mode(gtk.SELECTION_BROWSE)
-        self.OOF = Object_of_Files(self.number_of_panel, self.update_model)
-        self.OOF.add_path(edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list])
-        self.path_panel.refresh(self.OOF.Path.get_path())
+        self.OOF = Object_of_Files(start_path, self.update_model, callback)
+        #self.OOF.add_path(edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list])
+        self.OOF.add_path(start_path)
         self.connect('key-release-event', self.key_event)
         self.connect('key-press-event', self.key_event)
         self.connect('button-press-event', self.pr)
@@ -470,7 +486,6 @@ class File_List_Widget(gtk.TreeView):
         if self.OOF.Path.get_path() != '/':
             self.OOF.gio_activation(self.OOF.Path.get_parent().get_uri())
             self.set_model(self.OOF.Model)
-            self.path_panel.refresh(self.OOF.Path.get_path())
             self.__set_custom_cursor()
                     
     def chdir_new(self):
@@ -480,16 +495,14 @@ class File_List_Widget(gtk.TreeView):
         selection = self.get_selection()
         model, iter = selection.get_selected()        
         dp = model.get_value(iter, self.OOF.Path_Index)
-        self.OOF.gio_activation(dp)
+        self.OOF.gio_activation(gio.File(dp))
         self.set_model(self.OOF.Model)
-        self.path_panel.refresh(self.OOF.Path.get_path())
-        edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list] = self.OOF.Path.get_path()
+        #edna_builtin['configuration']['config']['panel_history%s' % self.Number_this_list] = self.OOF.Path.get_path()
         self.__set_custom_cursor()
         
     def change_dir(self, path):
-        self.OOF.gio_activation('file://' + path)
+        self.OOF.gio_activation(gio.File(path))
         self.set_model(self.OOF.Model)
-        self.path_panel.refresh(self.OOF.Path.get_path())
         self.__set_custom_cursor()
 
     def __add_columns(self):

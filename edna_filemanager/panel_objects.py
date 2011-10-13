@@ -9,9 +9,10 @@ import __builtin__
 edna_builtin = __builtin__.edna_builtin
 
 import gtk
-from widgets import list_widgets
-from widgets import drive_panel
-from widgets import path_panel
+import gio
+from edna_filemanager.widgets import drive_panel
+from edna_filemanager.widgets import list_widgets
+from edna_filemanager.widgets import path_panel
 import pango
 
 class Panel_Widget(gtk.VBox):
@@ -22,44 +23,89 @@ class Panel_Widget(gtk.VBox):
         gtk.VBox.__init__(self, False, 3)
         self.n = n
         self.return_path_cell = return_path_cell
-        #self.Cursor = 0
-        self.Focus_State = True
         self.number_of_panel = number_of_panel
-        ####################################
-        self.scrol = gtk.ScrolledWindow()
-        self.scrol.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-        self.scrol.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
-        ###################################
-        self.drive_info_label = gtk.Label('drive')
-        #label->set_markup('<span color="blue"><u>'.$title."</u></span>");
-        
-        self.path_panel = path_panel.PathPanel(self.__path_panel_callback__)
-        ###################################
-        self.path_entry = gtk.Label()
-        self.evtb = gtk.EventBox()
-        self.evtb.add(self.path_entry)
-        self.evtb.set_border_width(3)
-        
-        self.path_entry.set_alignment(0.0, 0.5)
-        ###################################
-        self.treeview = list_widgets.File_List_Widget(self.number_of_panel, n, return_path_cell, self.path_panel)
-        self.info_label = gtk.Label('info')
-        self.drive_panel = drive_panel.DrivePanel(self.__drive_panel_callback__)
-        self.drive_panel.set_border_width(0)
-        ###################################
-        self.scrol.add(self.treeview)
+        self.__conteiner_create__()
+        self.__widgets_create__()
+        self.__widgets_pack__()
         self.upData()
-        self.pack_start(self.drive_panel, False)
+      
+    def __callback_from_fileslist__(self, gioFile):
+        '''
+        Функция которую запускает список файлов при изминении текущего каталога
+        '''
+        path = gioFile.get_path()
+        self.path_panel.refresh(path)
+        if self.get_top_fileslist():
+            self.fileslist_pile.set_tab_label_text(self.get_top_fileslist(), path)
+        else:
+            self.fileslist_pile.set_tab_label_text(self.fileslist_pile.get_nth_page(0), path)
+      
+    def get_top_fileslist(self):
+        '''
+        Получение активного списка файлов
+        '''
+        current_page = self.fileslist_pile.get_current_page()
+        return self.fileslist_pile.get_nth_page(current_page)
+        
+    def __fileslist_add__(self, start_path):
+        '''
+        Добавление списка файлов
+        '''
+        #self.fileslist_container.append()
+        self.fileslist_pile.append_page(list_widgets.File_List_Widget(start_path, self.__callback_from_fileslist__))
+        
+    def __fileslist_remove__(self):
+        '''
+        Удаление списка файлов
+        '''
+    def __widgets_pack__(self):
+        '''
+        Упаковка виджетов
+        '''
         path_aligment = gtk.Alignment()
         path_aligment.set_padding(0,0,5,5)
         path_aligment.add(self.path_panel)
-        self.pack_start(path_aligment, False)
-        #self.pack_start(self.evtb, False)
-        self.pack_start(self.scrol)
+        
+        self.hbox1.pack_start(self.drive_info_label, True)
+        self.hbox1.pack_start(self.button_root, False)
+        self.hbox1.pack_start(self.button_home, False)
+        
+        self.hbox2.pack_start(path_aligment, True)
+        self.hbox2.pack_start(self.button_history, False)
+        self.hbox2.pack_start(self.button_mark, False)
+        
+        self.pack_start(self.drive_panel, False)
+        self.pack_start(self.hbox1, False)
+        self.pack_start(self.hbox2, False)
+        
+        self.pack_start(self.fileslist_pile)
         self.pack_start(self.info_label, False)
-        self.set_focus_chain((self.treeview, ))
-        #self.Timer_func = threading.Timer(0, self.timer_refresh)
-        #self.Timer_func.start()
+        
+    def __widgets_create__(self):
+        '''
+        Создание виджетов
+        '''
+        self.button_root = gtk.Button(' / ')
+        self.button_home = gtk.Button('~/')
+        self.button_history = gtk.Button('H')
+        self.button_mark = gtk.Button('+')
+        self.info_label = gtk.Label('info')
+        self.drive_info_label = gtk.Label('drive')
+        self.path_panel = path_panel.PathPanel(self.__path_panel_callback__)
+        self.info_label = gtk.Label('info')
+        self.drive_panel = drive_panel.DrivePanel(self.__drive_panel_callback__)
+        self.drive_panel.set_border_width(0)
+        self.fileslist_pile = gtk.Notebook()
+        self.__fileslist_add__(gio.File('/'))
+        self.set_focus_chain((self.fileslist_pile, ))
+        
+    def __conteiner_create__(self):
+        '''
+        Создание контейнеров
+        '''
+        self.hbox1 = gtk.HBox(False, 2)
+        self.hbox2 = gtk.HBox(False, 2)
+        
         
     def get_action_file_list(self):
         '''
@@ -86,7 +132,8 @@ class Panel_Widget(gtk.VBox):
         Метод-коллбек, который вызывается при кликах на path-панели
         '''
         if event.type == path_panel.PathEvent.TYPE_CD:
-            self.treeview.change_dir(event.path)
+            top_fileslist = self.get_top_fileslist()
+            top_fileslist.change_dir(event.path)
     
     def get_number_top_list(self):
         '''
@@ -96,10 +143,8 @@ class Panel_Widget(gtk.VBox):
         return self.treeview.OOF.Path
         
     def upData(self):
-        self.evtb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_builtin['configuration']['style']['even_row_bg']))
-        self.evtb.modify_font(pango.FontDescription(edna_builtin['configuration']['style']['font_cell_text']))
-        self.path_entry.modify_fg(gtk.STATE_NORMAL, gtk.gdk.Color(edna_builtin['configuration']['style']['even_row_fg']))
-        self.treeview.Cells_Refresh()
+        for i in self.fileslist_container:
+            i.treeview.Cells_Refresh()
 
 class Panel_Pile():
     '''
